@@ -13,7 +13,15 @@ extern "C" {
  * Signature: (I)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL Java_org_pq_Native_foobar
-  (JNIEnv* env, jclass, jint);
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    connect
+ * Signature: (Ljava/lang/String;)J
+ */
+JNIEXPORT jlong JNICALL Java_org_pq_Native_connect
+  (JNIEnv *, jclass, jstring);
 
 #ifdef __cplusplus
 }
