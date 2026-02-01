@@ -28,3 +28,24 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_connect (JNIEnv *env, jclass jthis, j
     PGconn *conn = PQconnectdb(conn_info);
     return (long) conn;
 };
+
+
+/*
+ * Class:     org_pq_Native
+ * Method:    PQconnectdb
+ * Signature: (Ljava/lang/String;)Lorg/pq/PGconn;
+ */
+JNIEXPORT jobject JNICALL Java_org_pq_Native_PQconnectdb (JNIEnv *env, jclass, jstring jconninfo) {
+    const char *conninfo = env->GetStringUTFChars(jconninfo, 0);
+    PGconn *conn = PQconnectdb(conninfo);
+    jclass class_pgconn = env->FindClass("org/pq/PGconn");
+    if (class_pgconn == NULL) {
+        std::cout << "FindClass is null";
+    }
+    jmethodID class_init = env->GetMethodID(class_pgconn, "<init>", "(J)V");
+    if (class_init == NULL) {
+            std::cout << "GetMethodID is null";
+        }
+    jobject newObj = env->NewObject(class_pgconn, class_init, (long) conn);
+    return newObj;
+};

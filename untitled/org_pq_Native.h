@@ -23,6 +23,54 @@ JNIEXPORT jstring JNICALL Java_org_pq_Native_foobar
 JNIEXPORT jlong JNICALL Java_org_pq_Native_connect
   (JNIEnv *, jclass, jstring);
 
+/*
+ * Class:     org_pq_Native
+ * Method:    PQconnectdb
+ * Signature: (Ljava/lang/String;)Lorg/pq/PGconn;
+ */
+JNIEXPORT jobject JNICALL Java_org_pq_Native_PQconnectdb
+  (JNIEnv *, jclass, jstring);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    PQconninfoOption
+ * Signature: ()Lorg/pq/PQconninfoOption;
+ */
+JNIEXPORT jobject JNICALL Java_org_pq_Native_PQconninfoOption
+  (JNIEnv *, jclass);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    PQconninfo
+ * Signature: (Lorg/pq/PGconn;)Lorg/pq/PQconninfoOption;
+ */
+JNIEXPORT jobject JNICALL Java_org_pq_Native_PQconninfo
+  (JNIEnv *, jclass, jobject);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    PQfinish
+ * Signature: (Lorg/pq/PGconn;)V
+ */
+JNIEXPORT void JNICALL Java_org_pq_Native_PQfinish
+  (JNIEnv *, jclass, jobject);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    PQreset
+ * Signature: (Lorg/pq/PGconn;)V
+ */
+JNIEXPORT void JNICALL Java_org_pq_Native_PQreset
+  (JNIEnv *, jclass, jobject);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    PQping
+ * Signature: (Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_PQping
+  (JNIEnv *, jclass, jstring);
+
 #ifdef __cplusplus
 }
 #endif
