@@ -121,6 +121,14 @@ JNIEXPORT void JNICALL Java_org_pq_Native_PQclear
 
 /*
  * Class:     org_pq_Native
+ * Method:    PQntuples
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_PQntuples
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     org_pq_Native
  * Method:    PQgetvalue
  * Signature: (JII)Ljava/lang/String;
  */

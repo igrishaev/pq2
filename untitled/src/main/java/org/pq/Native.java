@@ -144,7 +144,7 @@ public class Native {
 
     /* FIELDS */
 
-    // PQntuples
+    public static native int PQntuples(final long result);
     // PQnfields
     // PQfname
     // PQfnumber
@@ -195,8 +195,8 @@ public class Native {
         final var m = PQerrorMessage(conn);
         // System.out.println(m);
 
-        final var result = PQexec(conn, "select x::int8 from generate_series(1, 99) as seq(x)");
         // System.out.println(result);
+        final var result = PQexec(conn, "select '122b85b3-8385-48a6-9973-036cf8b04eac'::uuid from generate_series(1, 99) as seq(x)");
 
         final var status = PQresultStatus(result);
         // System.out.println(status);
@@ -206,7 +206,7 @@ public class Native {
 
         // System.out.println(PQgetvalue(result, 7, 0));
 
-        System.out.println(getValue(result, 66, 0));
+        System.out.println(getValue(result, 1, 0));
 
 //        final var pingres = PQping(conninfo);
 //        System.out.println(pingres);

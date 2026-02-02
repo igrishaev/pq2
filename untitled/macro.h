@@ -8,6 +8,18 @@ if (var == NULL) { \
     env->ThrowNew(env->FindClass("java/lang/Exception"), "Cannot find class: " path); \
 }
 
+#define defMethod(var, env, class, meth, sig) \
+jmethodID var = env->GetMethodID(class, meth, sig); \
+if (var == NULL) { \
+    env->ThrowNew(env->FindClass("java/lang/Exception"), "Cannot find method: " meth ", signature: " sig); \
+}
+
+#define defStaticMethod(var, env, cls, meth, sig) \
+jmethodID var = env->GetStaticMethodID(cls, meth, sig); \
+if (var == NULL) { \
+    env->ThrowNew(env->FindClass("java/lang/Exception"), "Cannot find static method: " meth ", signature: " sig); \
+}
+
 #define jPtr(x) (jlong) x
 
 #define getConn(x) (PGconn*) x

@@ -3,6 +3,7 @@
 #include "libpq-fe.h"
 #include "org_pq_Native.h"
 #include "macro.h"
+#include "oid.h"
 
 /*
  * Class:     org_pq_Native
@@ -162,9 +163,7 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_PQexec
                                     NULL,
                                     NULL,
                                     NULL,
-                                    0
-                                    // 1
-                                    );
+                                    0);
 
     // PGresult* result = PQexec(conn, command);
     return jPtr(result);
@@ -217,6 +216,17 @@ JNIEXPORT void JNICALL Java_org_pq_Native_PQclear
 
 /*
  * Class:     org_pq_Native
+ * Method:    PQntuples
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_PQntuples
+    (JNIEnv* env, jclass, jlong jresult) {
+    PGresult* result = getResult(jresult);
+    return  PQntuples(result);
+};
+
+/*
+ * Class:     org_pq_Native
  * Method:    PQgetvalue
  * Signature: (JII)Ljava/lang/String;
  */
@@ -249,7 +259,7 @@ JNIEXPORT jint JNICALL Java_org_pq_Native_PQgetlength
     return PQgetlength(result, jrow, jcol);
 };
 
-int PQparseShort(char* val, int format) {
+short PQparseInt2(char* val, int format) {
     if (format == 0) {
         return std::stoi(val);
     } else {
@@ -257,11 +267,60 @@ int PQparseShort(char* val, int format) {
     }
 }
 
-jobject PQJavaShort(JNIEnv* env, short val) {
-    jclass jClass = env->FindClass("java/lang/Short");
-    jmethodID jMethod = env->GetMethodID(jClass, "<init>", "(S)V");
-    return env->NewObject(jClass, jMethod, val);
+int PQparseInt4(char* val, int format) {
+    if (format == 0) {
+        return std::stoi(val);
+    } else {
+        return ntohl(*((int*) val));
+    }
 }
+
+long PQparseInt8(char* val, int format) {
+    if (format == 0) {
+        return std::stol(val);
+    } else {
+        return ntohll(*((long*) val));
+    }
+}
+
+jobject PQJavaUUID(JNIEnv* env, char* raw, int format) {
+
+    defClass(jUUID, env, "java/util/UUID");
+    defStaticMethod(fromString, env, jUUID, "fromString", "(Ljava/lang/String;)Ljava/util/UUID;");
+    defMethod(jInit, env, jUUID, "<init>", "(JJ)V");
+
+    jstring payload;
+    long bits_low, bits_hi;
+
+    if (format == 0) {
+        payload = jString(env, raw);
+        return env->CallStaticObjectMethod(jUUID, fromString, payload);
+    } else {
+        bits_hi = ntohll(*((long*) raw));
+        bits_low = ntohll(*((long*) (raw + 8)));
+        return env->NewObject(jUUID, jInit, bits_hi, bits_low);
+        return NULL;
+    }
+}
+
+jobject PQJavaShort(JNIEnv* env, short val) {
+    defClass(jClass, env, "java/lang/Short");
+    defMethod(jInit, env, jClass, "<init>", "(S)V");
+    return env->NewObject(jClass, jInit, val);
+}
+
+jobject PQJavaInteger(JNIEnv* env, int val) {
+    defClass(jClass, env, "java/lang/Integer");
+    defMethod(jInit, env, jClass, "<init>", "(I)V");
+    return env->NewObject(jClass, jInit, val);
+}
+
+jobject PQJavaLong(JNIEnv* env, long val) {
+    defClass(jClass, env, "java/lang/Long");
+    defMethod(jInit, env, jClass, "<init>", "(J)V");
+    return env->NewObject(jClass, jInit, val);
+}
+
 
 /*
  * Class:     org_pq_Native
@@ -280,37 +339,25 @@ JNIEXPORT jobject JNICALL Java_org_pq_Native_getValue
     Oid oid = PQftype(result, jcol);
 
     switch ((int) oid) {
-    case 21: { // int2
-        short parsed = PQparseShort(val, format);
+    case OID_INT2: {
+        short parsed = PQparseInt2(val, format);
         return PQJavaShort(env, parsed);
     }
-    case 23: { // int4
-        int parsed;
-        if (format == 0) {
-            parsed = std::stoi(val);
-        } else {
-            parsed = ntohl(*((int*) val));
-        }
-        std::cout << "parsed: " << parsed;
-        jclass jClass = env->FindClass("java/lang/Integer");
-        jmethodID jMethod = env->GetMethodID(jClass, "<init>", "(I)V");
-        return env->NewObject(jClass, jMethod, parsed);
+    case OID_INT4: {
+        int parsed = PQparseInt4(val, format);
+        return PQJavaInteger(env, parsed);
     }
-    case 20: { // int8
-        long parsed;
-        if (format == 0) {
-            parsed = std::stol(val);
-        } else {
-            parsed = ntohll(*((long*) val));
-        }
-        std::cout << "parsed: " << parsed;
-        jclass jClass = env->FindClass("java/lang/Long");
-        jmethodID jMethod = env->GetMethodID(jClass, "<init>", "(J)V");
-        return env->NewObject(jClass, jMethod, parsed);
+    case OID_INT8: {
+        long parsed = PQparseInt8(val, format);
+        return PQJavaLong(env, parsed);
     }
-    case 25:
-        return jString(env, val);
-    default:
+    case OID_UUID: {
+        return PQJavaUUID(env, val, format);
+    }
+    case OID_TEXT: {
         return jString(env, val);
     }
+    default: {
+        return jString(env, val);
+    }}
 };
