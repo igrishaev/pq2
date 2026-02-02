@@ -31,12 +31,12 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_connect (JNIEnv *env, jclass jthis, j
 };
 
 
-#define jString(env, ptr) env->NewStringUTF(ptr);
+#define jString(env, ptr) env->NewStringUTF(ptr)
 
 #define getClass(var, env, path) \
 jclass var = env->FindClass(path); \
-if (var == NULL) { \
-    env->ThrowNew(env->FindClass("java/lang/Exception"), "cannot find class"); \
+if (var != NULL) { \
+    env->ThrowNew(env->FindClass("java/lang/Exception"), "Cannot find class: " path); \
 }
 
 #define jThrow(env, template, ...) env->ThrowNew(env->FindClass("java/lang/Exception"), template);
