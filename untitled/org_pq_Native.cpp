@@ -249,6 +249,20 @@ JNIEXPORT jint JNICALL Java_org_pq_Native_PQgetlength
     return PQgetlength(result, jrow, jcol);
 };
 
+int PQparseShort(char* val, int format) {
+    if (format == 0) {
+        return std::stoi(val);
+    } else {
+        return ntohs(*((short*) val));
+    }
+}
+
+jobject PQJavaShort(JNIEnv* env, short val) {
+    jclass jClass = env->FindClass("java/lang/Short");
+    jmethodID jMethod = env->GetMethodID(jClass, "<init>", "(S)V");
+    return env->NewObject(jClass, jMethod, val);
+}
+
 /*
  * Class:     org_pq_Native
  * Method:    getValue
@@ -267,17 +281,8 @@ JNIEXPORT jobject JNICALL Java_org_pq_Native_getValue
 
     switch ((int) oid) {
     case 21: { // int2
-        short parsed;
-        if (format == 0) {
-            parsed = std::stoi(val);
-        } else {
-            parsed = ntohs(*((short*) val));
-        }
-        std::cout << "parsed: " << parsed;
-        jclass jClass = env->FindClass("java/lang/Short");
-        jmethodID jMethod = env->GetMethodID(jClass, "<init>", "(S)V");
-        return env->NewObject(jClass, jMethod, parsed);
-        return jString(env, val);
+        short parsed = PQparseShort(val, format);
+        return PQJavaShort(env, parsed);
     }
     case 23: { // int4
         int parsed;
