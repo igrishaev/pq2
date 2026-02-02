@@ -9,22 +9,6 @@ extern "C" {
 #endif
 /*
  * Class:     org_pq_Native
- * Method:    foobar
- * Signature: (I)Ljava/lang/String;
- */
-JNIEXPORT jstring JNICALL Java_org_pq_Native_foobar
-  (JNIEnv *, jclass, jint);
-
-/*
- * Class:     org_pq_Native
- * Method:    connect
- * Signature: (Ljava/lang/String;)J
- */
-JNIEXPORT jlong JNICALL Java_org_pq_Native_connect
-  (JNIEnv *, jclass, jstring);
-
-/*
- * Class:     org_pq_Native
  * Method:    PQconnectdb
  * Signature: (Ljava/lang/String;)J
  */
@@ -38,6 +22,14 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_PQconnectdb
  */
 JNIEXPORT jobjectArray JNICALL Java_org_pq_Native_PQconndefaults
   (JNIEnv *, jclass);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    PQconninfo
+ * Signature: (J)[Lorg/pq/PQconninfoOption;
+ */
+JNIEXPORT jobjectArray JNICALL Java_org_pq_Native_PQconninfo
+  (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     org_pq_Native
@@ -58,9 +50,9 @@ JNIEXPORT void JNICALL Java_org_pq_Native_PQreset
 /*
  * Class:     org_pq_Native
  * Method:    PQping
- * Signature: (Ljava/lang/String;)J
+ * Signature: (Ljava/lang/String;)I
  */
-JNIEXPORT jlong JNICALL Java_org_pq_Native_PQping
+JNIEXPORT jint JNICALL Java_org_pq_Native_PQping
   (JNIEnv *, jclass, jstring);
 
 /*
