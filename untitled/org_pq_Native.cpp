@@ -28,16 +28,10 @@ jobjectArray PQ_read_options(JNIEnv* env, PQconninfoOption* opt) {
         len++;
     }
 
-    defClass(jPQconninfoOption, env, "org/pq/PQconninfoOption");
+    defClass(PQconninfoOption, env, "org/pq/PQconninfoOption");
+    defMethod(Init, env, PQconninfoOption, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)V");
 
-    jmethodID jInit = env->GetMethodID(jPQconninfoOption, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)V");
-
-    if (jInit == NULL) {
-        std::cout << "GetMethodID is null";
-        return NULL;
-    }
-
-    jobjectArray jarr = env->NewObjectArray(len, jPQconninfoOption, NULL);
+    jobjectArray jarr = env->NewObjectArray(len, PQconninfoOption, NULL);
 
     for (int i = 0; i < len; i++) {
         keyword = jString(env, (opt + i)->keyword);
@@ -47,7 +41,7 @@ jobjectArray PQ_read_options(JNIEnv* env, PQconninfoOption* opt) {
         label = jString(env, (opt + i)->label);
         dispchar = jString(env, (opt + i)->dispchar);
         dispsize = (opt + i)->dispsize;
-        jEl = env->NewObject(jPQconninfoOption, jInit, keyword, envvar, compiled, val, label, dispchar, dispsize);
+        jEl = env->NewObject(PQconninfoOption, Init, keyword, envvar, compiled, val, label, dispchar, dispsize);
         env->SetObjectArrayElement(jarr, i, jEl);
     }
 

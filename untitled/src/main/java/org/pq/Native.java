@@ -211,9 +211,9 @@ public class Native {
 //        final var pingres = PQping(conninfo);
 //        System.out.println(pingres);
 //
-//        final var opts1 = PQconndefaults();
-//        System.out.println(opts1.length);
-//        System.out.println(Arrays.toString(opts1));
+        final var opts1 = PQconndefaults();
+        System.out.println(opts1.length);
+        System.out.println(Arrays.toString(opts1));
 //
 //        final var opts2 = PQconninfo(conn);
 //        System.out.println(opts2.length);
