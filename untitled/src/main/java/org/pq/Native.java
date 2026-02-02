@@ -5,17 +5,71 @@ import java.util.Arrays;
 
 public class Native {
 
-    public static class PQPING {
-        static int OK = 0;
-        static int REJECT = 1;
-        static int NO_RESPONSE = 2;
-        static int NO_ATTEMPT = 3;
+    public enum PQPING {
+        OK,
+        REJECT,
+        NO_RESPONSE,
+        NO_ATTEMPT;
+        private static final PQPING[] vals = values();
+        public static PQPING of(final int code) {
+            return vals[code];
+        }
     }
 
-    static int PQPING_OK = 0;
-    static int PQPING_REJECT = 1;
-    static int PQPING_NO_RESPONSE = 2;
-    static int PQPING_NO_ATTEMPT = 3;
+    public enum CONNECTION {
+        CONNECTION_OK,
+        CONNECTION_BAD,
+        CONNECTION_STARTED,
+        CONNECTION_MADE,
+        CONNECTION_AWAITING_RESPONSE,
+        CONNECTION_AUTH_OK,
+        CONNECTION_SETENV,
+        CONNECTION_SSL_STARTUP,
+        CONNECTION_NEEDED,
+        CONNECTION_CHECK_WRITABLE,
+        CONNECTION_CONSUME,
+        CONNECTION_GSS_STARTUP,
+        CONNECTION_CHECK_TARGET,
+        CONNECTION_CHECK_STANDBY,
+        CONNECTION_ALLOCATED,
+        CONNECTION_AUTHENTICATING;
+        private static final CONNECTION[] vals = values();
+        public static CONNECTION of(final int code) {
+            return vals[code];
+        }
+    }
+
+    enum PQTRANS {
+        IDLE,
+        ACTIVE,
+        INTRANS,
+        INERROR,
+        UNKNOWN;
+        private static final PQTRANS[] vals = values();
+        public static PQTRANS of(final int code) {
+            return vals[code];
+        }
+    }
+
+    enum PGRES {
+        EMPTY_QUERY,
+        COMMAND_OK,
+        TUPLES_OK,
+        COPY_OUT,
+        COPY_IN,
+        BAD_RESPONSE,
+        NONFATAL_ERROR,
+        FATAL_ERROR,
+        COPY_BOTH,
+        SINGLE_TUPLE,
+        PIPELINE_SYNC,
+        PIPELINE_ABORTED,
+        TUPLES_CHUNK;
+        private static final PGRES[] vals = values();
+        public static PGRES of(final int code) {
+            return vals[code];
+        }
+    }
 
     static {
         System.load("/opt/homebrew/Cellar/libpq/18.1/lib/libpq.dylib");
@@ -53,13 +107,13 @@ public class Native {
     // public static native String PQhostaddr(final long conn);
     // public static native String PQport(final long conn);
     // public static native String PQoptions(final long conn);
-    // - PQstatus int
-    // - PQtransactionStatus
+    public static native int PQstatus(final long conn);
+    public static native int PQtransactionStatus(final long conn);
     // PQparameterStatus
     // PQfullProtocolVersion
     // PQprotocolVersion
     // PQserverVersion
-    // - PQerrorMessage
+    public static native String PQerrorMessage(final long conn);
     // PQsocket
     // PQbackendPID
     // PQconnectionNeedsPassword
@@ -73,7 +127,7 @@ public class Native {
 
     /* EXEC */
 
-    // - PQexec
+    public static native long PQexec(final long conn, final String command);
     // PQexecParams
     // PQprepare
     // PQexecPrepared
@@ -81,12 +135,12 @@ public class Native {
     // PQdescribePortal
     // PQclosePrepared
     // PQclosePortal
-    // PQresultStatus
-    // - PQresStatus
-    // - PQresultErrorMessage
-    // - PQresultVerboseErrorMessage
+    public static native int PQresultStatus(final long result);
+    public static native String PQresStatus(final int code);
+    public static native String PQresultErrorMessage(final long result);
+    // PQresultVerboseErrorMessage
     // PQresultErrorField
-    // - PQclear
+    public static native void PQclear(final long result);
 
     /* FIELDS */
 
@@ -101,9 +155,9 @@ public class Native {
     // PQfmod
     // PQfsize
     // PQbinaryTuples
-    // - PQgetvalue
-    // - PQgetisnull
-    // - PQgetlength
+    public static native String PQgetvalue(final long result, final int row, final int col);
+    public static native boolean PQgetisnull(final long result, final int row, final int col);
+    public static native int PQgetlength(final long result, final int row, final int col);
     // PQnparams
     // PQparamtype
     // PQprint
@@ -125,21 +179,45 @@ public class Native {
     // PQescapeBytea
     // PQunescapeBytea
 
+    /* CUSTOM */
+
+    public static native Object getValue(final long result, final int row, final int col);
+
+
     public static void main(final String... args) {
-        final var conninfo = "host=localhost port=5432 dbname=book user=book password=book";
+        final var conninfo = "host=localhost port=15432 dbname=test user=test password=test";
         final var conn = PQconnectdb(conninfo);
-        System.out.println(conn);
+        // System.out.println(conn);
 
-        final var pingres = PQping(conninfo);
-        System.out.println(pingres);
+        final var st = PQstatus(conn);
+        // System.out.println(st);
 
-        final var opts1 = PQconndefaults();
-        System.out.println(opts1.length);
-        System.out.println(Arrays.toString(opts1));
+        final var m = PQerrorMessage(conn);
+        // System.out.println(m);
 
-        final var opts2 = PQconninfo(conn);
-        System.out.println(opts2.length);
-        System.out.println(Arrays.toString(opts2));
+        final var result = PQexec(conn, "select x::int4 from generate_series(1, 99) as seq(x)");
+        // System.out.println(result);
+
+        final var status = PQresultStatus(result);
+        // System.out.println(status);
+
+        final var msg = PQresultErrorMessage(result);
+        // System.out.println(msg);
+
+        // System.out.println(PQgetvalue(result, 7, 0));
+
+        System.out.println(getValue(result, 66, 0));
+
+//        final var pingres = PQping(conninfo);
+//        System.out.println(pingres);
+//
+//        final var opts1 = PQconndefaults();
+//        System.out.println(opts1.length);
+//        System.out.println(Arrays.toString(opts1));
+//
+//        final var opts2 = PQconninfo(conn);
+//        System.out.println(opts2.length);
+//        System.out.println(Arrays.toString(opts2));
 
         // final ByteBuffer bb = PQconndefaults(42);
         // System.out.println(bb.);

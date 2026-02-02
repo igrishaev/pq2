@@ -57,59 +57,99 @@ JNIEXPORT jint JNICALL Java_org_pq_Native_PQping
 
 /*
  * Class:     org_pq_Native
- * Method:    PQdb
- * Signature: (J)Ljava/lang/String;
+ * Method:    PQstatus
+ * Signature: (J)I
  */
-JNIEXPORT jstring JNICALL Java_org_pq_Native_PQdb
+JNIEXPORT jint JNICALL Java_org_pq_Native_PQstatus
   (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     org_pq_Native
- * Method:    PQuser
- * Signature: (J)Ljava/lang/String;
+ * Method:    PQtransactionStatus
+ * Signature: (J)I
  */
-JNIEXPORT jstring JNICALL Java_org_pq_Native_PQuser
+JNIEXPORT jint JNICALL Java_org_pq_Native_PQtransactionStatus
   (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     org_pq_Native
- * Method:    PQpass
+ * Method:    PQerrorMessage
  * Signature: (J)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_org_pq_Native_PQpass
+JNIEXPORT jstring JNICALL Java_org_pq_Native_PQerrorMessage
   (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     org_pq_Native
- * Method:    PQhost
- * Signature: (J)Ljava/lang/String;
+ * Method:    PQexec
+ * Signature: (JLjava/lang/String;)J
  */
-JNIEXPORT jstring JNICALL Java_org_pq_Native_PQhost
+JNIEXPORT jlong JNICALL Java_org_pq_Native_PQexec
+  (JNIEnv *, jclass, jlong, jstring);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    PQresultStatus
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_PQresultStatus
   (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     org_pq_Native
- * Method:    PQhostaddr
+ * Method:    PQresStatus
+ * Signature: (I)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_org_pq_Native_PQresStatus
+  (JNIEnv *, jclass, jint);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    PQresultErrorMessage
  * Signature: (J)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_org_pq_Native_PQhostaddr
+JNIEXPORT jstring JNICALL Java_org_pq_Native_PQresultErrorMessage
   (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     org_pq_Native
- * Method:    PQport
- * Signature: (J)Ljava/lang/String;
+ * Method:    PQclear
+ * Signature: (J)V
  */
-JNIEXPORT jstring JNICALL Java_org_pq_Native_PQport
+JNIEXPORT void JNICALL Java_org_pq_Native_PQclear
   (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     org_pq_Native
- * Method:    PQoptions
- * Signature: (J)Ljava/lang/String;
+ * Method:    PQgetvalue
+ * Signature: (JII)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_org_pq_Native_PQoptions
-  (JNIEnv *, jclass, jlong);
+JNIEXPORT jstring JNICALL Java_org_pq_Native_PQgetvalue
+  (JNIEnv *, jclass, jlong, jint, jint);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    PQgetisnull
+ * Signature: (JII)Z
+ */
+JNIEXPORT jboolean JNICALL Java_org_pq_Native_PQgetisnull
+  (JNIEnv *, jclass, jlong, jint, jint);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    PQgetlength
+ * Signature: (JII)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_PQgetlength
+  (JNIEnv *, jclass, jlong, jint, jint);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    getValue
+ * Signature: (JII)Ljava/lang/Object;
+ */
+JNIEXPORT jobject JNICALL Java_org_pq_Native_getValue
+  (JNIEnv *, jclass, jlong, jint, jint);
 
 #ifdef __cplusplus
 }
