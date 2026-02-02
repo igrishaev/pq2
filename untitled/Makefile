@@ -2,7 +2,7 @@
 all: cleanup gen-h compile link
 
 cleanup:
-	rm org_pq_Native.o libfoo.dylib
+	rm -f org_pq_Native.o libfoo.dylib
 
 compile:
 	g++ -c -fPIC \

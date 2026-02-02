@@ -195,7 +195,7 @@ public class Native {
         final var m = PQerrorMessage(conn);
         // System.out.println(m);
 
-        final var result = PQexec(conn, "select x::int4 from generate_series(1, 99) as seq(x)");
+        final var result = PQexec(conn, "select x::int8 from generate_series(1, 99) as seq(x)");
         // System.out.println(result);
 
         final var status = PQresultStatus(result);

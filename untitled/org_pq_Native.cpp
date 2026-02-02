@@ -162,7 +162,9 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_PQexec
                                     NULL,
                                     NULL,
                                     NULL,
-                                    1);
+                                    0
+                                    // 1
+                                    );
 
     // PGresult* result = PQexec(conn, command);
     return jPtr(result);
@@ -265,23 +267,42 @@ JNIEXPORT jobject JNICALL Java_org_pq_Native_getValue
 
     switch ((int) oid) {
     case 21: { // int2
-        // short parsed = (short) *val;
-        // int parsed = std::stos(val);
-        // jclass jClass = env->FindClass("java/lang/Short");
-        // jmethodID jMethod = env->GetMethodID(jClass, "<init>", "(S)V");
-        // return env->NewObject(jClass, jMethod, parsed);
+        short parsed;
+        if (format == 0) {
+            parsed = std::stoi(val);
+        } else {
+            parsed = ntohs(*((short*) val));
+        }
+        std::cout << "parsed: " << parsed;
+        jclass jClass = env->FindClass("java/lang/Short");
+        jmethodID jMethod = env->GetMethodID(jClass, "<init>", "(S)V");
+        return env->NewObject(jClass, jMethod, parsed);
         return jString(env, val);
     }
     case 23: { // int4
-        int parsed = (int) htonl(*((int*) val));
-        // int parsed = std::stoi(val);
+        int parsed;
+        if (format == 0) {
+            parsed = std::stoi(val);
+        } else {
+            parsed = ntohl(*((int*) val));
+        }
         std::cout << "parsed: " << parsed;
         jclass jClass = env->FindClass("java/lang/Integer");
         jmethodID jMethod = env->GetMethodID(jClass, "<init>", "(I)V");
         return env->NewObject(jClass, jMethod, parsed);
     }
-    case 20: // int8
-        return jString(env, val);
+    case 20: { // int8
+        long parsed;
+        if (format == 0) {
+            parsed = std::stol(val);
+        } else {
+            parsed = ntohll(*((long*) val));
+        }
+        std::cout << "parsed: " << parsed;
+        jclass jClass = env->FindClass("java/lang/Long");
+        jmethodID jMethod = env->GetMethodID(jClass, "<init>", "(J)V");
+        return env->NewObject(jClass, jMethod, parsed);
+    }
     case 25:
         return jString(env, val);
     default:
