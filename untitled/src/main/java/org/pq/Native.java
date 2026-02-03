@@ -183,6 +183,15 @@ public class Native {
 
     public static native Object getValue(final long result, final int row, final int col);
 
+    public static native int getInt(final long result, final int row, final int col);
+
+    public static native String getString(final long result, final int row, final int col);
+
+    public static native java.nio.ByteBuffer getBB(final long result, final int row, final int col);
+
+    public static native byte[] getBytes(final long result, final int row, final int col);
+
+    public static native Object[] getTuple(final long result, final int row);
 
     public static void main(final String... args) {
         final var conninfo = "host=localhost port=15432 dbname=test user=test password=test";

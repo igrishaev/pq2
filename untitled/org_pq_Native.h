@@ -159,6 +159,46 @@ JNIEXPORT jint JNICALL Java_org_pq_Native_PQgetlength
 JNIEXPORT jobject JNICALL Java_org_pq_Native_getValue
   (JNIEnv *, jclass, jlong, jint, jint);
 
+/*
+ * Class:     org_pq_Native
+ * Method:    getInt
+ * Signature: (JII)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_getInt
+  (JNIEnv *, jclass, jlong, jint, jint);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    getString
+ * Signature: (JII)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_org_pq_Native_getString
+  (JNIEnv *, jclass, jlong, jint, jint);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    getBB
+ * Signature: (JII)Ljava/nio/ByteBuffer;
+ */
+JNIEXPORT jobject JNICALL Java_org_pq_Native_getBB
+  (JNIEnv *, jclass, jlong, jint, jint);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    getBytes
+ * Signature: (JII)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_org_pq_Native_getBytes
+  (JNIEnv *, jclass, jlong, jint, jint);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    getTuple
+ * Signature: (JI)[Ljava/lang/Object;
+ */
+JNIEXPORT jobjectArray JNICALL Java_org_pq_Native_getTuple
+  (JNIEnv *, jclass, jlong, jint);
+
 #ifdef __cplusplus
 }
 #endif

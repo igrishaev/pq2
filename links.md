@@ -13,3 +13,9 @@ https://stackoverflow.com/questions/1610045/how-to-return-an-array-from-jni-to-j
 
 libpq/libpq-fe.h
 https://github.com/postgres/postgres/blob/master/src/interfaces/libpq/libpq-fe.h
+
+In JNI, how do I cache the class, methodID, and fieldIDs per IBM's performance recommendations?
+https://stackoverflow.com/questions/10617735/in-jni-how-do-i-cache-the-class-methodid-and-fieldids-per-ibms-performance-r
+
+JNI Performance - Welcome to the dark side
+http://normanmaurer.me/blog/2014/01/07/JNI-Performance-Welcome-to-the-dark-side/

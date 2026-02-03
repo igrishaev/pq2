@@ -157,7 +157,9 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_PQexec
                                     NULL,
                                     NULL,
                                     NULL,
-                                    0);
+                                    1
+                                    // 0
+                                    );
 
     // PGresult* result = PQexec(conn, command);
     return jPtr(result);
@@ -265,7 +267,7 @@ int PQparseInt4(char* val, int format) {
     if (format == 0) {
         return std::stoi(val);
     } else {
-        return ntohl(*((int*) val));
+        return /*ntohl(*/ *((int*) val) /*)*/ ;
     }
 }
 
@@ -354,4 +356,158 @@ JNIEXPORT jobject JNICALL Java_org_pq_Native_getValue
     default: {
         return jString(env, val);
     }}
+};
+
+
+/*
+ * Class:     org_pq_Native
+ * Method:    getInt
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_getInt
+    (JNIEnv* env, jclass, jlong jresult, jint jrow, jint jcol) {
+    PGresult* result = getResult(jresult);
+
+    int isNull = PQgetisnull(result, jrow, jcol);
+    if (isNull == 1) {
+        return -1;
+    }
+    char* val = PQgetvalue(result, jrow, jcol);
+    int format = PQfformat(result, jcol);
+    Oid oid = PQftype(result, jcol);
+
+    switch ((int) oid) {
+    case OID_INT2: {
+        return -1;
+    }
+    case OID_INT4: {
+        return PQparseInt4(val, format);
+        // return 42;
+    }
+    case OID_INT8: {
+        return -1;
+    }
+    case OID_UUID: {
+        return -1;
+    }
+    case OID_TEXT: {
+        return -1;
+    }
+    default: {
+        return -1;
+    }}
+
+    return 42;
+
+};
+
+JNIEXPORT jstring JNICALL Java_org_pq_Native_getString
+  (JNIEnv *env, jclass, jlong jresult, jint jrow, jint jcol) {
+
+    PGresult* result = getResult(jresult);
+
+    int isNull = PQgetisnull(result, jrow, jcol);
+    if (isNull == 1) {
+        return NULL;
+    }
+    char* val = PQgetvalue(result, jrow, jcol);
+    int format = PQfformat(result, jcol);
+    Oid oid = PQftype(result, jcol);
+
+    return NULL; // jString(env, val);
+};
+
+/*
+ * Class:     org_pq_Native
+ * Method:    getBytes
+ * Signature: (JII)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_org_pq_Native_getBytes
+  (JNIEnv *env, jclass, jlong jresult, jint jrow, jint jcol) {
+
+    PGresult* result = getResult(jresult);
+
+    // int isNull = PQgetisnull(result, jrow, jcol);
+    // if (isNull == 1) {
+    //     return NULL;
+    // }
+    char* val = PQgetvalue(result, jrow, jcol);
+    // int format = PQfformat(result, jcol);
+    // Oid oid = PQftype(result, jcol);
+
+    int len = PQgetlength(result, jrow, jcol);
+
+    jbyteArray array = env->NewByteArray(len);
+    env->SetByteArrayRegion(array, 0, len, (jbyte*) val);
+    return array;
+
+};
+
+/*
+ * Class:     org_pq_Native
+ * Method:    getBB
+ * Signature: (JII)Ljava/nio/ByteBuffer;
+ */
+JNIEXPORT jobject JNICALL Java_org_pq_Native_getBB
+  (JNIEnv *env, jclass, jlong jresult, jint jrow, jint jcol) {
+
+    PGresult* result = getResult(jresult);
+
+    // int isNull = PQgetisnull(result, jrow, jcol);
+    // if (isNull == 1) {
+    //     return NULL;
+    // }
+    char* val = PQgetvalue(result, jrow, jcol);
+    // int format = PQfformat(result, jcol);
+    // Oid oid = PQftype(result, jcol);
+
+    int len = PQgetlength(result, jrow, jcol);
+
+    return env->NewDirectByteBuffer(val, len);
+
+};
+
+
+
+/*
+ * Class:     org_pq_Native
+ * Method:    getTuple
+ * Signature: (JI)[Ljava/lang/Object;
+ */
+JNIEXPORT jobjectArray JNICALL Java_org_pq_Native_getTuple
+    (JNIEnv* env, jclass, jlong jresult, jint jrow) {
+
+    PGresult* result = getResult(jresult);
+
+    jobjectArray jarr = env->NewObjectArray(3, env->FindClass("java/lang/Object"), NULL);
+
+    char* val;
+    int format;
+    Oid oid;
+    int isNull;
+    jobject obj;
+    int parsed;
+
+    jclass jInt = env->FindClass("java/lang/Integer");
+    jmethodID jInit = env->GetMethodID(jInt, "<init>", "(I)V");
+
+
+    for (int i = 0; i < 3; i++) {
+
+        format = PQfformat(result, i);
+        oid = PQftype(result, i);
+
+        isNull = PQgetisnull(result, jrow, i);
+        if (isNull == 1) {
+            env->SetObjectArrayElement(jarr, i, NULL);
+        } else {
+            val = PQgetvalue(result, jrow, i);
+            parsed = PQparseInt4(val, format);
+            obj = env->NewObject(jInt, jInit, parsed);
+
+            env->SetObjectArrayElement(jarr, i, obj);
+        }
+    }
+
+    return jarr;
 };
