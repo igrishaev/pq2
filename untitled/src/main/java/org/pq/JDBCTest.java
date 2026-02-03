@@ -19,14 +19,14 @@ public class JDBCTest {
         Object obj;
         String s;
         byte[] bs;
-        PreparedStatement stmt = conn.prepareStatement("select x::text as a from generate_series(1, 9999) as seq(x)");
+        PreparedStatement stmt = conn.prepareStatement("select '122b85b3-8385-48a6-9973-036cf8b04eac'::uuid as a from generate_series(1, 9999) as seq(x)");
         ResultSet rs = stmt.executeQuery();
         while (rs.next()) {
-            // obj = rs.getObject(1);
-            //obj = rs.getObject(2);
+            obj = rs.getObject(1);
+            // obj = rs.getObject(2);
             //obj = rs.getObject(3);
             // num = rs.getInt(1);
-            s = rs.getString(1);
+            // s = rs.getString(1);
             // // s = rs.getString(1);
             // s = rs.getString(1);
             // num = rs.getInt(1);

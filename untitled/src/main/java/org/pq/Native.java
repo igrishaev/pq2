@@ -2,6 +2,7 @@ package org.pq;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.UUID;
 
 public class Native {
 
@@ -185,6 +186,10 @@ public class Native {
 
     public static native int getInt(final long result, final int row, final int col);
 
+    public static native long asLong(final long request, final int row, final int col);
+
+    public static native long asLong(final long request, final int row, final int col, int offset);
+
     public static native String getString(final long result, final int row, final int col);
 
     public static native java.nio.ByteBuffer getBB(final long result, final int row, final int col);
@@ -215,7 +220,13 @@ public class Native {
 
         // System.out.println(PQgetvalue(result, 7, 0));
 
-        System.out.println(getValue(result, 1, 0));
+        long bits1 = asLong(result, 0, 0);
+        long bits2 = asLong(result, 0, 0, 8);
+
+        System.out.println(new UUID(bits1, bits2));
+
+
+        // System.out.println(getValue(result, 1, 0));
 
 //        final var pingres = PQping(conninfo);
 //        System.out.println(pingres);

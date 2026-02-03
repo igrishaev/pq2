@@ -5,6 +5,25 @@
 #include "macro.h"
 #include "oid.h"
 
+jclass Integer;
+jmethodID IntegerNew;
+
+// Is automatically called once the native code is loaded via System.loadLibary(...);
+jint JNI_OnLoad(JavaVM* vm, void* reserved) {
+    JNIEnv *env;
+
+    if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_8) != JNI_OK) {
+        return JNI_ERR; // JVM version not supported
+    }
+
+    Integer = env->FindClass("java/lang/Integer");
+    IntegerNew = env->GetMethodID(Integer, "<init>", "(I)V");
+
+    return JNI_VERSION_1_8;
+
+}
+
+
 /*
  * Class:     org_pq_Native
  * Method:    PQconnectdb
@@ -306,9 +325,10 @@ jobject PQJavaShort(JNIEnv* env, short val) {
 }
 
 jobject PQJavaInteger(JNIEnv* env, int val) {
-    defClass(jClass, env, "java/lang/Integer");
-    defMethod(jInit, env, jClass, "<init>", "(I)V");
-    return env->NewObject(jClass, jInit, val);
+    // defClass(jClass, env, "java/lang/Integer");
+    // defMethod(jInit, env, jClass, "<init>", "(I)V");
+    // return env->NewObject(jClass, jInit, val);
+    return env->NewObject(Integer, IntegerNew, val);
 }
 
 jobject PQJavaLong(JNIEnv* env, long val) {
@@ -414,7 +434,8 @@ JNIEXPORT jstring JNICALL Java_org_pq_Native_getString
     int format = PQfformat(result, jcol);
     Oid oid = PQftype(result, jcol);
 
-    return NULL; // jString(env, val);
+    // return NULL;
+    return jString(env, val);
 };
 
 /*
@@ -510,4 +531,30 @@ JNIEXPORT jobjectArray JNICALL Java_org_pq_Native_getTuple
     }
 
     return jarr;
+};
+
+
+
+/*
+ * Class:     org_pq_Native
+ * Method:    asLong
+ * Signature: (JII)J
+ */
+JNIEXPORT jlong JNICALL Java_org_pq_Native_asLong__JII
+(JNIEnv* env, jclass, jlong jresult, jint jrow, jint jcol) {
+    PGresult* result = getResult(jresult);
+    char* val = PQgetvalue(result, jrow, jcol);
+    return ntohll(*((long*) val));
+};
+
+/*
+ * Class:     org_pq_Native
+ * Method:    asLong
+ * Signature: (JIII)J
+ */
+JNIEXPORT jlong JNICALL Java_org_pq_Native_asLong__JIII
+    (JNIEnv* env, jclass, jlong jresult, jint jrow, jint jcol, jint joffset) {
+    PGresult* result = getResult(jresult);
+    char* val = PQgetvalue(result, jrow, jcol);
+    return ntohll(*((long*) (val + joffset)));
 };

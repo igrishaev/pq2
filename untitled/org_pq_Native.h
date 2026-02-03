@@ -169,6 +169,22 @@ JNIEXPORT jint JNICALL Java_org_pq_Native_getInt
 
 /*
  * Class:     org_pq_Native
+ * Method:    asLong
+ * Signature: (JII)J
+ */
+JNIEXPORT jlong JNICALL Java_org_pq_Native_asLong__JII
+  (JNIEnv *, jclass, jlong, jint, jint);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    asLong
+ * Signature: (JIII)J
+ */
+JNIEXPORT jlong JNICALL Java_org_pq_Native_asLong__JIII
+  (JNIEnv *, jclass, jlong, jint, jint, jint);
+
+/*
+ * Class:     org_pq_Native
  * Method:    getString
  * Signature: (JII)Ljava/lang/String;
  */
