@@ -1,5 +1,7 @@
 package org.pq.jdbc;
 
+import org.pq.Native;
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -8,7 +10,19 @@ import java.sql.*;
 import java.util.Calendar;
 import java.util.Map;
 
-public class ResultSet implements java.sql.ResultSet {
+public class PQResultSet implements java.sql.ResultSet, AutoCloseable {
+
+    private final Foo foo;
+    private final int currentRow;
+
+    private PQResultSet(Foo foo) {
+        this.foo = foo;
+        this.currentRow = 0;
+    }
+
+    public static PQResultSet of(Foo foo) {
+        return new PQResultSet(foo);
+    }
 
     @Override
     public boolean next() throws SQLException {
@@ -16,18 +30,18 @@ public class ResultSet implements java.sql.ResultSet {
     }
 
     @Override
-    public void close() throws SQLException {
-
+    public void close() {
+        Native.PQclear(foo.result());
     }
 
     @Override
-    public boolean wasNull() throws SQLException {
+    public boolean wasNull() {
         return false;
     }
 
     @Override
-    public String getString(int columnIndex) throws SQLException {
-        return "";
+    public String getString(int col) {
+        return Native.getString(foo.result(), currentRow, col);
     }
 
     @Override
@@ -46,12 +60,12 @@ public class ResultSet implements java.sql.ResultSet {
     }
 
     @Override
-    public int getInt(int columnIndex) throws SQLException {
-        return 0;
+    public int getInt(final int col) {
+        return Native.getInt(foo.result(), currentRow, col);
     }
 
     @Override
-    public long getLong(int columnIndex) throws SQLException {
+    public long getLong(int columnIndex) {
         return 0;
     }
 
@@ -126,13 +140,15 @@ public class ResultSet implements java.sql.ResultSet {
     }
 
     @Override
-    public int getInt(String columnLabel) throws SQLException {
-        return 0;
+    public int getInt(String columnLabel) {
+        final int i = foo.getIndex(columnLabel);
+        return getInt(i);
     }
 
     @Override
-    public long getLong(String columnLabel) throws SQLException {
-        return 0;
+    public long getLong(String columnLabel) {
+        final int i = foo.getIndex(columnLabel);
+        return getLong(i);
     }
 
     @Override

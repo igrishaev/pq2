@@ -1,5 +1,7 @@
 package org.pq.jdbc;
 
+import org.pq.Native;
+
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -10,6 +12,10 @@ import java.sql.ResultSet;
 import java.util.Calendar;
 
 public class PreparedStatement implements java.sql.PreparedStatement {
+
+    private long conn;
+    private long result;
+    private String sql;
 
     @Override
     public ResultSet executeQuery() throws SQLException {
@@ -123,7 +129,8 @@ public class PreparedStatement implements java.sql.PreparedStatement {
 
     @Override
     public boolean execute() throws SQLException {
-        return false;
+        result = Native.PQexec(conn, sql);
+        return true;
     }
 
     @Override
@@ -358,12 +365,14 @@ public class PreparedStatement implements java.sql.PreparedStatement {
 
     @Override
     public boolean execute(String sql) throws SQLException {
+
         return false;
     }
 
     @Override
     public ResultSet getResultSet() throws SQLException {
-        return null;
+        Foo foo = Foo.ofResult(result);
+        return PQResultSet.of(foo);
     }
 
     @Override

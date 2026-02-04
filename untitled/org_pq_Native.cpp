@@ -242,6 +242,18 @@ JNIEXPORT jint JNICALL Java_org_pq_Native_PQntuples
 
 /*
  * Class:     org_pq_Native
+ * Method:    PQnfields
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_PQnfields
+(JNIEnv* env, jclass, jlong jresult) {
+    PGresult* result = getResult(jresult);
+    return PQnfields(result);
+};
+
+
+/*
+ * Class:     org_pq_Native
  * Method:    PQgetvalue
  * Signature: (JII)Ljava/lang/String;
  */
@@ -557,4 +569,46 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_asLong__JIII
     PGresult* result = getResult(jresult);
     char* val = PQgetvalue(result, jrow, jcol);
     return ntohll(*((long*) (val + joffset)));
+};
+
+
+ /*
+ * Class:     org_pq_Native
+ * Method:    writeBB
+ * Signature: (Ljava/nio/ByteBuffer;)V
+ */
+JNIEXPORT void JNICALL Java_org_pq_Native_writeBB
+  (JNIEnv *env, jclass, jobject bb) {
+    void* bufferPtr = env->GetDirectBufferAddress(bb);
+    // jlong capacity = env->GetDirectBufferCapacity(bb);
+    const char* sourceData = "Hello from JNI";
+    size_t dataSize = strlen(sourceData);
+    memcpy(bufferPtr, sourceData, dataSize);
+
+    // char source[] = "Hello, World!";
+    // memcpy(mem, source, 10);
+};
+
+ /*
+ * Class:     org_pq_Native
+ * Method:    getBBAddress
+ * Signature: (Ljava/nio/ByteBuffer;)J
+ */
+JNIEXPORT jlong JNICALL Java_org_pq_Native_getBBAddress
+  (JNIEnv *env, jclass, jobject bb) {
+    return (jlong) env->GetDirectBufferAddress(bb);
+};
+
+
+ /*
+ * Class:     org_pq_Native
+ * Method:    writeBBPTR
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_org_pq_Native_writeBBPTR
+  (JNIEnv *env, jclass, jlong jptr) {
+    void* bb = (void*) jptr;
+    const char* sourceData = "Hello from JNI";
+    size_t dataSize = strlen(sourceData);
+    memcpy(bb, sourceData, dataSize);
 };

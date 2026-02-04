@@ -146,16 +146,17 @@ public class Native {
     /* FIELDS */
 
     public static native int PQntuples(final long result);
-    // PQnfields
-    // PQfname
-    // PQfnumber
-    // PQftable
-    // PQftablecol
-    // PQfformat
-    // PQftype
-    // PQfmod
-    // PQfsize
-    // PQbinaryTuples
+    public static native int PQnfields(final long result);
+    public static native String PQfname(final long result, final int col);
+    public static native int PQfnumber(final long result, final String label);
+    public static native int PQftable(final long result, final int col);
+    public static native int PQftablecol(final long result, final String label);
+    public static native int PQfformat(final long result, final int col);
+    public static native int PQftype(final long result, final int col);
+    public static native int PQfmod(final long result, final int col);
+    public static native int PQfsize(final long result, final int col);
+    public static native int PQbinaryTuples(final long result);
+    // TODO: string?
     public static native String PQgetvalue(final long result, final int row, final int col);
     public static native boolean PQgetisnull(final long result, final int row, final int col);
     public static native int PQgetlength(final long result, final int row, final int col);
@@ -181,6 +182,12 @@ public class Native {
     // PQunescapeBytea
 
     /* CUSTOM */
+
+    public static native void writeBB(final java.nio.ByteBuffer bb);
+
+    public static native void writeBBPTR(final long bbptr);
+
+    public static native long getBBAddress(final java.nio.ByteBuffer bb);
 
     public static native Object getValue(final long result, final int row, final int col);
 

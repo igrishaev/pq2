@@ -5,7 +5,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
-public class Connection implements java.sql.Connection {
+public class PQConnection implements java.sql.Connection {
+
+    private long conn;
 
     @Override
     public Statement createStatement() throws SQLException {
@@ -13,7 +15,7 @@ public class Connection implements java.sql.Connection {
     }
 
     @Override
-    public PreparedStatement prepareStatement(String sql) throws SQLException {
+    public PreparedStatement prepareStatement(final String sql) throws SQLException {
         return null;
     }
 
