@@ -29,22 +29,25 @@ public class PQTest {
         Object obj;
         long bits1, bits2;
         var result = Native.PQexec(conn, "select x::text as a from generate_series(1, 9999) as seq(x)");
-        var len = Native.PQntuples(result);
-        for (int i = 0; i < len; i++) {
+        var tuples = Native.PQntuples(result);
+        for (int row = 0; row < tuples; row++) {
 
-            Native.writeBBPTR(ptr);
-            this.bb.get(0, bs);
+            Native.fetchField(result, ptr, row, 0);
+            // Native.writeBBPTR(ptr);
+            // this.bb.get(0, bs);
             // s = this.bb.asCharBuffer().toString();
-            s = new String(bs, StandardCharsets.UTF_8);
-            s = new String(bs, StandardCharsets.UTF_8);
-            s = new String(bs, StandardCharsets.UTF_8);
-            s = new String(bs, StandardCharsets.UTF_8);
-            s = new String(bs, StandardCharsets.UTF_8);
-            s = new String(bs, StandardCharsets.UTF_8);
-            s = new String(bs, StandardCharsets.UTF_8);
-            s = new String(bs, StandardCharsets.UTF_8);
-            s = new String(bs, StandardCharsets.UTF_8);
-            s = new String(bs, StandardCharsets.UTF_8);
+            // s = new String(bs, StandardCharsets.UTF_8);
+
+            // this.bb.reset();
+            this.bb.rewind();
+            System.out.println("--------------");
+            System.out.println(bb.getInt());
+            System.out.println(bb.getInt());
+            System.out.println(bb.getInt());
+            System.out.println(bb.getInt());
+
+            if (row > 10) {System.exit(0);}
+
 
             // s = new String(bs);
             // System.out.println(s);

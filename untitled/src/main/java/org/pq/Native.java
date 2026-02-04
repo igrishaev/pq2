@@ -205,6 +205,8 @@ public class Native {
 
     public static native Object[] getTuple(final long result, final int row);
 
+    public static native int fetchField(final long pgresult, final long bb, final int row, final int col);
+
     public static void main(final String... args) {
         final var conninfo = "host=localhost port=15432 dbname=test user=test password=test";
         final var conn = PQconnectdb(conninfo);

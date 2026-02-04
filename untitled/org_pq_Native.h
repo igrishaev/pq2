@@ -319,6 +319,14 @@ JNIEXPORT jbyteArray JNICALL Java_org_pq_Native_getBytes
 JNIEXPORT jobjectArray JNICALL Java_org_pq_Native_getTuple
   (JNIEnv *, jclass, jlong, jint);
 
+/*
+ * Class:     org_pq_Native
+ * Method:    fetchField
+ * Signature: (JJII)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_fetchField
+  (JNIEnv *, jclass, jlong, jlong, jint, jint);
+
 #ifdef __cplusplus
 }
 #endif

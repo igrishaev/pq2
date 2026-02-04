@@ -612,3 +612,39 @@ JNIEXPORT void JNICALL Java_org_pq_Native_writeBBPTR
     size_t dataSize = strlen(sourceData);
     memcpy(bb, sourceData, dataSize);
 };
+
+
+ /*
+ * Class:     org_pq_Native
+ * Method:    fetchField
+ * Signature: (JJ)I
+ */
+ JNIEXPORT jint JNICALL Java_org_pq_Native_fetchField
+     (JNIEnv *, jclass, jlong jresult, jlong jbb, jint jrow, jint jcol) {
+     PGresult* result = getResult(jresult);
+     int* bb = (int*) jbb;
+
+     int isnull = PQgetisnull(result, jrow, jcol);
+     int format = PQfformat(result, jcol);
+     Oid oid = PQftype(result, jcol);
+     int len = PQgetlength(result, jrow, jcol);
+     char* val = PQgetvalue(result, jrow, jcol);
+
+     int intlen = sizeof(int);
+
+     bb[0] = oid;
+
+     // bb[0] = isnull;
+     // bb[1] = format;
+     // bb[2] = oid;
+     // bb[3] = len;
+
+
+     // memcpy(bb + 0,              &isnull, intlen);
+     // memcpy(bb + 1,     &format, intlen);
+     // memcpy(bb + 2, &oid,    intlen);
+     // memcpy(bb + 3, &len,    intlen);
+     // memcpy(bb + 4, val,     len);
+
+     return 0;
+};
