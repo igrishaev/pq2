@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public class Native {
 
-    public enum FORMAT {
+    public static enum FORMAT {
         TXT,
         BIN;
         private static final FORMAT[] vals = values();

@@ -1,5 +1,6 @@
 package org.pq.jdbc;
 
+import org.pq.Decode;
 import org.pq.Native;
 
 import java.nio.ByteBuffer;
@@ -23,36 +24,7 @@ public class PQTest {
         this.conn = Native.PQconnectdb("host=localhost port=5432 dbname=book user=book password=book");
     }
 
-    public static Object parseVal(final ByteBuffer bb) {
-        bb.rewind();
-        int isNull = bb.getInt();
-        if (isNull == 1) {
-            return null;
-        }
-        int format = bb.getInt();
-        int oid = bb.getInt();
-        int len = bb.getInt();
 
-        return switch (oid) {
-            case 20 -> bb.getLong();
-            case 23 -> bb.getInt();
-            case 25 -> {
-                byte[] buf = new byte[len];
-                bb.get(buf);
-                yield new String(buf, StandardCharsets.UTF_8);
-            }
-            case 1082 -> {
-                int days = bb.getInt();
-                yield LocalDate.ofEpochDay(days);
-            }
-            case 2950 -> {
-                long bits1 = bb.getLong();
-                long bits2 = bb.getLong();
-                yield new UUID(bits1, bits2);
-            }
-            default -> throw new RuntimeException("aaa");
-        };
-    }
 
     public void test() {
         int num;
@@ -116,7 +88,7 @@ public class PQTest {
             for (int j = 0; j < 10; j++) {
 //                Native.getInt(result, row, 0);
                 Native.fetchField(result, ptr, row, 0);
-                obj = parseVal(this.bb);
+                obj = Decode.parseVal(bb);
             }
 
 
