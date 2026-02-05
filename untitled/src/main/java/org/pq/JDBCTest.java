@@ -11,7 +11,7 @@ public class JDBCTest {
     private Connection conn;
 
     public JDBCTest() throws SQLException {
-        conn = DriverManager.getConnection("jdbc:postgresql://localhost:15432/test?user=test&password=test");
+        conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/book?user=book&password=book");
     }
 
     public void test() throws SQLException {
@@ -19,26 +19,43 @@ public class JDBCTest {
         Object obj;
         String s;
         byte[] bs;
-        PreparedStatement stmt = conn.prepareStatement("select x::text as a from generate_series(1, 9999) as seq(x)");
+        PreparedStatement stmt = conn.prepareStatement("select now()::date as a from generate_series(1, 9999) as seq(x)");
         ResultSet rs = stmt.executeQuery();
         while (rs.next()) {
             // obj = rs.getObject(1);
             // obj = rs.getObject(2);
             //obj = rs.getObject(3);
             // num = rs.getInt(1);
-            s = rs.getString(1);
-            s = rs.getString(1);
-            s = rs.getString(1);
-            s = rs.getString(1);
-            s = rs.getString(1);
-            s = rs.getString(1);
-            s = rs.getString(1);
-            s = rs.getString(1);
-            s = rs.getString(1);
-            s = rs.getString(1);
+//            s = rs.getString(1);
+//            s = rs.getString(1);
+//            s = rs.getString(1);
+//            s = rs.getString(1);
+//            s = rs.getString(1);
+//            s = rs.getString(1);
+//            s = rs.getString(1);
+//            s = rs.getString(1);
+//            s = rs.getString(1);
+//            s = rs.getString(1);
             // // s = rs.getString(1);
             // s = rs.getString(1);
-            // num = rs.getInt(1);
+            for (int j = 0; j < 10; j++) {
+                obj = rs.getObject(1);
+            }
+//            obj = rs.getObject(1);
+//            obj = rs.getObject(1);
+//            obj = rs.getObject(1);
+//            obj = rs.getObject(1);
+//            obj = rs.getObject(1);
+//            obj = rs.getObject(1);
+//            obj = rs.getObject(1);
+//            obj = rs.getObject(1);
+//            obj = rs.getObject(1);
+//            obj = rs.getObject(1);
+//             num = rs.getInt(1);
+//            num = rs.getInt(1);
+//            num = rs.getInt(1);
+//            num = rs.getInt(1);
+//            num = rs.getInt(1);
         }
     }
 

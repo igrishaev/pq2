@@ -1,10 +1,20 @@
 package org.pq;
 
+import javax.swing.plaf.PanelUI;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.UUID;
 
 public class Native {
+
+    public enum FORMAT {
+        TXT,
+        BIN;
+        private static final FORMAT[] vals = values();
+        public static FORMAT of(final int code) {
+            return vals[code];
+        }
+    }
 
     public enum PQPING {
         OK,
@@ -74,7 +84,7 @@ public class Native {
 
     static {
         System.load("/opt/homebrew/Cellar/libpq/18.1/lib/libpq.dylib");
-        System.load("/Users/ivan.grishaev-external/work/pq2/untitled/libfoo.dylib");
+        System.load("/Users/ivan/work/pq2/untitled/libfoo.dylib");
     }
 
     /* INIT */

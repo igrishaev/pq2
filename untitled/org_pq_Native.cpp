@@ -622,7 +622,7 @@ JNIEXPORT void JNICALL Java_org_pq_Native_writeBBPTR
  JNIEXPORT jint JNICALL Java_org_pq_Native_fetchField
      (JNIEnv *, jclass, jlong jresult, jlong jbb, jint jrow, jint jcol) {
      PGresult* result = getResult(jresult);
-     int* bb = (int*) jbb;
+     char* bb = (char*) jbb;
 
      int isnull = PQgetisnull(result, jrow, jcol);
      int format = PQfformat(result, jcol);
@@ -631,20 +631,33 @@ JNIEXPORT void JNICALL Java_org_pq_Native_writeBBPTR
      char* val = PQgetvalue(result, jrow, jcol);
 
      int intlen = sizeof(int);
+     int off = 0;
 
-     bb[0] = oid;
+     int tmp;
 
-     // bb[0] = isnull;
-     // bb[1] = format;
-     // bb[2] = oid;
-     // bb[3] = len;
+     // is null?
+     tmp = htonl(isnull);
+     memcpy(bb + off, &tmp, intlen);
+     off += intlen;
 
+     // format: txt | bin
+     tmp = htonl(format);
+     memcpy(bb + off, &tmp, intlen);
+     off += intlen;
 
-     // memcpy(bb + 0,              &isnull, intlen);
-     // memcpy(bb + 1,     &format, intlen);
-     // memcpy(bb + 2, &oid,    intlen);
-     // memcpy(bb + 3, &len,    intlen);
-     // memcpy(bb + 4, val,     len);
+     // oid
+     tmp = htonl(oid);
+     memcpy(bb + off, &tmp, intlen);
+     off += intlen;
+
+     // len
+     tmp = htonl(len);
+     memcpy(bb + off, &tmp, intlen);
+     off += intlen;
+
+     // value
+     memcpy(bb + off, val, len);
+     off += len;
 
      return 0;
 };
