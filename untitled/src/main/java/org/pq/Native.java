@@ -2,8 +2,11 @@ package org.pq;
 
 import javax.swing.plaf.PanelUI;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.UUID;
+
+import static org.pq.Decode.encodeValues;
 
 public class Native {
 
@@ -84,7 +87,7 @@ public class Native {
 
     static {
         System.load("/opt/homebrew/Cellar/libpq/18.1/lib/libpq.dylib");
-        System.load("/Users/ivan/work/pq2/untitled/libfoo.dylib");
+        System.load("/Users/ivan.grishaev-external/work/pq2/untitled/libfoo.dylib");
     }
 
     /* INIT */
@@ -193,6 +196,8 @@ public class Native {
 
     /* CUSTOM */
 
+    public static native long execWithParams(final long conn, final long bb);
+
     public static native void writeBB(final java.nio.ByteBuffer bb);
 
     public static native void writeBBPTR(final long bbptr);
@@ -218,6 +223,20 @@ public class Native {
     public static native int fetchField(final long pgresult, final long bb, final int row, final int col);
 
     public static void main(final String... args) {
+
+
+
+        byte[] ba = new byte[16];
+        ByteBuffer bb = ByteBuffer.allocate(128);
+
+
+
+
+//        bb.order(ByteOrder.LITTLE_ENDIAN);
+//        // bb.put(new byte[] {1, 2, 3, 4});
+//        bb.putInt(12345678);
+//        System.out.println(Arrays.toString(bb.array()));
+
         final var conninfo = "host=localhost port=15432 dbname=test user=test password=test";
         final var conn = PQconnectdb(conninfo);
         // System.out.println(conn);

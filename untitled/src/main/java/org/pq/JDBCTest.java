@@ -11,7 +11,7 @@ public class JDBCTest {
     private Connection conn;
 
     public JDBCTest() throws SQLException {
-        conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/book?user=book&password=book");
+        conn = DriverManager.getConnection("jdbc:postgresql://localhost:15432/test?user=test&password=test");
     }
 
     public void test() throws SQLException {

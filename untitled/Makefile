@@ -15,4 +15,4 @@ link:
 
 
 gen-h:
-	javac -h . src/main/java/org/pq/Native.java src/main/java/org/pq/PQconninfoOption.java
+	javac -h . src/main/java/org/pq/Native.java src/main/java/org/pq/PQconninfoOption.java src/main/java/org/pq/Decode.java src/main/java/org/pq/OID.java

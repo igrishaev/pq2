@@ -661,3 +661,76 @@ JNIEXPORT void JNICALL Java_org_pq_Native_writeBBPTR
 
      return 0;
 };
+
+
+/*
+ * Class:     org_pq_Native
+ * Method:    execWithParams
+ * Signature: (JJ)J
+ */
+JNIEXPORT jlong JNICALL Java_org_pq_Native_execWithParams
+(JNIEnv* env, jclass, jlong jconn, jlong jbb) {
+    PGconn* conn = (PGconn*) jconn;
+
+    char* bb = (char*) jbb;
+
+    // int nParams,
+    // Oid *paramTypes,
+    // char * const *paramValues,
+    // int *paramLengths,
+    // int *paramFormats,
+    // int resultFormat
+
+    int off = 0;
+
+    int32_t nParams = *((int32_t*) bb);
+    off += sizeof(int32_t);
+
+    Oid* paramTypes = (Oid*) (bb + off);
+    off += sizeof(Oid) * nParams;
+
+    char** paramValues = (char**) (bb + off);
+    off += sizeof(char*) * nParams;
+
+    printf("nParams: %d \n", nParams);
+
+    Oid* oid;
+    for (int i = 0; i < nParams; i++) {
+        oid = paramTypes + i;
+        printf("oid: %d \n", *oid);
+    }
+
+    char* ptr;
+    int val;
+    for (int i = 0; i < nParams; i++) {
+        ptr = paramValues[i];
+        val = *((int*) ptr);
+        printf("val: %d \n", htonl(val));
+    }
+
+    int* paramLengths = (int*) (bb + off);
+    off += sizeof(int32_t) * nParams;
+
+    int* len;
+    for (int i = 0; i < nParams; i++) {
+        len = paramLengths + i;
+        printf("len: %d \n", *len);
+    }
+
+
+    // int *paramLengths = bb[3];
+
+
+    // int resultFormat = *bb[1];
+    // Oid *paramTypes = *bb[2];
+    // int *paramFormats = *bb[2 + nParams];
+    // int *paramLengths = *bb[2 + nParams + nParams];
+
+
+    // char * const *paramValues
+
+    return 0;
+
+
+
+};

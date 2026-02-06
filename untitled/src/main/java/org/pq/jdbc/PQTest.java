@@ -19,14 +19,19 @@ public class PQTest {
 
     public PQTest() {
         this.bb = ByteBuffer.allocateDirect(6400);
+        // this.bb.order(ByteOrder.BIG_ENDIAN);
         this.bb.order(ByteOrder.BIG_ENDIAN);
         this.ptr = Native.getBBAddress(bb);
-        this.conn = Native.PQconnectdb("host=localhost port=5432 dbname=book user=book password=book");
+        this.conn = Native.PQconnectdb("host=localhost port=15432 dbname=test user=test password=test");
     }
 
-
-
     public void test() {
+
+        Decode.encodeValues(bb, ptr, new Object[]{1, 99, 3}, new int[]{23,23,23}, new int[]{1,1,1}, 0);
+        Native.execWithParams(conn, ptr);
+
+        System.exit(0);
+
         int num;
         Object[] arr;
         String s;
@@ -34,7 +39,7 @@ public class PQTest {
 
         Object obj;
         long bits1, bits2;
-        var result = Native.PQexec(conn, "select now()::date from generate_series(1, 9999) as seq(x)");
+        var result = Native.PQexec(conn, "select x from generate_series(1, 9999) as seq(x)");
         var tuples = Native.PQntuples(result);
         for (int row = 0; row < tuples; row++) {
 
@@ -89,6 +94,7 @@ public class PQTest {
 //                Native.getInt(result, row, 0);
                 Native.fetchField(result, ptr, row, 0);
                 obj = Decode.parseVal(bb);
+                System.out.println(obj);
             }
 
 
