@@ -56,4 +56,18 @@ public class Decode {
         };
     }
 
+    public static int encodeVal(final ByteBuffer bb, final int oid, final int format) {
+        // nparams
+        // oids
+        // values
+        // lengths
+        // formats
+        // result format
+        return 0;
+    }
+
+    public static void encodeValues(final ByteBuffer bb, int[] oids, int[] formats, final Object[] values) {
+        
+    }
+
 }
