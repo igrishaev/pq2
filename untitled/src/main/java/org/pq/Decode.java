@@ -114,7 +114,7 @@ public class Decode {
         }
 
         // resultFormat
-        // bb.putInt(format);
+        bb.putInt(format);
 
         // length and pointers
         int len;

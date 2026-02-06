@@ -234,10 +234,10 @@ JNIEXPORT jint JNICALL Java_org_pq_Native_PQgetlength
 /*
  * Class:     org_pq_Native
  * Method:    execWithParams
- * Signature: (JJ)J
+ * Signature: (JLjava/lang/String;J)J
  */
 JNIEXPORT jlong JNICALL Java_org_pq_Native_execWithParams
-  (JNIEnv *, jclass, jlong, jlong);
+  (JNIEnv *, jclass, jlong, jstring, jlong);
 
 /*
  * Class:     org_pq_Native

@@ -27,8 +27,15 @@ public class PQTest {
 
     public void test() {
 
-        Decode.encodeValues(bb, ptr, new Object[]{1, 99, 3}, new int[]{23,23,23}, new int[]{1,1,1}, 0);
-        Native.execWithParams(conn, ptr);
+        Decode.encodeValues(bb, ptr, new Object[]{999, 99, 3}, new int[]{23,23,23}, new int[]{1,1,1}, 0);
+        long res = Native.execWithParams(conn, "select $1 as a, $2 as b, $3 as c", ptr);
+
+        System.out.println(res);
+
+        // bb.order(ByteOrder.BIG_ENDIAN);
+        Native.fetchField(res, ptr, 0, 0);
+        var obj2 = Decode.parseVal(bb);
+        System.out.println(obj2);
 
         System.exit(0);
 

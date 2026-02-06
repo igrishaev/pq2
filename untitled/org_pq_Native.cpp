@@ -669,10 +669,12 @@ JNIEXPORT void JNICALL Java_org_pq_Native_writeBBPTR
  * Signature: (JJ)J
  */
 JNIEXPORT jlong JNICALL Java_org_pq_Native_execWithParams
-(JNIEnv* env, jclass, jlong jconn, jlong jbb) {
+(JNIEnv* env, jclass, jlong jconn, jstring jsql, jlong jbb) {
     PGconn* conn = (PGconn*) jconn;
 
     char* bb = (char*) jbb;
+
+    const char* sql = env->GetStringUTFChars(jsql, NULL);
 
     // int nParams,
     // Oid *paramTypes,
@@ -683,7 +685,7 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_execWithParams
 
     int off = 0;
 
-    int32_t nParams = *((int32_t*) bb);
+    int32_t nParams = *((int32_t*) (bb + off));
     off += sizeof(int32_t);
 
     Oid* paramTypes = (Oid*) (bb + off);
@@ -691,6 +693,15 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_execWithParams
 
     char** paramValues = (char**) (bb + off);
     off += sizeof(char*) * nParams;
+
+    int32_t* paramLengths = (int32_t*) (bb + off);
+    off += sizeof(int32_t) * nParams;;
+
+    int32_t* paramFormats = (int32_t*) (bb + off);
+    off += sizeof(int32_t) * nParams;;
+
+    int32_t resultFormat = *((int32_t*) (bb + off));
+    off += sizeof(int32_t);
 
     printf("nParams: %d \n", nParams);
 
@@ -708,15 +719,29 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_execWithParams
         printf("val: %d \n", htonl(val));
     }
 
-    int* paramLengths = (int*) (bb + off);
-    off += sizeof(int32_t) * nParams;
-
     int* len;
     for (int i = 0; i < nParams; i++) {
         len = paramLengths + i;
         printf("len: %d \n", *len);
     }
 
+    int* fmt;
+    for (int i = 0; i < nParams; i++) {
+        fmt = paramFormats + i;
+        printf("format: %d \n", *fmt);
+    }
+
+    printf("resultFormat: %d \n", resultFormat);
+
+    PGresult* result = PQexecParams(conn,
+                                    sql,
+                                    nParams,
+                                    paramTypes,
+                                    paramValues,
+                                    paramLengths,
+                                    paramFormats,
+                                    resultFormat
+                                    );
 
     // int *paramLengths = bb[3];
 
@@ -729,8 +754,6 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_execWithParams
 
     // char * const *paramValues
 
-    return 0;
-
-
+    return (long) result;
 
 };

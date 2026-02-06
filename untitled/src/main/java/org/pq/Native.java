@@ -196,7 +196,7 @@ public class Native {
 
     /* CUSTOM */
 
-    public static native long execWithParams(final long conn, final long bb);
+    public static native long execWithParams(final long conn, String sql, final long bb);
 
     public static native void writeBB(final java.nio.ByteBuffer bb);
 
@@ -223,7 +223,6 @@ public class Native {
     public static native int fetchField(final long pgresult, final long bb, final int row, final int col);
 
     public static void main(final String... args) {
-
 
 
         byte[] ba = new byte[16];
