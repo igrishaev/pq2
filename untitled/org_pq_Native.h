@@ -18,7 +18,7 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_PQconnectdb
 /*
  * Class:     org_pq_Native
  * Method:    PQconndefaults
- * Signature: ()[Lorg/pq/PQconninfoOption;
+ * Signature: ()[Lorg/pq/api/PQconninfoOption;
  */
 JNIEXPORT jobjectArray JNICALL Java_org_pq_Native_PQconndefaults
   (JNIEnv *, jclass);
@@ -26,7 +26,7 @@ JNIEXPORT jobjectArray JNICALL Java_org_pq_Native_PQconndefaults
 /*
  * Class:     org_pq_Native
  * Method:    PQconninfo
- * Signature: (J)[Lorg/pq/PQconninfoOption;
+ * Signature: (J)[Lorg/pq/api/PQconninfoOption;
  */
 JNIEXPORT jobjectArray JNICALL Java_org_pq_Native_PQconninfo
   (JNIEnv *, jclass, jlong);

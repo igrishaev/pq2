@@ -1,6 +1,8 @@
 package org.pq;
 
-import javax.swing.plaf.PanelUI;
+import org.pq.api.FORMAT;
+import org.pq.api.OID;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -24,18 +26,18 @@ public class Decode {
         }
         int format = bb.getInt();
 
-        Native.FORMAT frmt = Native.FORMAT.of(format);
+        FORMAT frmt = FORMAT.of(format);
 
         int oid = bb.getInt();
         int len = bb.getInt();
 
         return switch (oid) {
             case OID.INT8 -> switch (frmt) {
-                case Native.FORMAT.TXT -> {
+                case TXT -> {
                     final var s = readString(bb, len);
                     yield Integer.parseInt(s);
                 }
-                case Native.FORMAT.BIN -> bb.getLong();
+                case BIN -> bb.getLong();
             };
 
             case OID.INT4 -> bb.getInt(); // TODO
@@ -45,12 +47,12 @@ public class Decode {
                 yield LocalDate.ofEpochDay(days); // TODO
             }
             case OID.UUID -> switch (frmt) {
-                case Native.FORMAT.BIN -> {
+                case BIN -> {
                     long bits1 = bb.getLong();
                     long bits2 = bb.getLong();
                     yield new UUID(bits1, bits2);
                 }
-                case Native.FORMAT.TXT -> {
+                case TXT -> {
                     final var s = readString(bb, len);
                     yield UUID.fromString(s);
                 }
@@ -59,7 +61,7 @@ public class Decode {
         };
     }
 
-    public static int encodeVal(final ByteBuffer bb, Object param, final int oid, final Native.FORMAT format) {
+    public static int encodeVal(final ByteBuffer bb, Object param, final int oid, final FORMAT format) {
         return switch (oid) {
             case OID.INT4 -> switch (format) {
                 case TXT -> {
@@ -122,7 +124,7 @@ public class Decode {
         for (int i = 0; i < nParams; i++) {
             pos = bb.position();
             bb.order(ByteOrder.BIG_ENDIAN);
-            len = encodeVal(bb, params[i], oids[i], Native.FORMAT.of(formats[i]));
+            len = encodeVal(bb, params[i], oids[i], FORMAT.of(formats[i]));
             bb.order(ByteOrder.LITTLE_ENDIAN);
             bb.putInt(posLen + i * 4, len);
             bb.putLong(posPtr + i * 8, ptr + pos);

@@ -1,93 +1,16 @@
 package org.pq;
 
-import javax.swing.plaf.PanelUI;
+import org.pq.api.PQconninfoOption;
+
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.UUID;
 
-import static org.pq.Decode.encodeValues;
-
 public class Native {
-
-    public static enum FORMAT {
-        TXT,
-        BIN;
-        private static final FORMAT[] vals = values();
-        public static FORMAT of(final int code) {
-            return vals[code];
-        }
-    }
-
-    public enum PQPING {
-        OK,
-        REJECT,
-        NO_RESPONSE,
-        NO_ATTEMPT;
-        private static final PQPING[] vals = values();
-        public static PQPING of(final int code) {
-            return vals[code];
-        }
-    }
-
-    public enum CONNECTION {
-        CONNECTION_OK,
-        CONNECTION_BAD,
-        CONNECTION_STARTED,
-        CONNECTION_MADE,
-        CONNECTION_AWAITING_RESPONSE,
-        CONNECTION_AUTH_OK,
-        CONNECTION_SETENV,
-        CONNECTION_SSL_STARTUP,
-        CONNECTION_NEEDED,
-        CONNECTION_CHECK_WRITABLE,
-        CONNECTION_CONSUME,
-        CONNECTION_GSS_STARTUP,
-        CONNECTION_CHECK_TARGET,
-        CONNECTION_CHECK_STANDBY,
-        CONNECTION_ALLOCATED,
-        CONNECTION_AUTHENTICATING;
-        private static final CONNECTION[] vals = values();
-        public static CONNECTION of(final int code) {
-            return vals[code];
-        }
-    }
-
-    enum PQTRANS {
-        IDLE,
-        ACTIVE,
-        INTRANS,
-        INERROR,
-        UNKNOWN;
-        private static final PQTRANS[] vals = values();
-        public static PQTRANS of(final int code) {
-            return vals[code];
-        }
-    }
-
-    enum PGRES {
-        EMPTY_QUERY,
-        COMMAND_OK,
-        TUPLES_OK,
-        COPY_OUT,
-        COPY_IN,
-        BAD_RESPONSE,
-        NONFATAL_ERROR,
-        FATAL_ERROR,
-        COPY_BOTH,
-        SINGLE_TUPLE,
-        PIPELINE_SYNC,
-        PIPELINE_ABORTED,
-        TUPLES_CHUNK;
-        private static final PGRES[] vals = values();
-        public static PGRES of(final int code) {
-            return vals[code];
-        }
-    }
 
     static {
         System.load("/opt/homebrew/Cellar/libpq/18.1/lib/libpq.dylib");
-        System.load("/Users/ivan.grishaev-external/work/pq2/untitled/libfoo.dylib");
+        System.load("/Users/ivan/work/pq2/untitled/libfoo.dylib");
     }
 
     /* INIT */
@@ -227,9 +150,6 @@ public class Native {
 
         byte[] ba = new byte[16];
         ByteBuffer bb = ByteBuffer.allocate(128);
-
-
-
 
 //        bb.order(ByteOrder.LITTLE_ENDIAN);
 //        // bb.put(new byte[] {1, 2, 3, 4});

@@ -1,4 +1,4 @@
-package org.pq;
+package org.pq.api;
 
 public record PQconninfoOption(
         String keyword,

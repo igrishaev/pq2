@@ -1,4 +1,4 @@
-package org.pq;
+package org.pq.api;
 
 public class OID {
     public static final int DEFAULT                       =    0;

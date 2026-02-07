@@ -2,7 +2,7 @@ package org.pq.jdbc;
 
 import java.sql.SQLException;
 
-public class ResultSetMetaData implements java.sql.ResultSetMetaData {
+public class PQResultSetMetaData implements java.sql.ResultSetMetaData {
 
     @Override
     public int getColumnCount() throws SQLException {

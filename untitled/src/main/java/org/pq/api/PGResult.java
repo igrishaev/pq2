@@ -1,11 +1,18 @@
-package org.pq.jdbc;
+package org.pq.api;
 
 import org.pq.Native;
 
-public record Foo(
-        long result, int width, int height, String[] columns, int[] formats, int[] oids) {
+public record PGResult(
+        long ptr,
+        int nColumns,
+        int nTuples,
+        String[] columns,
+        int[] formats,
+        int[] oids
+) {
 
-    public static Foo ofResult(long result) {
+    public static PGResult ofResult(long result) {
+        // TODO: get in bulk with byte buffer
         int width = Native.PQnfields(result);
         int height = Native.PQntuples(result);
         String[] columns = new String[width];
@@ -16,15 +23,15 @@ public record Foo(
             formats[i] = Native.PQfformat(result, i);
             oids[i] = Native.PQftype(result, i);
         }
-        return new Foo(result, width, height, columns, formats, oids);
+        return new PGResult(result, width, height, columns, formats, oids);
     }
 
     public int getIndex(final String column) {
-        for (int s = 0; s < width; s++) {
+        for (int s = 0; s < nColumns; s++) {
             if (columns[s].equals(column)) {
                 return s;
             }
         }
-        return -1;
+        throw PQError.of("missing column: %s", column);
     }
 }

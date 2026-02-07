@@ -11,7 +11,7 @@ import java.sql.ResultSetMetaData;
 import java.util.Calendar;
 import java.util.Map;
 
-public class CallableStatement implements java.sql.CallableStatement {
+public class PQCallableStatement implements java.sql.CallableStatement {
 
     @Override
     public void registerOutParameter(int parameterIndex, int sqlType) throws SQLException {

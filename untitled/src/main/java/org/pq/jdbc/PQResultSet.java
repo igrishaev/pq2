@@ -1,5 +1,6 @@
 package org.pq.jdbc;
 
+import org.pq.api.PGResult;
 import org.pq.Native;
 
 import java.io.InputStream;
@@ -12,16 +13,16 @@ import java.util.Map;
 
 public class PQResultSet implements java.sql.ResultSet, AutoCloseable {
 
-    private final Foo foo;
+    private final PGResult PGResult;
     private final int currentRow;
 
-    private PQResultSet(Foo foo) {
-        this.foo = foo;
+    private PQResultSet(PGResult PGResult) {
+        this.PGResult = PGResult;
         this.currentRow = 0;
     }
 
-    public static PQResultSet of(Foo foo) {
-        return new PQResultSet(foo);
+    public static PQResultSet of(PGResult PGResult) {
+        return new PQResultSet(PGResult);
     }
 
     @Override
@@ -31,7 +32,7 @@ public class PQResultSet implements java.sql.ResultSet, AutoCloseable {
 
     @Override
     public void close() {
-        Native.PQclear(foo.result());
+        // Native.PQclear(PGResult.result());
     }
 
     @Override
@@ -41,7 +42,8 @@ public class PQResultSet implements java.sql.ResultSet, AutoCloseable {
 
     @Override
     public String getString(int col) {
-        return Native.getString(foo.result(), currentRow, col);
+        // return Native.getString(PGResult.result(), currentRow, col);
+        return "";
     }
 
     @Override
@@ -61,7 +63,8 @@ public class PQResultSet implements java.sql.ResultSet, AutoCloseable {
 
     @Override
     public int getInt(final int col) {
-        return Native.getInt(foo.result(), currentRow, col);
+        // return Native.getInt(PGResult.result(), currentRow, col);
+        return 1;
     }
 
     @Override
@@ -141,13 +144,13 @@ public class PQResultSet implements java.sql.ResultSet, AutoCloseable {
 
     @Override
     public int getInt(String columnLabel) {
-        final int i = foo.getIndex(columnLabel);
+        final int i = PGResult.getIndex(columnLabel);
         return getInt(i);
     }
 
     @Override
     public long getLong(String columnLabel) {
-        final int i = foo.getIndex(columnLabel);
+        final int i = PGResult.getIndex(columnLabel);
         return getLong(i);
     }
 
@@ -217,7 +220,7 @@ public class PQResultSet implements java.sql.ResultSet, AutoCloseable {
     }
 
     @Override
-    public ResultSetMetaData getMetaData() throws SQLException {
+    public PQResultSetMetaData getMetaData() throws SQLException {
         return null;
     }
 
@@ -587,7 +590,7 @@ public class PQResultSet implements java.sql.ResultSet, AutoCloseable {
     }
 
     @Override
-    public Statement getStatement() throws SQLException {
+    public PQStatement getStatement() throws SQLException {
         return null;
     }
 

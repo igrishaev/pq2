@@ -1,15 +1,8 @@
-package org.pq.jdbc;
-
-import org.pq.Decode;
-import org.pq.Native;
+package org.pq;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
-import java.time.LocalDate;
-import java.util.UUID;
 
 public class PQTest {
 
