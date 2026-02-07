@@ -12,13 +12,15 @@ public class PQClient implements AutoCloseable {
     private final long bbPtr;
     private final ByteOrder BO_JVM;
     private final ByteOrder BO_CPP;
+    private final long NULL;
 
     private PQClient(final long ptr,
                      final String conninfo,
                      final ByteBuffer bb,
                      final long bbPtr,
                      final ByteOrder BO_JVM,
-                     final ByteOrder BO_CPP
+                     final ByteOrder BO_CPP,
+                     final long NULL
     ) {
         this.connPtr = ptr;
         this.conninfo = conninfo;
@@ -26,6 +28,7 @@ public class PQClient implements AutoCloseable {
         this.bbPtr = bbPtr;
         this.BO_JVM = BO_JVM;
         this.BO_CPP = BO_CPP;
+        this.NULL = NULL;
     }
 
     public static PQClient of(final String conninfo) {
@@ -35,18 +38,28 @@ public class PQClient implements AutoCloseable {
         final CONNECTION status = CONNECTION.of(statusCode);
         return switch (status) {
             case OK -> {
-                final ByteBuffer bb = ByteBuffer.allocateDirect(64000);
-                // TODO: init these three
-                final long bbPtr = 42;
+                ByteOrder BO_CPP;
                 final ByteOrder BO_JVM = ByteOrder.BIG_ENDIAN;
-                final ByteOrder BO_CPP = ByteOrder.LITTLE_ENDIAN;
+                final ByteBuffer bb = ByteBuffer.allocateDirect(CONST.BB_SIZE);
+                Native.initBB(bb);
+                final byte lead = bb.get(0);
+                if (lead == 1) {
+                    BO_CPP = ByteOrder.LITTLE_ENDIAN;
+                } else {
+                    BO_CPP = ByteOrder.BIG_ENDIAN;
+                }
+                bb.order(BO_CPP);
+                bb.getLong();
+                final long bbPtr = bb.getLong();
+                final long NULL = bb.getLong();
                 yield new PQClient(
                         ptr,
                         conninfo,
                         bb,
                         bbPtr,
                         BO_JVM,
-                        BO_CPP
+                        BO_CPP,
+                        NULL
                 );
             }
             case BAD -> {

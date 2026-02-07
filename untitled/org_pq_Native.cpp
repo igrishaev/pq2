@@ -757,3 +757,26 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_execWithParams
     return (long) result;
 
 };
+
+
+/*
+ * Class:     org_pq_Native
+ * Method:    initBB
+ * Signature: (Ljava/nio/ByteBuffer;)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_initBB
+  (JNIEnv* env, jclass, jobject jbb) {
+
+    void* addr = env->GetDirectBufferAddress(jbb);
+    if (addr == NULL) {
+        return -1;
+    }
+
+    long* bb = (long*) addr;
+
+    bb[0] = 1;
+    bb[1] = (long) bb;
+    bb[2] = (long) NULL;
+
+    return 0;
+};

@@ -119,6 +119,8 @@ public class Native {
 
     /* CUSTOM */
 
+    public static native int initBB(final java.nio.ByteBuffer bb);
+
     public static native long execWithParams(final long conn, String sql, final long bb);
 
     public static native void writeBB(final java.nio.ByteBuffer bb);
