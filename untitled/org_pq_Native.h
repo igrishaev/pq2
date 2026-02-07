@@ -241,6 +241,14 @@ JNIEXPORT jint JNICALL Java_org_pq_Native_initBB
 
 /*
  * Class:     org_pq_Native
+ * Method:    PGresultInfo
+ * Signature: (JJ)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_PGresultInfo
+  (JNIEnv *, jclass, jlong, jlong);
+
+/*
+ * Class:     org_pq_Native
  * Method:    execWithParams
  * Signature: (JLjava/lang/String;J)J
  */

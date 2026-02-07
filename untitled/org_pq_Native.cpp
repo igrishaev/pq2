@@ -169,18 +169,18 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_PQexec
     PGconn* conn = getConn(jconn);
     const char* command = cString(env, jcommand);
 
-    PGresult* result = PQexecParams(conn,
-                                    command,
-                                    0,
-                                    NULL,
-                                    NULL,
-                                    NULL,
-                                    NULL,
-                                    1
-                                    // 0
-                                    );
+    // PGresult* result = PQexecParams(conn,
+    //                                 command,
+    //                                 0,
+    //                                 NULL,
+    //                                 NULL,
+    //                                 NULL,
+    //                                 NULL,
+    //                                 1
+    //                                 // 0
+    //                                 );
 
-    // PGresult* result = PQexec(conn, command);
+    PGresult* result = PQexec(conn, command);
     return jPtr(result);
 };
 
@@ -779,4 +779,50 @@ JNIEXPORT jint JNICALL Java_org_pq_Native_initBB
     bb[2] = (long) NULL;
 
     return 0;
+};
+
+/*
+ * Class:     org_pq_Native
+ * Method:    PGresultInfo
+ * Signature: (JLjava/nio/ByteBuffer;)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_PGresultInfo
+  (JNIEnv *, jclass, jlong jresult, jlong jbb) {
+
+    PGresult* result = getResult(jresult);
+    void* bb = (void*) jbb;
+
+    int nTuples = PQntuples(result);
+    std::memcpy(bb, &nTuples, 4);
+
+    printf("Tuples: %d \n", nTuples);
+
+    // memcpy(bb, &nTuples, sizeof(int));
+    // bb += sizeof(int);
+
+    // int nColumns = PQnfields(result);
+    // memcpy(bb, &nColumns, sizeof(int));
+    // bb += sizeof(int);
+
+    // char* column;
+    // char* pos;
+    // int len;
+    // for (int i = 0; i < nColumns; i++) {
+    //     column = PQfname(result, i);
+    //     pos = strcpy(bb + 4, column);
+    //     len = pos - bb;
+    //     memcpy(bb, &len, sizeof(int));
+    //     bb += len;
+    // }
+
+    // int isnull = PQgetisnull(result, jrow, jcol);
+    // int format = PQfformat(result, jcol);
+    // Oid oid = PQftype(result, jcol);
+    // int len = PQgetlength(result, jrow, jcol);
+    // char* val = PQgetvalue(result, jrow, jcol);
+
+    return 0;
+
+
+
 };
