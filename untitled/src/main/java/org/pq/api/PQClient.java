@@ -10,8 +10,8 @@ import java.util.Arrays;
 public class PQClient implements AutoCloseable {
     private final long connPtr;
     private final String conninfo;
-    private final ByteBuffer bb;
-    private final long bbPtr;
+    protected final ByteBuffer bb;
+    protected final long bbPtr;
     private final ByteOrder BO_JVM;
     private final ByteOrder BO_CPP;
     private final long NULL;
@@ -77,15 +77,19 @@ public class PQClient implements AutoCloseable {
         };
     }
 
-    private void bbJVM() {
+    protected void rewind() {
+        bb.rewind();
+    }
+
+    protected void bbJVM() {
         bb.order(BO_JVM);
     }
 
-    private void bbCPP() {
+    protected void bbCPP() {
         bb.order(BO_CPP);
     }
 
-    private void bbDebug(final int len) {
+    protected void bbDebug(final int len) {
         final byte[] ba = new byte[len];
         bb.get(0, ba);
         System.out.println(Arrays.toString(ba));
@@ -94,9 +98,8 @@ public class PQClient implements AutoCloseable {
     public PGResult exec(final String sql) {
         final long resPtr = Native.PQexec(connPtr, sql);
         if (resPtr == NULL) {
-            throw PQError.of("PQExec returned null");
+            throw PQError.of("PQExec returned null (most likely no enough memory)");
         }
-
         int opStatus = Native.PQresultStatus(resPtr);
         PGRES pgres = PGRES.of(opStatus);
         switch (pgres) {
@@ -106,30 +109,12 @@ public class PQClient implements AutoCloseable {
                 throw PQError.of(message);
             }
         }
-        
         opStatus = Native.PGresultInfo(resPtr, bbPtr);
         if (opStatus != 0) {
             Native.PQclear(resPtr);
             throw PQError.of("PGresultInfo returned non-zero status: %s", opStatus);
         }
-
-        bbDebug(64);
-
-        bb.rewind();
-        bbCPP();
-//        final int nTuples = bb.getInt();
-//        final int nColumns = bb.getInt();
-////        final int len = bb.getInt();
-//        // System.out.println("len");
-//        System.out.println(nTuples);
-//        System.out.println(nColumns);
-//        byte[] ba = new byte[4];
-//        bb.get(ba);
-//        String s = new String(ba, StandardCharsets.UTF_8);
-//        System.out.println(nTuples);
-//        System.out.println(nColumns);
-//        System.out.println(s);
-        return null;
+        return PGResult.of(this, resPtr, bb);
     }
 
     public void reset() {
@@ -151,13 +136,11 @@ public class PQClient implements AutoCloseable {
         Native.PQfinish(connPtr);
     }
 
-    public static void main(String... args) {
-        PQClient client = PQClient.of("host=localhost port=5432 dbname=book user=book password=book");
-//        System.out.println(client);
-//        System.out.println(client.status());
-//        System.out.println(client.transactionStatus());
-        client.exec("select x as foobar from generate_series(1, 3) as seq(x)");
-
+    static void main(String... args) {
+        PQClient client = PQClient.of("host=localhost port=15432 dbname=test user=test password=test");
+        try (PGResult res = client.exec("select x as foobar, x as foo from generate_series(1, 3) as seq(x)")) {
+            System.out.println(res.getValue(0, 0));
+        }
         client.close();
     }
 }

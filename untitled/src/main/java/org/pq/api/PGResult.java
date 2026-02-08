@@ -1,29 +1,61 @@
 package org.pq.api;
 
 import org.pq.Native;
+import org.pq.codec.Decoder;
+
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 public record PGResult(
-        long ptr,
-        int nColumns,
+        PQClient client,
+        long resPtr,
         int nTuples,
+        int nColumns,
         String[] columns,
         int[] formats,
-        int[] oids
-) {
+        int[] oids,
+        int[] tableOids,
+        int[] typeMods
+) implements AutoCloseable {
 
-    public static PGResult ofResult(long result) {
-        // TODO: get in bulk with byte buffer
-        int width = Native.PQnfields(result);
-        int height = Native.PQntuples(result);
-        String[] columns = new String[width];
-        int[] formats = new int[width];
-        int[] oids = new int[width];
-        for (int i = 0; i < width; i++) {
-            columns[i] = Native.PQfname(result, i);
-            formats[i] = Native.PQfformat(result, i);
-            oids[i] = Native.PQftype(result, i);
+    public static PGResult of(final PQClient client, final long resPtr, final ByteBuffer bb) {
+        bb.rewind();
+        client.bbJVM();
+
+        final int nTuples = bb.getInt();
+        final int nColumns = bb.getInt();
+
+        final String[] columns = new String[nColumns];
+        final int[] oids = new int[nColumns];
+        final int[] formats = new int[nColumns];
+        final int[] tableOids = new int[nColumns];
+        final int[] typeMods = new int[nColumns];
+
+        for (int i = 0; i < nColumns; i++) {
+            oids[i] = bb.getInt();
+            formats[i] = bb.getInt();
+            tableOids[i] = bb.getInt();
+            typeMods[i] = bb.getInt();
+            columns[i] = BB.getString(bb);
         }
-        return new PGResult(result, width, height, columns, formats, oids);
+
+        return new PGResult(client, resPtr, nTuples, nColumns, columns, formats, oids, tableOids, typeMods);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("PGResult[client=%s, resPtr=%d, nTuples=%d, nColumns=%d, columns=%s, formats=%s, oids=%s, tableOids=%s, typeMods=%s",
+                client,
+                resPtr,
+                nTuples,
+                nColumns,
+                Arrays.toString(columns),
+                Arrays.toString(formats),
+                Arrays.toString(oids),
+                Arrays.toString(tableOids),
+                Arrays.toString(typeMods)
+        );
     }
 
     public int getIndex(final String column) {
@@ -33,5 +65,43 @@ public record PGResult(
             }
         }
         throw PQError.of("missing column: %s", column);
+    }
+
+    public Object getValue(final int row, final int col) {
+
+        // TODO check row
+        // TODO check col
+
+        final int opStatus = Native.fetchField(resPtr, client.bbPtr, row, col);
+        if (opStatus != 0) {
+            throw PQError.of("fetchField returned non-zero status: %s, row: %s, column: %s",
+                             opStatus, row, col);
+        }
+
+        client.rewind();
+        client.bbCPP();
+
+        // is null?
+        if (client.bb.getInt() == 1) {
+            return null;
+        }
+
+        final int oid = client.bb.getInt();
+        final int format = client.bb.getInt();
+        final int len = client.bb.getInt();
+
+        return switch (FORMAT.of(format)) {
+            case TXT -> {
+                final byte[] ba = new byte[len];
+                client.bb.get(ba);
+                yield Decoder.decodeTxt(oid, new String(ba, StandardCharsets.UTF_8));
+            }
+            case BIN -> Decoder.decodeBin(oid, len, client.bb);
+        };
+    }
+
+    @Override
+    public void close() {
+        Native.PQclear(resPtr);
     }
 }

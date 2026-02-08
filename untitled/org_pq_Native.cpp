@@ -5,6 +5,19 @@
 #include "macro.h"
 #include "oid.h"
 
+char* put_int32(char* bb, int value) {
+    memcpy(bb, &value, 4);
+    return bb += 4;
+}
+
+char* put_string(char* bb, char* string) {
+    char* pos = stpcpy(bb + 4, string);
+    int len = pos - bb - 4;
+    put_int32(bb, len);
+    memcpy(bb, &len, 4);
+    return pos;
+}
+
 jclass Integer;
 jmethodID IntegerNew;
 
@@ -621,43 +634,29 @@ JNIEXPORT void JNICALL Java_org_pq_Native_writeBBPTR
  */
  JNIEXPORT jint JNICALL Java_org_pq_Native_fetchField
      (JNIEnv *, jclass, jlong jresult, jlong jbb, jint jrow, jint jcol) {
+
      PGresult* result = getResult(jresult);
      char* bb = (char*) jbb;
 
      int isnull = PQgetisnull(result, jrow, jcol);
-     int format = PQfformat(result, jcol);
+
+     bb = put_int32(bb, isnull);
+     if (isnull == 1) {
+         return 0;
+     }
+
      Oid oid = PQftype(result, jcol);
+     int format = PQfformat(result, jcol);
      int len = PQgetlength(result, jrow, jcol);
-     char* val = PQgetvalue(result, jrow, jcol);
+     char* value = PQgetvalue(result, jrow, jcol);
 
-     int intlen = sizeof(int);
-     int off = 0;
+     // TODO: decode numberic values from text
 
-     int tmp;
-
-     // is null?
-     tmp = htonl(isnull);
-     memcpy(bb + off, &tmp, intlen);
-     off += intlen;
-
-     // format: txt | bin
-     tmp = htonl(format);
-     memcpy(bb + off, &tmp, intlen);
-     off += intlen;
-
-     // oid
-     tmp = htonl(oid);
-     memcpy(bb + off, &tmp, intlen);
-     off += intlen;
-
-     // len
-     tmp = htonl(len);
-     memcpy(bb + off, &tmp, intlen);
-     off += intlen;
-
-     // value
-     memcpy(bb + off, val, len);
-     off += len;
+     bb = put_int32(bb, oid);
+     bb = put_int32(bb, format);
+     bb = put_int32(bb, len);
+     memcpy(bb, value, len);
+     bb += len;
 
      return 0;
 };
@@ -781,6 +780,8 @@ JNIEXPORT jint JNICALL Java_org_pq_Native_initBB
     return 0;
 };
 
+
+
 /*
  * Class:     org_pq_Native
  * Method:    PGresultInfo
@@ -790,39 +791,40 @@ JNIEXPORT jint JNICALL Java_org_pq_Native_PGresultInfo
   (JNIEnv *, jclass, jlong jresult, jlong jbb) {
 
     PGresult* result = getResult(jresult);
-    void* bb = (void*) jbb;
+    char* bb = (char*) jbb;
 
+    // n of tuples
     int nTuples = PQntuples(result);
-    std::memcpy(bb, &nTuples, 4);
+    bb = put_int32(bb, nTuples);
 
-    printf("Tuples: %d \n", nTuples);
+    // n of columns
+    int nColumns = PQnfields(result);
+    bb = put_int32(bb, nColumns);
 
-    // memcpy(bb, &nTuples, sizeof(int));
-    // bb += sizeof(int);
+    // per-column info
+    char* column;
+    Oid tableOid;
+    int format;
+    Oid oid;
+    int typeMod;
+    for (int i = 0; i < nColumns; i++) {
 
-    // int nColumns = PQnfields(result);
-    // memcpy(bb, &nColumns, sizeof(int));
-    // bb += sizeof(int);
+        oid = PQftype(result, i);
+        bb = put_int32(bb, oid);
 
-    // char* column;
-    // char* pos;
-    // int len;
-    // for (int i = 0; i < nColumns; i++) {
-    //     column = PQfname(result, i);
-    //     pos = strcpy(bb + 4, column);
-    //     len = pos - bb;
-    //     memcpy(bb, &len, sizeof(int));
-    //     bb += len;
-    // }
+        format = PQfformat(result, i);
+        bb = put_int32(bb, format);
 
-    // int isnull = PQgetisnull(result, jrow, jcol);
-    // int format = PQfformat(result, jcol);
-    // Oid oid = PQftype(result, jcol);
-    // int len = PQgetlength(result, jrow, jcol);
-    // char* val = PQgetvalue(result, jrow, jcol);
+        tableOid = PQftable(result, i);
+        bb = put_int32(bb, tableOid);
+
+        typeMod = PQfmod(result, i);
+        bb = put_int32(bb, typeMod);
+
+        column = PQfname(result, i);
+        bb = put_string(bb, column);
+    }
 
     return 0;
-
-
 
 };
