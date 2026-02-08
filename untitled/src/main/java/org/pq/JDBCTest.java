@@ -11,7 +11,7 @@ public class JDBCTest {
     private Connection conn;
 
     public JDBCTest() throws SQLException {
-        conn = DriverManager.getConnection("jdbc:postgresql://localhost:15432/test?user=test&password=test");
+        conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/book?user=book&password=book");
     }
 
     public void test() throws SQLException {
@@ -21,6 +21,7 @@ public class JDBCTest {
         byte[] bs;
         PreparedStatement stmt = conn.prepareStatement("select now()::date as a from generate_series(1, 9999) as seq(x)");
         ResultSet rs = stmt.executeQuery();
+        rs.getObject(1);
         while (rs.next()) {
             // obj = rs.getObject(1);
             // obj = rs.getObject(2);

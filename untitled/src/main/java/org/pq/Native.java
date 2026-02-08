@@ -10,7 +10,7 @@ public class Native {
 
     static {
         System.load("/opt/homebrew/Cellar/libpq/18.1/lib/libpq.dylib");
-        System.load("/Users/ivan.grishaev-external/work/pq2/untitled/libfoo.dylib");
+        System.load("/Users/ivan/work/pq2/untitled/libfoo.dylib");
     }
 
     /* INIT */

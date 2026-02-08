@@ -4,7 +4,6 @@ import org.pq.Native;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 public class PQClient implements AutoCloseable {
@@ -136,10 +135,17 @@ public class PQClient implements AutoCloseable {
         Native.PQfinish(connPtr);
     }
 
-    static void main(String... args) {
-        PQClient client = PQClient.of("host=localhost port=15432 dbname=test user=test password=test");
+    public static void main(String... args) {
+        PQClient client = PQClient.of("host=localhost port=5432 dbname=book user=book password=book");
         try (PGResult res = client.exec("select x as foobar, x as foo from generate_series(1, 3) as seq(x)")) {
-            System.out.println(res.getValue(0, 0));
+            System.out.println(res.getObject(0, 0));
+            for (PGResult it = res; it.hasNext(); ) {
+                PGResult res2 = it.next();
+                System.out.println(res.getObject(0, 0));
+
+
+            }
+            // System.out.println(res.getObject(0, 0));
         }
         client.close();
     }

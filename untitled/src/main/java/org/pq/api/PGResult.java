@@ -6,18 +6,43 @@ import org.pq.codec.Decoder;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Iterator;
 
-public record PGResult(
-        PQClient client,
-        long resPtr,
-        int nTuples,
-        int nColumns,
-        String[] columns,
-        int[] formats,
-        int[] oids,
-        int[] tableOids,
-        int[] typeMods
-) implements AutoCloseable {
+public class PGResult implements AutoCloseable, Iterator<PGResult> {
+
+    private final PQClient client;
+    private final long resPtr;
+    private final int nTuples;
+    private final int nColumns;
+    private final String[] columns;
+    private final int[] formats;
+    private final int[] oids;
+    private final int[] tableOids;
+    private final int[] typeMods;
+    private int current;
+
+    private PGResult(
+            final PQClient client,
+            final long resPtr,
+            final int nTuples,
+            final int nColumns,
+            final String[] columns,
+            final int[] formats,
+            final int[] oids,
+            final int[] tableOids,
+            final int[] typeMods
+    ) {
+        this.client    = client;
+        this.resPtr    = resPtr;
+        this.nTuples   = nTuples;
+        this.nColumns  = nColumns;
+        this.columns   = columns;
+        this.formats   = formats;
+        this.oids      = oids;
+        this.tableOids = tableOids;
+        this.typeMods  = typeMods;
+        this.current   = -1;
+    }
 
     public static PGResult of(final PQClient client, final long resPtr, final ByteBuffer bb) {
         bb.rewind();
@@ -40,23 +65,28 @@ public record PGResult(
             columns[i] = BB.getString(bb);
         }
 
-        return new PGResult(client, resPtr, nTuples, nColumns, columns, formats, oids, tableOids, typeMods);
-    }
-
-    @Override
-    public String toString() {
-        return String.format("PGResult[client=%s, resPtr=%d, nTuples=%d, nColumns=%d, columns=%s, formats=%s, oids=%s, tableOids=%s, typeMods=%s",
-                client,
-                resPtr,
-                nTuples,
-                nColumns,
-                Arrays.toString(columns),
-                Arrays.toString(formats),
-                Arrays.toString(oids),
-                Arrays.toString(tableOids),
-                Arrays.toString(typeMods)
+        return new PGResult(
+                client, resPtr,
+                nTuples, nColumns, columns,
+                formats, oids, tableOids, typeMods
         );
     }
+
+//    @Override
+//    public String toString() {
+//        return String.format("PGResult[client=%s, resPtr=%d, nTuples=%d, nColumns=%d, current=%d, columns=%s, formats=%s, oids=%s, tableOids=%s, typeMods=%s",
+//                client,
+//                resPtr,
+//                nTuples,
+//                nColumns,
+//                current,
+//                Arrays.toString(columns),
+//                Arrays.toString(formats),
+//                Arrays.toString(oids),
+//                Arrays.toString(tableOids),
+//                Arrays.toString(typeMods)
+//        );
+//    }
 
     public int getIndex(final String column) {
         for (int s = 0; s < nColumns; s++) {
@@ -67,7 +97,11 @@ public record PGResult(
         throw PQError.of("missing column: %s", column);
     }
 
-    public Object getValue(final int row, final int col) {
+    public Object getObject(final int col) {
+        return getObject(current, col);
+    }
+
+    public Object getObject(final int row, final int col) {
 
         // TODO check row
         // TODO check col
@@ -103,5 +137,16 @@ public record PGResult(
     @Override
     public void close() {
         Native.PQclear(resPtr);
+    }
+
+    @Override
+    public boolean hasNext() {
+        return current < nTuples - 1;
+    }
+
+    @Override
+    public PGResult next() {
+        current += 1;
+        return this;
     }
 }
