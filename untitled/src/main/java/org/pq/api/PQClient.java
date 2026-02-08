@@ -97,11 +97,19 @@ public class PQClient implements AutoCloseable {
             throw PQError.of("PQExec returned null");
         }
 
-        // TODO check result state
-
-        final int opStatus = Native.PGresultInfo(resPtr, bbPtr);
+        int opStatus = Native.PQresultStatus(resPtr);
+        PGRES pgres = PGRES.of(opStatus);
+        switch (pgres) {
+            case FATAL_ERROR, NONFATAL_ERROR, BAD_RESPONSE -> {
+                Native.PQclear(resPtr);
+                String message = Native.PQerrorMessage(connPtr);
+                throw PQError.of(message);
+            }
+        }
+        
+        opStatus = Native.PGresultInfo(resPtr, bbPtr);
         if (opStatus != 0) {
-            // TODO: close PGResult;
+            Native.PQclear(resPtr);
             throw PQError.of("PGresultInfo returned non-zero status: %s", opStatus);
         }
 
