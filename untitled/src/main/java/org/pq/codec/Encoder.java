@@ -1,8 +1,10 @@
 package org.pq.codec;
 
+import org.pq.api.FORMAT;
 import org.pq.api.OID;
 
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.UUID;
 
 import static org.pq.tool.BB.*;
@@ -38,6 +40,57 @@ public class Encoder {
             case OID.UUID -> putString(bb, castUUID(x).toString());
             default -> throw error("Don't know how to text-encode a value: %s", x);
         };
+    }
+
+    public static void encodeBB(final ByteBuffer bb, long bbPtr, Object[] params, int[] oids, int[] formats, int resultFormat) {
+
+        rewind(bb);
+        bb.order(ByteOrder.LITTLE_ENDIAN);
+
+        int nParams = params.length;
+
+        // nParams
+        putInt(bb, nParams);
+
+        // paramTypes
+        for (int i = 0; i < nParams; i++) {
+            putInt(bb, oids[i]);
+        }
+
+        // paramValues
+        int posPtr = bb.position();
+        skip(bb, 8 * nParams);
+
+        // paramLengths
+        int posLen = bb.position();
+        skip(bb, 4 * nParams);
+
+        // paramFormats
+        for (int i = 0; i < nParams; i++) {
+            putInt(bb, formats[i]);
+        }
+
+        // resultFormat
+        putInt(bb, resultFormat);
+
+        // update length and pointers
+        int len;
+        int pos;
+        FORMAT format;
+        for (int i = 0; i < nParams; i++) {
+            format = FORMAT.of(formats[i]);
+            pos = bb.position();
+            bb.order(ByteOrder.BIG_ENDIAN);
+            switch (format) {
+                case TXT -> encodeText(oids[i], params[i], bb);
+                case BIN -> encodeBin(oids[i], params[i], bb);
+            }
+            len = pos - bb.position();
+            bb.order(ByteOrder.LITTLE_ENDIAN);
+            bb.putInt(posLen + i * 4, len);
+            bb.putLong(posPtr + i * 8, bbPtr + pos);
+        }
+
     }
 
 

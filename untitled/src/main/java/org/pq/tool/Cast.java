@@ -56,6 +56,22 @@ public class Cast {
         }
     }
 
+    public static long castLong(final Float f) {
+        if ((f % 1 == 0) && (Long.MIN_VALUE <= f) && (f <= Long.MAX_VALUE)) {
+            return f.longValue();
+        } else {
+            throw error("cannot cast float %s to long", f);
+        }
+    }
+
+    public static long castLong(final Double d) {
+        if ((d % 1 == 0) && (Long.MIN_VALUE <= d) && (d <= Long.MAX_VALUE)) {
+            return d.longValue();
+        } else {
+            throw error("cannot cast double %s to long", d);
+        }
+    }
+
     public static long castLong(final Object x) {
         if (x instanceof Short s) {
             return s.longValue();
@@ -63,8 +79,28 @@ public class Cast {
             return i.longValue();
         } else if (x instanceof Long l) {
             return l;
+        } else if (x instanceof Float f) {
+            return castLong(f);
+        } else if (x instanceof Double d) {
+            return castLong(d);
         } else {
             throw error("cannot cast object %s to long", x);
+        }
+    }
+
+    public static float castFloat(final Double d) {
+        if ((Float.MIN_VALUE <= d) && (d <= Float.MAX_VALUE)) {
+            return d.floatValue();
+        } else {
+            throw error("cannot cast double %s to float", d);
+        }
+    }
+
+    public static float castFloat(final Long l) {
+        if (Float.MIN_VALUE <= l) {
+            return l.floatValue();
+        } else {
+            throw error("cannot cast long %s to float", l);
         }
     }
 
@@ -75,6 +111,10 @@ public class Cast {
             return s.floatValue();
         } else if (x instanceof Integer i) {
             return i.floatValue();
+        } else if (x instanceof Double d) {
+            return castFloat(d);
+        } else if (x instanceof Long l) {
+            return castFloat(l);
         } else {
             throw error("cannot cast object %s to float", x);
         }

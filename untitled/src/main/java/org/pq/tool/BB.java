@@ -5,6 +5,15 @@ import java.nio.charset.StandardCharsets;
 
 public class BB {
 
+    public static void rewind(final ByteBuffer bb) {
+        bb.rewind();
+    }
+
+    public static void skip(final ByteBuffer bb, final int size) {
+        final int pos = bb.position();
+        bb.position(pos + size);
+    }
+
     public static int putShort(final ByteBuffer bb, final short s) {
         final int pos = bb.position();
         bb.putShort(s);

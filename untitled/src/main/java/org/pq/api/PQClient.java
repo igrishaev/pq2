@@ -5,6 +5,7 @@ import org.pq.Native;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
+import java.util.List;
 
 public class PQClient implements AutoCloseable {
     private final long connPtr;
@@ -92,6 +93,10 @@ public class PQClient implements AutoCloseable {
         final byte[] ba = new byte[len];
         bb.get(0, ba);
         System.out.println(Arrays.toString(ba));
+    }
+
+    public PGResult execWithParams(final String sql, final List<Object> params) {
+        return null;
     }
 
     public PGResult exec(final String sql) {
