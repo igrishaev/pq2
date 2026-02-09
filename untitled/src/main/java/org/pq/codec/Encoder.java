@@ -31,7 +31,7 @@ public class Encoder {
                 bb.putLong(bits_lo);
             }
             default -> throw error("Don't know how to binary-encode a value: %s", x);
-        };
+        }
     }
 
     public static void encodeText(final int oid, final Object x, final ByteBuffer bb) {
@@ -40,7 +40,7 @@ public class Encoder {
             case OID.INT4 -> putString(bb, String.valueOf(castInteger(x)));
             case OID.UUID -> putString(bb, castUUID(x).toString());
             default -> throw error("Don't know how to text-encode a value: %s", x);
-        };
+        }
     }
 
     public static void encodeBB(final ByteBuffer bb, long bbPtr, Object[] params, int[] oids, int[] formats, int resultFormat) {
