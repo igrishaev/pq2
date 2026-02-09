@@ -16,25 +16,26 @@ public class Encoder {
         return new RuntimeException(String.format(template, args));
     }
 
-    public static int encodeBin(final int oid, final Object x, final ByteBuffer bb) {
-        return switch (oid) {
-            case OID.INT2 -> putShort(bb, castShort(x));
-            case OID.INT4 -> putInt(bb, castInteger(x));
-            case OID.INT8 -> putLong(bb, castLong(x));
-            case OID.FLOAT4 -> putFloat(bb, castFloat(x));
-            case OID.FLOAT8 -> putDouble(bb, castDouble(x));
+    public static void encodeBin(final int oid, final Object x, final ByteBuffer bb) {
+        switch (oid) {
+            case OID.INT2 -> bb.putShort(castShort(x));
+            case OID.INT4 -> bb.putInt(castInteger(x));
+            case OID.INT8 -> bb.putLong(castLong(x));
+            case OID.FLOAT4 -> bb.putFloat(castFloat(x));
+            case OID.FLOAT8 -> bb.putDouble(castDouble(x));
             case OID.UUID -> {
                 final UUID uuid = castUUID(x);
                 final long bits_hi = uuid.getMostSignificantBits();
                 final long bits_lo = uuid.getLeastSignificantBits();
-                yield putLong(bb, bits_hi) + putLong(bb, bits_lo);
+                bb.putLong(bits_hi);
+                bb.putLong(bits_lo);
             }
             default -> throw error("Don't know how to binary-encode a value: %s", x);
         };
     }
 
-    public static Object encodeText(final int oid, final Object x, final ByteBuffer bb) {
-        return switch (oid) {
+    public static void encodeText(final int oid, final Object x, final ByteBuffer bb) {
+        switch (oid) {
             case OID.INT2 -> putString(bb, String.valueOf(castShort(x)));
             case OID.INT4 -> putString(bb, String.valueOf(castInteger(x)));
             case OID.UUID -> putString(bb, castUUID(x).toString());
@@ -44,17 +45,17 @@ public class Encoder {
 
     public static void encodeBB(final ByteBuffer bb, long bbPtr, Object[] params, int[] oids, int[] formats, int resultFormat) {
 
-        rewind(bb);
-        bb.order(ByteOrder.LITTLE_ENDIAN);
+//        bb.rewind();
+//        bb.order(ByteOrder.LITTLE_ENDIAN);
 
         int nParams = params.length;
 
         // nParams
-        putInt(bb, nParams);
+        bb.putInt(nParams);
 
         // paramTypes
         for (int i = 0; i < nParams; i++) {
-            putInt(bb, oids[i]);
+            bb.putInt(oids[i]);
         }
 
         // paramValues
@@ -67,11 +68,11 @@ public class Encoder {
 
         // paramFormats
         for (int i = 0; i < nParams; i++) {
-            putInt(bb, formats[i]);
+            bb.putInt(formats[i]);
         }
 
         // resultFormat
-        putInt(bb, resultFormat);
+        bb.putInt(resultFormat);
 
         // update length and pointers
         int len;
