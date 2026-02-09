@@ -21,11 +21,10 @@ public class JDBCTest {
               x::numeric               as numeric,
               x::text || 'foobar'      as line,
               x > 100500               as bool,
-              now()                    as ts,
+              gen_random_uuid()        as uuid,
               now()::date              as date,
-              now()::time              as time,
-              '2024-01-13 21:08:57.593323+05:30'::timestamptz,
-              '2024-01-13 21:08:57.593323+05:30'::timestamp,
+              -- timestamptz
+              -- time
               null                     as nil
             from
               generate_series(1,9999) as s(x)
@@ -37,7 +36,7 @@ public class JDBCTest {
         PreparedStatement stmt = conn.prepareStatement(sql);
         ResultSet rs = stmt.executeQuery();
         while (rs.next()) {
-            for (int col = 1; col < 11; col++) {
+            for (int col = 1; col < 9; col++) {
                 obj = rs.getObject(col);
             }
         }

@@ -3,6 +3,7 @@ package org.pq.codec;
 import org.pq.api.OID;
 
 import java.nio.ByteBuffer;
+import java.util.UUID;
 
 public class Decoder {
 
@@ -13,6 +14,12 @@ public class Decoder {
             case OID.INT8 -> bb.getLong();
             case OID.FLOAT4 -> bb.getFloat();
             case OID.FLOAT8 -> bb.getDouble();
+            case OID.UUID -> {
+                final long bits_hi = bb.getLong();
+                final long bits_lo = bb.getLong();
+                yield new UUID(bits_hi, bits_lo);
+            }
+            case OID.DATE -> DateTimeBin.decodeDATE(bb);
             default -> {
                 final byte[] ba = new byte[len];
                 bb.get(ba);
