@@ -182,18 +182,18 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_PQexec
     PGconn* conn = getConn(jconn);
     const char* command = cString(env, jcommand);
 
-    // PGresult* result = PQexecParams(conn,
-    //                                 command,
-    //                                 0,
-    //                                 NULL,
-    //                                 NULL,
-    //                                 NULL,
-    //                                 NULL,
-    //                                 1
-    //                                 // 0
-    //                                 );
+    PGresult* result = PQexecParams(conn,
+                                    command,
+                                    0,
+                                    NULL,
+                                    NULL,
+                                    NULL,
+                                    NULL,
+                                    1
+                                    // 0
+                                    );
 
-    PGresult* result = PQexec(conn, command);
+    // PGresult* result = PQexec(conn, command);
     return jPtr(result);
 };
 

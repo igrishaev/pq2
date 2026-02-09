@@ -5,10 +5,9 @@ import org.pq.codec.Decoder;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Iterator;
 
-public class PGResult implements AutoCloseable, Iterator<PGResult> {
+public class PGResult implements AutoCloseable, Iterable<Integer> {
 
     private final PQClient client;
     private final long resPtr;
@@ -140,13 +139,17 @@ public class PGResult implements AutoCloseable, Iterator<PGResult> {
     }
 
     @Override
-    public boolean hasNext() {
-        return current < nTuples - 1;
-    }
+    public Iterator<Integer> iterator() {
+        return new Iterator<>() {
+            @Override
+            public boolean hasNext() {
+                return current < nTuples - 1;
+            }
 
-    @Override
-    public PGResult next() {
-        current += 1;
-        return this;
+            @Override
+            public Integer next() {
+                return ++current;
+            }
+        };
     }
 }

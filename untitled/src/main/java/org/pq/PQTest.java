@@ -1,162 +1,52 @@
 package org.pq;
 
+import org.pq.api.PGResult;
+import org.pq.api.PQClient;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.sql.SQLException;
 
 public class PQTest {
 
-    private long conn;
-    private ByteBuffer bb;
-    private long ptr;
+    private PQClient client;
+
+    public static String sql = """
+            select
+              x::int4                  as int4,
+              x::int8                  as int8,
+              x::numeric               as numeric,
+              x::text || 'foobar'      as line,
+              x > 100500               as bool,
+              now()                    as ts,
+              now()::date              as date,
+              now()::time              as time,
+              '2024-01-13 21:08:57.593323+05:30'::timestamptz,
+              '2024-01-13 21:08:57.593323+05:30'::timestamp,
+              null                     as nil
+            from
+              generate_series(1,9999) as s(x)
+            
+            """;
 
     public PQTest() {
-        this.bb = ByteBuffer.allocateDirect(6400);
-        // this.bb.order(ByteOrder.BIG_ENDIAN);
-        this.bb.order(ByteOrder.BIG_ENDIAN);
-        this.ptr = Native.getBBAddress(bb);
-        this.conn = Native.PQconnectdb("host=localhost port=15432 dbname=test user=test password=test");
+        this.client = PQClient.of("host=localhost port=15432 dbname=test user=test password=test");
     }
 
     public void test() {
 
-        Decode.encodeValues(bb, ptr, new Object[]{999, 99, 3}, new int[]{23,23,23}, new int[]{1,1,1}, 0);
-        long res = Native.execWithParams(conn, "select $1 as a, $2 as b, $3 as c", ptr);
-
-        System.out.println(res);
-
-        // bb.order(ByteOrder.BIG_ENDIAN);
-        Native.fetchField(res, ptr, 0, 0);
-        var obj2 = Decode.parseVal(bb);
-        System.out.println(obj2);
-
-        System.exit(0);
-
-        int num;
-        Object[] arr;
-        String s;
-        byte[] bs = new byte[14];
-
         Object obj;
-        long bits1, bits2;
-        var result = Native.PQexec(conn, "select x from generate_series(1, 9999) as seq(x)");
-        var tuples = Native.PQntuples(result);
-        for (int row = 0; row < tuples; row++) {
-
-            // Native.writeBBPTR(ptr);
-            // this.bb.get(0, bs);
-            // s = this.bb.asCharBuffer().toString();
-            // s = new String(bs, StandardCharsets.UTF_8);
-
-
-            // this.bb.reset();
-//            this.bb.rewind();
-//            Native.fetchField(result, ptr, row, 0);
-//            bb.getInt();
-//            bb.getInt();
-//            bb.getInt();
-//            bb.getInt();
-//            bb.getInt();
-//
-//            this.bb.rewind();
-//            Native.fetchField(result, ptr, row, 0);
-//            bb.getInt();
-//            bb.getInt();
-//            bb.getInt();
-//            bb.getInt();
-//            bb.getInt();
-//
-//            this.bb.rewind();
-//            Native.fetchField(result, ptr, row, 0);
-//            bb.getInt();
-//            bb.getInt();
-//            bb.getInt();
-//            bb.getInt();
-//            bb.getInt();
-//
-//            this.bb.rewind();
-//            Native.fetchField(result, ptr, row, 0);
-//            bb.getInt();
-//            bb.getInt();
-//            bb.getInt();
-//            bb.getInt();
-//            bb.getInt();
-//
-//            this.bb.rewind();
-//            Native.fetchField(result, ptr, row, 0);
-//            bb.getInt();
-//            bb.getInt();
-//            bb.getInt();
-//            bb.getInt();
-//            bb.getInt();
-
-            for (int j = 0; j < 10; j++) {
-//                Native.getInt(result, row, 0);
-                Native.fetchField(result, ptr, row, 0);
-                obj = Decode.parseVal(bb);
-                System.out.println(obj);
+        try (PGResult res = client.exec(sql)) {
+            for (int row: res) {
+                for (int col = 1; col < 11; col++) {
+                    obj = res.getObject(row, col);
+                }
             }
-
-
-//            Native.fetchField(result, ptr, row, 1);
-//            obj = parseVal(this.bb);
-//            Native.fetchField(result, ptr, row, 2);
-//            obj = parseVal(this.bb);
-//            Native.fetchField(result, ptr, row, 3);
-//            obj = parseVal(this.bb);
-//            Native.fetchField(result, ptr, row, 4);
-//            obj = parseVal(this.bb);
-//            Native.fetchField(result, ptr, row, 5);
-//            obj = parseVal(this.bb);
-//            Native.fetchField(result, ptr, row, 6);
-//            obj = parseVal(this.bb);
-//            Native.fetchField(result, ptr, row, 7);
-//            obj = parseVal(this.bb);
-//            Native.fetchField(result, ptr, row, 8);
-//            obj = parseVal(this.bb);
-//            Native.fetchField(result, ptr, row, 9);
-//            obj = parseVal(this.bb);
-
-
-
-//            this.bb.rewind();
-//            System.out.println(obj);
-//            System.out.println(bb.getInt());
-//            System.out.println(bb.getInt());
-//            System.out.println(bb.getInt());
-//            System.out.println(bb.getInt());
-//            System.out.println(bb.getInt());
-//            System.out.println(bb.getInt());
-
-//             if (row > 10) {System.exit(0);}
-
-
-            // s = new String(bs);
-            // System.out.println(s);
-
-            // bits1 = Native.asLong(result, i, 0);
-//            bits2 = Native.asLong(result, i, 0, 8);
-//
-//            obj = new UUID(bits1, bits2);
-
-            // bb = Native.getBB(result, i, 0);
-//            bs = Native.getBytes(result, i, 0);
-            // s = Native.getString(result, i, 0);
-            // arr = Native.getTuple(result, i);
-//            num = Native.getInt(result, row, 0);
-//            num = Native.getInt(result, row, 1);
-//            num = Native.getInt(result, row, 2);
-//            num = Native.getInt(result, row, 3);
-//            num = Native.getInt(result, row, 4);
-//            num = Native.getInt(result, row, 5);
-//            num = Native.getInt(result, row, 6);
-//            num = Native.getInt(result, row, 7);
-//            num = Native.getInt(result, row, 8);
-//            num = Native.getInt(result, row, 9);
-
-            // Native.PQgetisnull(result, i, 0);
-            // obj = Native.getValue(result, i, 0);
         }
+
+        // Decode.encodeValues(bb, ptr, new Object[]{999, 99, 3}, new int[]{23,23,23}, new int[]{1,1,1}, 0);
+        // long res = Native.execWithParams(conn, "select $1 as a, $2 as b, $3 as c", ptr);
+
     }
 
     public void bench() throws SQLException {

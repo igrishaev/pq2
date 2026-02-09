@@ -11,52 +11,35 @@ public class JDBCTest {
     private Connection conn;
 
     public JDBCTest() throws SQLException {
-        conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/book?user=book&password=book");
+        conn = DriverManager.getConnection("jdbc:postgresql://localhost:15432/test?user=test&password=test");
     }
 
+    public static String sql = """
+            select
+              x::int4                  as int4,
+              x::int8                  as int8,
+              x::numeric               as numeric,
+              x::text || 'foobar'      as line,
+              x > 100500               as bool,
+              now()                    as ts,
+              now()::date              as date,
+              now()::time              as time,
+              '2024-01-13 21:08:57.593323+05:30'::timestamptz,
+              '2024-01-13 21:08:57.593323+05:30'::timestamp,
+              null                     as nil
+            from
+              generate_series(1,9999) as s(x)
+            
+            """;
+
     public void test() throws SQLException {
-        int num;
         Object obj;
-        String s;
-        byte[] bs;
-        PreparedStatement stmt = conn.prepareStatement("select now()::date as a from generate_series(1, 9999) as seq(x)");
+        PreparedStatement stmt = conn.prepareStatement(sql);
         ResultSet rs = stmt.executeQuery();
-        rs.getObject(1);
         while (rs.next()) {
-            // obj = rs.getObject(1);
-            // obj = rs.getObject(2);
-            //obj = rs.getObject(3);
-            // num = rs.getInt(1);
-//            s = rs.getString(1);
-//            s = rs.getString(1);
-//            s = rs.getString(1);
-//            s = rs.getString(1);
-//            s = rs.getString(1);
-//            s = rs.getString(1);
-//            s = rs.getString(1);
-//            s = rs.getString(1);
-//            s = rs.getString(1);
-//            s = rs.getString(1);
-            // // s = rs.getString(1);
-            // s = rs.getString(1);
-            for (int j = 0; j < 10; j++) {
-                obj = rs.getObject(1);
+            for (int col = 1; col < 11; col++) {
+                obj = rs.getObject(col);
             }
-//            obj = rs.getObject(1);
-//            obj = rs.getObject(1);
-//            obj = rs.getObject(1);
-//            obj = rs.getObject(1);
-//            obj = rs.getObject(1);
-//            obj = rs.getObject(1);
-//            obj = rs.getObject(1);
-//            obj = rs.getObject(1);
-//            obj = rs.getObject(1);
-//            obj = rs.getObject(1);
-//             num = rs.getInt(1);
-//            num = rs.getInt(1);
-//            num = rs.getInt(1);
-//            num = rs.getInt(1);
-//            num = rs.getInt(1);
         }
     }
 
