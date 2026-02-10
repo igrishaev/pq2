@@ -10,6 +10,12 @@ char* put_int32(char* bb, int value) {
     return bb += 4;
 }
 
+char* put_long(char* bb, long value) {
+    memcpy(bb, &value, 8);
+    return bb += 8;
+}
+
+
 char* put_string(char* bb, char* string) {
     char* pos = stpcpy(bb + 4, string);
     int len = pos - bb - 4;
@@ -781,19 +787,11 @@ JNIEXPORT jint JNICALL Java_org_pq_Native_initBB
 };
 
 
+char* PQ_dump_PGresult(PGresult* result, char* bb) {
 
-/*
- * Class:     org_pq_Native
- * Method:    PGresultInfo
- * Signature: (JLjava/nio/ByteBuffer;)I
- */
-JNIEXPORT jint JNICALL Java_org_pq_Native_PGresultInfo
-  (JNIEnv *, jclass, jlong jresult, jlong jbb) {
+    // self
+    bb = put_long(bb, (long) result);
 
-    PGresult* result = getResult(jresult);
-    char* bb = (char*) jbb;
-
-    // n of tuples
     int nTuples = PQntuples(result);
     bb = put_int32(bb, nTuples);
 
@@ -801,7 +799,7 @@ JNIEXPORT jint JNICALL Java_org_pq_Native_PGresultInfo
     int nColumns = PQnfields(result);
     bb = put_int32(bb, nColumns);
 
-    // per-column info
+    // columns
     char* column;
     Oid tableOid;
     int format;
@@ -825,6 +823,61 @@ JNIEXPORT jint JNICALL Java_org_pq_Native_PGresultInfo
         bb = put_string(bb, column);
     }
 
+    // params
+    int nParams = PQnparams(result);
+    bb = put_int32(bb, nParams);
+    for (int i = 0; i < nParams; i++) {
+        oid = PQparamtype(result, i);
+        bb = put_int32(bb, oid);
+    }
+
+    return bb;
+}
+
+
+/*
+ * Class:     org_pq_Native
+ * Method:    PGresultInfo
+ * Signature: (JLjava/nio/ByteBuffer;)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_PGresultInfo
+  (JNIEnv *, jclass, jlong jresult, jlong jbb) {
+
+    PGresult* result = getResult(jresult);
+    char* bb = (char*) jbb;
+
+    bb = PQ_dump_PGresult(result, bb);
+
     return 0;
+
+};
+
+
+/*
+ * Class:     org_pq_Native
+ * Method:    _PQprepare
+ * Signature: (JLjava/lang/String;Ljava/lang/String;)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native__1PQprepare
+  (JNIEnv* env, jclass, jlong jconn, jstring jname, jstring jsql, jlong jbb) {
+
+    PGconn* conn = (PGconn*) jconn;
+    char* bb = (char*) jbb;
+
+    const char* stmtName = env->GetStringUTFChars(jname, NULL);
+    const char* query = env->GetStringUTFChars(jsql, NULL);
+
+    PGresult* result;
+
+    result = PQprepare(conn, stmtName, query, 0, NULL);
+    // TODO: check result
+
+    result = PQdescribePrepared(conn, stmtName);
+    // TODO: check result
+
+    bb = PQ_dump_PGresult(result, bb);
+
+    return 0;
+
 
 };

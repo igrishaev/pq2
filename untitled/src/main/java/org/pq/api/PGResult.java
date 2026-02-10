@@ -9,16 +9,19 @@ import java.util.Iterator;
 
 public class PGResult implements AutoCloseable, Iterable<Integer> {
 
+    // TODO: remove ref to the client
     private final PQClient client;
     private final long resPtr;
     private final int nTuples;
     private final int nColumns;
     private final String[] columns;
-    private final int[] formats;
-    private final int[] oids;
+    private final int[] columnFormats;
+    private final int[] columnOids;
     private final int[] tableOids;
     private final int[] typeMods;
-    private int current;
+    private final int nParams;
+    private final int[] paramOids;
+    private int currentRow;
 
     private PGResult(
             final PQClient client,
@@ -26,48 +29,60 @@ public class PGResult implements AutoCloseable, Iterable<Integer> {
             final int nTuples,
             final int nColumns,
             final String[] columns,
-            final int[] formats,
-            final int[] oids,
+            final int[] columnFormats,
+            final int[] columnOids,
             final int[] tableOids,
-            final int[] typeMods
+            final int[] typeMods,
+            final int nParams,
+            final int[] paramOids
     ) {
         this.client    = client;
         this.resPtr    = resPtr;
         this.nTuples   = nTuples;
         this.nColumns  = nColumns;
         this.columns   = columns;
-        this.formats   = formats;
-        this.oids      = oids;
+        this.columnFormats = columnFormats;
+        this.columnOids = columnOids;
         this.tableOids = tableOids;
         this.typeMods  = typeMods;
-        this.current   = -1;
+        this.nParams = nParams;
+        this.paramOids = paramOids;
+        this.currentRow = -1;
     }
 
-    public static PGResult of(final PQClient client, final long resPtr, final ByteBuffer bb) {
+    public static PGResult of(final PQClient client, final ByteBuffer bb) {
         bb.rewind();
         client.bbCPP();
+
+        final long resPtr = bb.getLong();
 
         final int nTuples = bb.getInt();
         final int nColumns = bb.getInt();
 
         final String[] columns = new String[nColumns];
-        final int[] oids = new int[nColumns];
-        final int[] formats = new int[nColumns];
+        final int[] columnOids = new int[nColumns];
+        final int[] columnFormats = new int[nColumns];
         final int[] tableOids = new int[nColumns];
         final int[] typeMods = new int[nColumns];
 
         for (int i = 0; i < nColumns; i++) {
-            oids[i] = bb.getInt();
-            formats[i] = bb.getInt();
+            columnOids[i] = bb.getInt();
+            columnFormats[i] = bb.getInt();
             tableOids[i] = bb.getInt();
             typeMods[i] = bb.getInt();
             columns[i] = BB.getString(bb);
         }
 
+        final int nParams = bb.getInt();
+        final int[] paramOids = new int[nParams];
+        for (int i = 0; i < nParams; i++) {
+            paramOids[i] = bb.getInt();
+        }
+
         return new PGResult(
                 client, resPtr,
-                nTuples, nColumns, columns,
-                formats, oids, tableOids, typeMods
+                nTuples, nColumns, columns, columnFormats, columnOids, tableOids, typeMods,
+                nParams, paramOids
         );
     }
 
@@ -97,7 +112,7 @@ public class PGResult implements AutoCloseable, Iterable<Integer> {
     }
 
     public Object getObject(final int col) {
-        return getObject(current, col);
+        return getObject(currentRow, col);
     }
 
     public Object getObject(final int row, final int col) {
@@ -125,7 +140,7 @@ public class PGResult implements AutoCloseable, Iterable<Integer> {
 
         client.bbJVM();
         // client.bbCPP();
-        client.bbDebug(64);
+        // client.bbDebug(64);
 
         return switch (FORMAT.of(format)) {
             case TXT -> {
@@ -147,12 +162,12 @@ public class PGResult implements AutoCloseable, Iterable<Integer> {
         return new Iterator<>() {
             @Override
             public boolean hasNext() {
-                return current < nTuples - 1;
+                return currentRow < nTuples - 1;
             }
 
             @Override
             public Integer next() {
-                return ++current;
+                return ++currentRow;
             }
         };
     }

@@ -233,6 +233,14 @@ JNIEXPORT jint JNICALL Java_org_pq_Native_PQgetlength
 
 /*
  * Class:     org_pq_Native
+ * Method:    _PQprepare
+ * Signature: (JLjava/lang/String;Ljava/lang/String;J)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native__1PQprepare
+  (JNIEnv *, jclass, jlong, jstring, jstring, jlong);
+
+/*
+ * Class:     org_pq_Native
  * Method:    initBB
  * Signature: (Ljava/nio/ByteBuffer;)I
  */

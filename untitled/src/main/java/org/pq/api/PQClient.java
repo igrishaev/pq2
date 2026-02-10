@@ -16,6 +16,7 @@ public class PQClient implements AutoCloseable {
     private final ByteOrder BO_JVM;
     private final ByteOrder BO_CPP;
     private final long NULL;
+    private int counter = 0;
 
     private PQClient(final long ptr,
                      final String conninfo,
@@ -121,8 +122,8 @@ public class PQClient implements AutoCloseable {
             Native.PQclear(resPtr);
             throw PQError.of("PGresultInfo returned non-zero status: %s", opStatus);
         }
-        bbDebug(64);
-        return PGResult.of(this, resPtr, bb);
+        // bbDebug(64);
+        return PGResult.of(this, bb);
 
     }
 
@@ -145,7 +146,18 @@ public class PQClient implements AutoCloseable {
             Native.PQclear(resPtr);
             throw PQError.of("PGresultInfo returned non-zero status: %s", opStatus);
         }
-        return PGResult.of(this, resPtr, bb);
+        return PGResult.of(this, bb);
+    }
+
+    private String getStmtName() {
+        return "s" + ++counter;
+    }
+
+    public Stmt prepare(final String query) {
+        final String stmtName = getStmtName();
+        Native._PQprepare(connPtr, stmtName, query, bbPtr);
+        final PGResult pgResult = PGResult.of(this, bb);
+        return new Stmt(this, stmtName, pgResult);
     }
 
     public void reset() {
@@ -169,11 +181,12 @@ public class PQClient implements AutoCloseable {
 
     public static void main(String... args) {
         PQClient client = PQClient.of("host=localhost port=5432 dbname=book user=book password=book");
-        try (PGResult res = client.execWithParams("select $1::int4 as x", List.of(1))) {
-            for (int row: res) {
-                System.out.println(res.getObject(row, 0));
-            }
-        }
-        client.close();
+        client.prepare("select $1::int4 as foo");
+//        try (PGResult res = client.execWithParams("select $1::int4 as x", List.of(1))) {
+//            for (int row: res) {
+//                System.out.println(res.getObject(row, 0));
+//            }
+//        }
+//        client.close();
     }
 }
