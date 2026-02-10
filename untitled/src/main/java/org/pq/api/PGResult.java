@@ -45,7 +45,7 @@ public class PGResult implements AutoCloseable, Iterable<Integer> {
 
     public static PGResult of(final PQClient client, final long resPtr, final ByteBuffer bb) {
         bb.rewind();
-        client.bbJVM();
+        client.bbCPP();
 
         final int nTuples = bb.getInt();
         final int nColumns = bb.getInt();
@@ -122,6 +122,10 @@ public class PGResult implements AutoCloseable, Iterable<Integer> {
         final int oid = client.bb.getInt();
         final int format = client.bb.getInt();
         final int len = client.bb.getInt();
+
+        client.bbJVM();
+        // client.bbCPP();
+        client.bbDebug(64);
 
         return switch (FORMAT.of(format)) {
             case TXT -> {

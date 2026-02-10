@@ -119,11 +119,13 @@ public class Native {
 
     /* CUSTOM */
 
+
+
     public static native int initBB(final java.nio.ByteBuffer bb);
 
     public static native int PGresultInfo(final long resPtr, final long bbPtr);
 
-    public static native long execWithParams(final long conn, String sql, final long bb);
+    public static native long execWithParams(final long connPtr, String sql, final long bbPtr);
 
     public static native void writeBB(final java.nio.ByteBuffer bb);
 

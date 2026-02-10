@@ -1,6 +1,7 @@
 package org.pq.api;
 
 import org.pq.Native;
+import org.pq.codec.Encoder;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -41,7 +42,7 @@ public class PQClient implements AutoCloseable {
             throw PQError.of("byte buffer init error, code: %s", initStatus);
         }
 
-        final ByteOrder BO_JVM = ByteOrder.nativeOrder();
+        final ByteOrder BO_JVM = ByteOrder.BIG_ENDIAN;
 
         final byte lead = bb.get(0);
         final ByteOrder BO_CPP = (lead == 1) ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN;
@@ -96,7 +97,33 @@ public class PQClient implements AutoCloseable {
     }
 
     public PGResult execWithParams(final String sql, final List<Object> params) {
-        return null;
+        final int len = params.size();
+        final Object[] prms = params.toArray(new Object[0]);
+        final int[] oids = new int[] {23};
+        final int[] formats = new int[] {1};
+        Encoder.encodeBB(bb, bbPtr, prms, oids, formats, 1);
+
+        final long resPtr = Native.execWithParams(connPtr, sql, bbPtr);
+        if (resPtr == NULL) {
+            throw PQError.of("PQExec returned null (most likely no enough memory)");
+        }
+        int opStatus = Native.PQresultStatus(resPtr);
+        PGRES pgres = PGRES.of(opStatus);
+        switch (pgres) {
+            case FATAL_ERROR, NONFATAL_ERROR, BAD_RESPONSE -> {
+                Native.PQclear(resPtr);
+                String message = Native.PQerrorMessage(connPtr);
+                throw PQError.of(message);
+            }
+        }
+        opStatus = Native.PGresultInfo(resPtr, bbPtr);
+        if (opStatus != 0) {
+            Native.PQclear(resPtr);
+            throw PQError.of("PGresultInfo returned non-zero status: %s", opStatus);
+        }
+        bbDebug(64);
+        return PGResult.of(this, resPtr, bb);
+
     }
 
     public PGResult exec(final String sql) {
@@ -141,10 +168,10 @@ public class PQClient implements AutoCloseable {
     }
 
     public static void main(String... args) {
-        PQClient client = PQClient.of("host=localhost port=15432 dbname=test user=test password=test");
-        try (PGResult res = client.exec("select x as foobar, x + 2 as foo from generate_series(1, 3) as seq(x)")) {
+        PQClient client = PQClient.of("host=localhost port=5432 dbname=book user=book password=book");
+        try (PGResult res = client.execWithParams("select $1::int4 as x", List.of(1))) {
             for (int row: res) {
-                System.out.println(res.getObject(row, 1));
+                System.out.println(res.getObject(row, 0));
             }
         }
         client.close();

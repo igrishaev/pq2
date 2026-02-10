@@ -45,8 +45,8 @@ public class Encoder {
 
     public static void encodeBB(final ByteBuffer bb, long bbPtr, Object[] params, int[] oids, int[] formats, int resultFormat) {
 
-//        bb.rewind();
-//        bb.order(ByteOrder.LITTLE_ENDIAN);
+        bb.rewind();
+        bb.order(ByteOrder.LITTLE_ENDIAN);
 
         int nParams = params.length;
 
@@ -74,7 +74,7 @@ public class Encoder {
         // resultFormat
         bb.putInt(resultFormat);
 
-        // update length and pointers
+        // update lengths and pointers
         int len;
         int pos;
         FORMAT format;
@@ -86,13 +86,14 @@ public class Encoder {
                 case TXT -> encodeText(oids[i], params[i], bb);
                 case BIN -> encodeBin(oids[i], params[i], bb);
             }
-            len = pos - bb.position();
+            len = bb.position() - pos;
             bb.order(ByteOrder.LITTLE_ENDIAN);
             bb.putInt(posLen + i * 4, len);
             bb.putLong(posPtr + i * 8, bbPtr + pos);
         }
 
     }
+
 
 
 
