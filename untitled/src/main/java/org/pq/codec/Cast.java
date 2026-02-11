@@ -1,4 +1,4 @@
-package org.pq.tool;
+package org.pq.codec;
 
 import java.util.UUID;
 

@@ -3,6 +3,7 @@ package org.pq.api;
 import org.pq.Native;
 import org.pq.codec.Decoder;
 import static org.pq.api.PQError.error;
+import static org.pq.tool.BB.*;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -44,7 +45,7 @@ public record PGResult(
             columnFormats[i] = bb.getInt();
             tableOids[i] = bb.getInt();
             typeMods[i] = bb.getInt();
-            columns[i] = BB.getString(bb);
+            columns[i] = getLenString(bb);
         }
 
         final int nParams = bb.getInt();
