@@ -2,51 +2,25 @@ package org.pq.api;
 
 import org.pq.Native;
 import org.pq.codec.Decoder;
+import static org.pq.api.PQError.error;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 
-public class PGResult implements AutoCloseable {
-
-    // TODO: remove ref to the client
-    private final PQClient client;
-    private final long resPtr;
-    private final int nTuples;
-    private final int nColumns;
-    private final String[] columns;
-    private final int[] columnFormats;
-    private final int[] columnOids;
-    private final int[] tableOids;
-    private final int[] typeMods;
-    protected final int nParams;
-    protected final int[] paramOids;
-
-    private PGResult(
-            final PQClient client,
-            final long resPtr,
-            final int nTuples,
-            final int nColumns,
-            final String[] columns,
-            final int[] columnFormats,
-            final int[] columnOids,
-            final int[] tableOids,
-            final int[] typeMods,
-            final int nParams,
-            final int[] paramOids
-    ) {
-        this.client    = client;
-        this.resPtr    = resPtr;
-        this.nTuples   = nTuples;
-        this.nColumns  = nColumns;
-        this.columns   = columns;
-        this.columnFormats = columnFormats;
-        this.columnOids = columnOids;
-        this.tableOids = tableOids;
-        this.typeMods  = typeMods;
-        this.nParams = nParams;
-        this.paramOids = paramOids;
-    }
+public record PGResult(
+        PQClient client, 
+        long resPtr, 
+        int nTuples, 
+        int nColumns, 
+        String[] columns, 
+        int[] columnFormats,
+        int[] columnOids, 
+        int[] tableOids, 
+        int[] typeMods, 
+        int nParams,
+        int[] paramOids
+) implements AutoCloseable {
 
     public static PGResult of(final PQClient client, final ByteBuffer bb) {
         bb.rewind();
@@ -77,36 +51,19 @@ public class PGResult implements AutoCloseable {
             paramOids[i] = bb.getInt();
         }
 
-        return new PGResult(
-                client, resPtr,
-                nTuples, nColumns, columns, columnFormats, columnOids, tableOids, typeMods,
+        return new PGResult(client, resPtr, nTuples, nColumns, columns, 
+                columnFormats, columnOids, tableOids, typeMods,
                 nParams, paramOids
         );
     }
-
-//    @Override
-//    public String toString() {
-//        return String.format("PGResult[client=%s, resPtr=%d, nTuples=%d, nColumns=%d, current=%d, columns=%s, formats=%s, oids=%s, tableOids=%s, typeMods=%s",
-//                client,
-//                resPtr,
-//                nTuples,
-//                nColumns,
-//                current,
-//                Arrays.toString(columns),
-//                Arrays.toString(formats),
-//                Arrays.toString(oids),
-//                Arrays.toString(tableOids),
-//                Arrays.toString(typeMods)
-//        );
-//    }
-
-    public int getIndex(final String column) {
+    
+    public int getColIndex(final String column) {
         for (int s = 0; s < nColumns; s++) {
             if (columns[s].equals(column)) {
                 return s;
             }
         }
-        throw PQError.of("missing column: %s", column);
+        throw error("missing column: %s", column);
     }
 
     public Object getObject(final int row, final int col) {
@@ -116,8 +73,8 @@ public class PGResult implements AutoCloseable {
 
         final int opStatus = Native.fetchField(resPtr, client.bbPtr, row, col);
         if (opStatus != 0) {
-            throw PQError.of("fetchField returned non-zero status: %s, row: %s, column: %s",
-                             opStatus, row, col);
+            throw error("fetchField returned non-zero status: %s, row: %s, column: %s",
+                    opStatus, row, col);
         }
 
         client.rewind();
@@ -133,8 +90,6 @@ public class PGResult implements AutoCloseable {
         final int len = client.bb.getInt();
 
         client.bbJVM();
-        // client.bbCPP();
-        // client.bbDebug(64);
 
         return switch (FORMAT.of(format)) {
             case TXT -> {
@@ -149,10 +104,6 @@ public class PGResult implements AutoCloseable {
     @Override
     public void close() {
         Native.PQclear(resPtr);
-    }
-
-    final int nColumns () {
-        return nColumns;
     }
 
     public Iterable<Integer> iterRows() {

@@ -1,7 +1,6 @@
 package org.pq.jdbc;
 
 import org.pq.api.PGResult;
-import org.pq.Native;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -144,13 +143,13 @@ public class PQResultSet implements java.sql.ResultSet, AutoCloseable {
 
     @Override
     public int getInt(String columnLabel) {
-        final int i = PGResult.getIndex(columnLabel);
+        final int i = PGResult.getColIndex(columnLabel);
         return getInt(i);
     }
 
     @Override
     public long getLong(String columnLabel) {
-        final int i = PGResult.getIndex(columnLabel);
+        final int i = PGResult.getColIndex(columnLabel);
         return getLong(i);
     }
 

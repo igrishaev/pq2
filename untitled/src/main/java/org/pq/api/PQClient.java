@@ -11,7 +11,7 @@ import java.util.UUID;
 
 public class PQClient implements AutoCloseable {
     protected final long connPtr;
-    private final String conninfo;
+    private final String connInfo;
     protected final ByteBuffer bb;
     protected final long bbPtr;
     private final ByteOrder BO_JVM;
@@ -19,16 +19,16 @@ public class PQClient implements AutoCloseable {
     private final long NULL;
     private int counter = 0;
 
-    private PQClient(final long ptr,
-                     final String conninfo,
+    private PQClient(final long connPtr,
+                     final String connInfo,
                      final ByteBuffer bb,
                      final long bbPtr,
                      final ByteOrder BO_JVM,
                      final ByteOrder BO_CPP,
                      final long NULL
     ) {
-        this.connPtr = ptr;
-        this.conninfo = conninfo;
+        this.connPtr = connPtr;
+        this.connInfo = connInfo;
         this.bb = bb;
         this.bbPtr = bbPtr;
         this.BO_JVM = BO_JVM;
@@ -36,12 +36,12 @@ public class PQClient implements AutoCloseable {
         this.NULL = NULL;
     }
 
-    public static PQClient of(final String conninfo) {
+    public static PQClient of(final String connInfo) {
         final ByteBuffer bb = ByteBuffer.allocateDirect(CONST.BB_SIZE);
         final int initStatus = Native.initBB(bb);
 
         if (initStatus != 0) {
-            throw PQError.of("byte buffer init error, code: %s", initStatus);
+            throw PQError.error("byte buffer init error, code: %s", initStatus);
         }
 
         final ByteOrder BO_JVM = ByteOrder.BIG_ENDIAN;
@@ -54,9 +54,9 @@ public class PQClient implements AutoCloseable {
         final long bbPtr = bb.getLong();
         final long NULL = bb.getLong();
 
-        final long connPtr = Native.PQconnectdb(conninfo);
+        final long connPtr = Native.PQconnectdb(connInfo);
         if (connPtr == NULL) {
-            throw PQError.of("PQ connection returned null");
+            throw PQError.error("PQ connection returned null");
         }
 
         final int statusCode = Native.PQstatus(connPtr);
@@ -65,7 +65,7 @@ public class PQClient implements AutoCloseable {
         return switch (status) {
             case OK -> new PQClient(
                     connPtr,
-                    conninfo,
+                    connInfo,
                     bb,
                     bbPtr,
                     BO_JVM,
@@ -74,9 +74,9 @@ public class PQClient implements AutoCloseable {
             );
             case BAD -> {
                 final String message = Native.PQerrorMessage(connPtr);
-                throw PQError.of(message);
+                throw PQError.error(message);
             }
-            default -> throw PQError.of("wrong status: %s, code: %s", status, statusCode);
+            default -> throw PQError.error("wrong status: %s, code: %s", status, statusCode);
         };
     }
 
@@ -107,7 +107,7 @@ public class PQClient implements AutoCloseable {
 
         final long resPtr = Native.execWithParams(connPtr, sql, bbPtr);
         if (resPtr == NULL) {
-            throw PQError.of("PQExec returned null (most likely no enough memory)");
+            throw PQError.error("PQExec returned null (most likely no enough memory)");
         }
         int opStatus = Native.PQresultStatus(resPtr);
         PGRES pgres = PGRES.of(opStatus);
@@ -115,15 +115,14 @@ public class PQClient implements AutoCloseable {
             case FATAL_ERROR, NONFATAL_ERROR, BAD_RESPONSE -> {
                 Native.PQclear(resPtr);
                 String message = Native.PQerrorMessage(connPtr);
-                throw PQError.of(message);
+                throw PQError.error(message);
             }
         }
         opStatus = Native.PGresultInfo(resPtr, bbPtr);
         if (opStatus != 0) {
             Native.PQclear(resPtr);
-            throw PQError.of("PGresultInfo returned non-zero status: %s", opStatus);
+            throw PQError.error("PGresultInfo returned non-zero status: %s", opStatus);
         }
-        // bbDebug(64);
         return PGResult.of(this, bb);
 
     }
@@ -131,7 +130,7 @@ public class PQClient implements AutoCloseable {
     public PGResult exec(final String sql) {
         final long resPtr = Native.PQexec(connPtr, sql);
         if (resPtr == NULL) {
-            throw PQError.of("PQExec returned null (most likely no enough memory)");
+            throw PQError.error("PQExec returned null (most likely no enough memory)");
         }
         int opStatus = Native.PQresultStatus(resPtr);
         PGRES pgres = PGRES.of(opStatus);
@@ -139,13 +138,13 @@ public class PQClient implements AutoCloseable {
             case FATAL_ERROR, NONFATAL_ERROR, BAD_RESPONSE -> {
                 Native.PQclear(resPtr);
                 String message = Native.PQerrorMessage(connPtr);
-                throw PQError.of(message);
+                throw PQError.error(message);
             }
         }
         opStatus = Native.PGresultInfo(resPtr, bbPtr);
         if (opStatus != 0) {
             Native.PQclear(resPtr);
-            throw PQError.of("PGresultInfo returned non-zero status: %s", opStatus);
+            throw PQError.error("PGresultInfo returned non-zero status: %s", opStatus);
         }
         return PGResult.of(this, bb);
     }
