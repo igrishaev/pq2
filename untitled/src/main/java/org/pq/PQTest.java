@@ -36,7 +36,7 @@ public class PQTest {
 
         Object obj;
         try (PGResult res = client.exec(sql)) {
-            for (int row: res) {
+            for (int row: res.iterRows()) {
                 for (int col = 1; col < 8; col++) {
                     obj = res.getObject(row, col);
                 }

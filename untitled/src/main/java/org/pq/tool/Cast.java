@@ -145,4 +145,16 @@ public class Cast {
             throw error("cannot cast object %s to UUID", x);
         }
     }
+
+    public static String castString(final Object x) {
+        if (x instanceof String s) {
+            return s;
+        } else if (x instanceof CharSequence cs) {
+            return cs.toString();
+        } else if (x instanceof Character c) {
+            return c.toString();
+        } else {
+            throw error("cannot cast object %s to text", x);
+        }
+    }
 }

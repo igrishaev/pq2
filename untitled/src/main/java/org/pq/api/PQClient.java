@@ -7,6 +7,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 public class PQClient implements AutoCloseable {
     protected final long connPtr;
@@ -180,18 +181,16 @@ public class PQClient implements AutoCloseable {
     }
 
     public static void main(String... args) {
-        PQClient client = PQClient.of("host=localhost port=15432 dbname=test user=test password=test");
-
-        Stmt s = client.prepare("select $1::int4 as foo");
-        PGResult res = s.execute(List.of(555));
-        for (int row: res) {
-            System.out.println(res.getObject(row, 0));
+        final String connInfo = "host=localhost port=15432 dbname=test user=test password=test";
+        final String query = "select $1::int4, $2::text, $3::uuid as foo";
+        try (final PQClient client = PQClient.of(connInfo);
+             final Stmt stmt = client.prepare(query);
+             final PGResult  res = stmt.execute(List.of(555, "hello", UUID.randomUUID()))) {
+            for (int row: res.iterRows()) {
+                for (int col: res.iterCols()) {
+                    System.out.println(res.getObject(row, col));
+                }
+            }
         }
-//        try (PGResult res = client.execWithParams("select $1::int4 as x", List.of(1))) {
-//            for (int row: res) {
-//                System.out.println(res.getObject(row, 0));
-//            }
-//        }
-//        client.close();
     }
 }

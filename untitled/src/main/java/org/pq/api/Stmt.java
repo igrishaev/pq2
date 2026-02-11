@@ -12,18 +12,19 @@ public record Stmt (
 ) implements AutoCloseable {
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         // Native.PQclosePrepared(client.connPtr, stmtName);
         // check PGRES_COMMAND_OK
     }
 
     public PGResult execute(List<Object> params) {
 
-        final int len = params.size();
-        final Object[] prms = params.toArray(new Object[0]);
+        final int nParams = params.size();
+        if (nParams != result.nParams) {
+            throw PQError.of("parameters mismatch: %s required, %s passed", result.nParams, nParams);
+        }
         final int[] oids = result.paramOids;
-        final int[] formats = new int[] {1};
-        Encoder.encodePrepared(client.bb, client.bbPtr, prms, oids, formats, 1);
+        Encoder.encodePrepared(client.bb, client.bbPtr, nParams, params, oids);
         final long resPtr = Native._PQexecPrepared(client.connPtr, stmtName, client.bbPtr);
         return PGResult.of(client, client.bb);
     }

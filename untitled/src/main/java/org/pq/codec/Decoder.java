@@ -3,6 +3,7 @@ package org.pq.codec;
 import org.pq.api.OID;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 public class Decoder {
@@ -20,6 +21,11 @@ public class Decoder {
                 yield new UUID(bits_hi, bits_lo);
             }
             case OID.DATE -> DateTimeBin.decodeDATE(bb);
+            case OID.TEXT -> {
+                final byte[] ba = new byte[len];
+                bb.get(ba);
+                yield new String(ba, StandardCharsets.UTF_8);
+            }
             default -> {
                 final byte[] ba = new byte[len];
                 bb.get(ba);

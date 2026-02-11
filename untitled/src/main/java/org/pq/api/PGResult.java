@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 
-public class PGResult implements AutoCloseable, Iterable<Integer> {
+public class PGResult implements AutoCloseable {
 
     // TODO: remove ref to the client
     private final PQClient client;
@@ -19,9 +19,8 @@ public class PGResult implements AutoCloseable, Iterable<Integer> {
     private final int[] columnOids;
     private final int[] tableOids;
     private final int[] typeMods;
-    private final int nParams;
+    protected final int nParams;
     protected final int[] paramOids;
-    private int currentRow;
 
     private PGResult(
             final PQClient client,
@@ -47,7 +46,6 @@ public class PGResult implements AutoCloseable, Iterable<Integer> {
         this.typeMods  = typeMods;
         this.nParams = nParams;
         this.paramOids = paramOids;
-        this.currentRow = -1;
     }
 
     public static PGResult of(final PQClient client, final ByteBuffer bb) {
@@ -111,10 +109,6 @@ public class PGResult implements AutoCloseable, Iterable<Integer> {
         throw PQError.of("missing column: %s", column);
     }
 
-    public Object getObject(final int col) {
-        return getObject(currentRow, col);
-    }
-
     public Object getObject(final int row, final int col) {
 
         // TODO check row
@@ -157,18 +151,40 @@ public class PGResult implements AutoCloseable, Iterable<Integer> {
         Native.PQclear(resPtr);
     }
 
-    @Override
-    public Iterator<Integer> iterator() {
-        return new Iterator<>() {
+    final int nColumns () {
+        return nColumns;
+    }
+
+    public Iterable<Integer> iterRows() {
+        return () -> new Iterator<>() {
+            private int i = -1;
+
             @Override
             public boolean hasNext() {
-                return currentRow < nTuples - 1;
+                return i < nTuples - 1;
             }
 
             @Override
             public Integer next() {
-                return ++currentRow;
+                return ++i;
             }
         };
     }
+
+    public Iterable<Integer> iterCols() {
+        return () -> new Iterator<>() {
+            private int i = -1;
+
+            @Override
+            public boolean hasNext() {
+                return i < nColumns - 1;
+            }
+
+            @Override
+            public Integer next() {
+                return ++i;
+            }
+        };
+    }
+
 }

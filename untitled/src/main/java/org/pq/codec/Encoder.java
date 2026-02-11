@@ -5,6 +5,7 @@ import org.pq.api.OID;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.List;
 import java.util.UUID;
 
 import static org.pq.tool.BB.*;
@@ -23,6 +24,7 @@ public class Encoder {
             case OID.INT8 -> bb.putLong(castLong(x));
             case OID.FLOAT4 -> bb.putFloat(castFloat(x));
             case OID.FLOAT8 -> bb.putDouble(castDouble(x));
+            case OID.TEXT -> putString(bb, castString(x));
             case OID.UUID -> {
                 final UUID uuid = castUUID(x);
                 final long bits_hi = uuid.getMostSignificantBits();
@@ -38,6 +40,10 @@ public class Encoder {
         switch (oid) {
             case OID.INT2 -> putString(bb, String.valueOf(castShort(x)));
             case OID.INT4 -> putString(bb, String.valueOf(castInteger(x)));
+            case OID.INT8 -> putString(bb, String.valueOf(castLong(x)));
+            case OID.FLOAT4 -> putString(bb, String.valueOf(castFloat(x)));
+            case OID.FLOAT8 -> putString(bb, String.valueOf(castDouble(x)));
+            case OID.TEXT -> castString(x);
             case OID.UUID -> putString(bb, castUUID(x).toString());
             default -> throw error("Don't know how to text-encode a value: %s", x);
         }
@@ -94,12 +100,12 @@ public class Encoder {
 
     }
 
-    public static void encodePrepared(final ByteBuffer bb, long bbPtr, Object[] params, int[] oids, int[] formats, int resultFormat) {
+    public static void encodePrepared(final ByteBuffer bb, long bbPtr, final int nParams, final List<Object> params, int[] oids) {
 
         bb.rewind();
         bb.order(ByteOrder.LITTLE_ENDIAN);
 
-        int nParams = params.length;
+        final int format = 1;
 
         // nParams
         bb.putInt(nParams);
@@ -114,23 +120,21 @@ public class Encoder {
 
         // paramFormats
         for (int i = 0; i < nParams; i++) {
-            bb.putInt(formats[i]);
+            bb.putInt(format);
         }
 
         // resultFormat
-        bb.putInt(resultFormat);
+        bb.putInt(format);
 
         // update lengths and pointers
         int len;
         int pos;
-        FORMAT format;
         for (int i = 0; i < nParams; i++) {
-            format = FORMAT.of(formats[i]);
             pos = bb.position();
             bb.order(ByteOrder.BIG_ENDIAN);
-            switch (format) {
-                case TXT -> encodeText(oids[i], params[i], bb);
-                case BIN -> encodeBin(oids[i], params[i], bb);
+            switch (FORMAT.of(format)) {
+                case TXT -> encodeText(oids[i], params.get(i), bb);
+                case BIN -> encodeBin(oids[i], params.get(i), bb);
             }
             len = bb.position() - pos;
             bb.order(ByteOrder.LITTLE_ENDIAN);
