@@ -20,7 +20,7 @@ public class PGResult implements AutoCloseable, Iterable<Integer> {
     private final int[] tableOids;
     private final int[] typeMods;
     private final int nParams;
-    private final int[] paramOids;
+    protected final int[] paramOids;
     private int currentRow;
 
     private PGResult(

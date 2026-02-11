@@ -241,6 +241,14 @@ JNIEXPORT jint JNICALL Java_org_pq_Native__1PQprepare
 
 /*
  * Class:     org_pq_Native
+ * Method:    _PQexecPrepared
+ * Signature: (JLjava/lang/String;J)J
+ */
+JNIEXPORT jlong JNICALL Java_org_pq_Native__1PQexecPrepared
+  (JNIEnv *, jclass, jlong, jstring, jlong);
+
+/*
+ * Class:     org_pq_Native
  * Method:    initBB
  * Signature: (Ljava/nio/ByteBuffer;)I
  */

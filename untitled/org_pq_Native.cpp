@@ -867,6 +867,14 @@ JNIEXPORT jint JNICALL Java_org_pq_Native__1PQprepare
     const char* stmtName = env->GetStringUTFChars(jname, NULL);
     const char* query = env->GetStringUTFChars(jsql, NULL);
 
+
+    // const char *stmtName
+    // int nParams
+    // const char * const *paramValues
+    // const int *paramLengths
+    // const int *paramFormats
+    // int resultFormat
+
     PGresult* result;
 
     result = PQprepare(conn, stmtName, query, 0, NULL);
@@ -879,5 +887,84 @@ JNIEXPORT jint JNICALL Java_org_pq_Native__1PQprepare
 
     return 0;
 
+
+};
+
+/*
+ * Class:     org_pq_Native
+ * Method:    _PQexecPrepared
+ * Signature: (JLjava/lang/String;J)I
+ */
+JNIEXPORT jlong JNICALL Java_org_pq_Native__1PQexecPrepared
+  (JNIEnv* env, jclass, jlong jconn, jstring jstmt, jlong jbb) {
+
+    PGconn* conn = (PGconn*) jconn;
+    char* bb = (char*) jbb;
+
+    const char* stmtName = env->GetStringUTFChars(jstmt, NULL);
+
+    int off = 0;
+
+    int32_t nParams = *((int32_t*) (bb + off));
+    off += sizeof(int32_t);
+
+    // Oid* paramTypes = (Oid*) (bb + off);
+    // off += sizeof(Oid) * nParams;
+
+    char** paramValues = (char**) (bb + off);
+    off += sizeof(char*) * nParams;
+
+    int32_t* paramLengths = (int32_t*) (bb + off);
+    off += sizeof(int32_t) * nParams;;
+
+    int32_t* paramFormats = (int32_t*) (bb + off);
+    off += sizeof(int32_t) * nParams;;
+
+    int32_t resultFormat = *((int32_t*) (bb + off));
+    off += sizeof(int32_t);
+
+    printf("nParams: %d \n", nParams);
+
+    // Oid* oid;
+    // for (int i = 0; i < nParams; i++) {
+    //     oid = paramTypes + i;
+    //     printf("oid: %d \n", *oid);
+    // }
+
+    char* ptr;
+    int val;
+    for (int i = 0; i < nParams; i++) {
+        ptr = paramValues[i];
+        val = *((int*) ptr);
+        printf("val: %d \n", htonl(val));
+    }
+
+    int* len;
+    for (int i = 0; i < nParams; i++) {
+        len = paramLengths + i;
+        printf("len: %d \n", *len);
+    }
+
+    int* fmt;
+    for (int i = 0; i < nParams; i++) {
+        fmt = paramFormats + i;
+        printf("format: %d \n", *fmt);
+    }
+
+    printf("resultFormat: %d \n", resultFormat);
+
+    PGresult* result = PQexecPrepared(conn,
+                                      stmtName,
+                                      nParams,
+                                      paramValues,
+                                      paramLengths,
+                                      paramFormats,
+                                      resultFormat);
+
+    // todo check result
+
+    bb = PQ_dump_PGresult(result, bb);
+
+    return (long) bb;
 
 };

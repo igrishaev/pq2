@@ -122,7 +122,7 @@ public class Native {
 
     public static native int _PQprepare(final long connPtr, final String stmtName, final String sql, final long bbPtr);
 
-    public static native int _PQexecPrepared(final long connPtr, final String stmtName, final long bbPtr);
+    public static native long _PQexecPrepared(final long connPtr, final String stmtName, final long bbPtr);
 
     public static native int initBB(final java.nio.ByteBuffer bb);
 

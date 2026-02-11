@@ -9,7 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class PQClient implements AutoCloseable {
-    private final long connPtr;
+    protected final long connPtr;
     private final String conninfo;
     protected final ByteBuffer bb;
     protected final long bbPtr;
@@ -180,8 +180,13 @@ public class PQClient implements AutoCloseable {
     }
 
     public static void main(String... args) {
-        PQClient client = PQClient.of("host=localhost port=5432 dbname=book user=book password=book");
-        client.prepare("select $1::int4 as foo");
+        PQClient client = PQClient.of("host=localhost port=15432 dbname=test user=test password=test");
+
+        Stmt s = client.prepare("select $1::int4 as foo");
+        PGResult res = s.execute(List.of(555));
+        for (int row: res) {
+            System.out.println(res.getObject(row, 0));
+        }
 //        try (PGResult res = client.execWithParams("select $1::int4 as x", List.of(1))) {
 //            for (int row: res) {
 //                System.out.println(res.getObject(row, 0));
