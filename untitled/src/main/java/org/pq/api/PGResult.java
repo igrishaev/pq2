@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 
 public record PGResult(
-        PQClient client, 
+        Arena arena,
         long resPtr, 
         int nTuples, 
         int nColumns, 
@@ -22,9 +22,11 @@ public record PGResult(
         int[] paramOids
 ) implements AutoCloseable {
 
-    public static PGResult of(final PQClient client, final ByteBuffer bb) {
-        bb.rewind();
-        client.bbCPP();
+    public static PGResult of(final Arena arena) {
+        arena.rewind();
+        arena.orderCPP();
+
+        final ByteBuffer bb = arena.bb();
 
         final long resPtr = bb.getLong();
 
@@ -51,7 +53,7 @@ public record PGResult(
             paramOids[i] = bb.getInt();
         }
 
-        return new PGResult(client, resPtr, nTuples, nColumns, columns, 
+        return new PGResult(arena, resPtr, nTuples, nColumns, columns,
                 columnFormats, columnOids, tableOids, typeMods,
                 nParams, paramOids
         );
@@ -71,33 +73,35 @@ public record PGResult(
         // TODO check row
         // TODO check col
 
-        final int opStatus = Native.fetchField(resPtr, client.bbPtr, row, col);
+        final int opStatus = Native.fetchField(resPtr, arena.bbPtr(), row, col);
         if (opStatus != 0) {
             throw error("fetchField returned non-zero status: %s, row: %s, column: %s",
                     opStatus, row, col);
         }
 
-        client.rewind();
-        client.bbCPP();
+        arena.rewind();
+        arena.orderCPP();
+
+        final ByteBuffer bb = arena.bb();
 
         // is null?
-        if (client.bb.getInt() == 1) {
+        if (bb.getInt() == 1) {
             return null;
         }
 
-        final int oid = client.bb.getInt();
-        final int format = client.bb.getInt();
-        final int len = client.bb.getInt();
+        final int oid = bb.getInt();
+        final int format = bb.getInt();
+        final int len = bb.getInt();
 
-        client.bbJVM();
+        arena.orderJVM();
 
         return switch (FORMAT.of(format)) {
             case TXT -> {
                 final byte[] ba = new byte[len];
-                client.bb.get(ba);
+                bb.get(ba);
                 yield Decoder.decodeTxt(oid, new String(ba, StandardCharsets.UTF_8));
             }
-            case BIN -> Decoder.decodeBin(oid, len, client.bb);
+            case BIN -> Decoder.decodeBin(oid, len, bb);
         };
     }
 

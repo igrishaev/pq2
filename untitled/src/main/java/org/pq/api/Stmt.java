@@ -6,13 +6,15 @@ import org.pq.codec.Encoder;
 import java.util.List;
 
 public record Stmt (
-        PQClient client,
+        long connPtr,
+        Arena arena,
         String stmtName,
         PGResult result
 ) implements AutoCloseable {
 
     @Override
     public void close() {
+        // TODO: close
         // Native.PQclosePrepared(client.connPtr, stmtName);
         // check PGRES_COMMAND_OK
     }
@@ -24,8 +26,10 @@ public record Stmt (
             throw PQError.error("parameters mismatch: %s required, %s passed", result.nParams(), nParams);
         }
         final int[] oids = result.paramOids();
-        Encoder.encodePrepared(client.bb, client.bbPtr, nParams, params, oids);
-        final long resPtr = Native._PQexecPrepared(client.connPtr, stmtName, client.bbPtr);
-        return PGResult.of(client, client.bb);
+        Encoder.encodePrepared(arena.bb(), arena.bbPtr(), nParams, params, oids);
+
+
+        final long resPtr = Native._PQexecPrepared(connPtr, stmtName, arena.bbPtr());
+        return PGResult.of(arena);
     }
 }

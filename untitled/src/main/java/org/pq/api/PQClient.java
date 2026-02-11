@@ -12,28 +12,16 @@ import java.util.UUID;
 public class PQClient implements AutoCloseable {
     protected final long connPtr;
     private final String connInfo;
-    protected final ByteBuffer bb;
-    protected final long bbPtr;
-    private final ByteOrder BO_JVM;
-    private final ByteOrder BO_CPP;
-    private final long NULL;
+    private final Arena arena;
     private int counter = 0;
 
     private PQClient(final long connPtr,
                      final String connInfo,
-                     final ByteBuffer bb,
-                     final long bbPtr,
-                     final ByteOrder BO_JVM,
-                     final ByteOrder BO_CPP,
-                     final long NULL
+                     final Arena arena
     ) {
         this.connPtr = connPtr;
         this.connInfo = connInfo;
-        this.bb = bb;
-        this.bbPtr = bbPtr;
-        this.BO_JVM = BO_JVM;
-        this.BO_CPP = BO_CPP;
-        this.NULL = NULL;
+        this.arena = arena;
     }
 
     public static PQClient of(final String connInfo) {
@@ -54,6 +42,8 @@ public class PQClient implements AutoCloseable {
         final long bbPtr = bb.getLong();
         final long NULL = bb.getLong();
 
+        final Arena arena = new Arena(bb, bbPtr, BO_JVM, BO_CPP, NULL);
+
         final long connPtr = Native.PQconnectdb(connInfo);
         if (connPtr == NULL) {
             throw PQError.error("PQ connection returned null");
@@ -66,11 +56,7 @@ public class PQClient implements AutoCloseable {
             case OK -> new PQClient(
                     connPtr,
                     connInfo,
-                    bb,
-                    bbPtr,
-                    BO_JVM,
-                    BO_CPP,
-                    NULL
+                    arena
             );
             case BAD -> {
                 final String message = Native.PQerrorMessage(connPtr);
@@ -80,21 +66,9 @@ public class PQClient implements AutoCloseable {
         };
     }
 
-    protected void rewind() {
-        bb.rewind();
-    }
-
-    protected void bbJVM() {
-        bb.order(BO_JVM);
-    }
-
-    protected void bbCPP() {
-        bb.order(BO_CPP);
-    }
-
     protected void bbDebug(final int len) {
         final byte[] ba = new byte[len];
-        bb.get(0, ba);
+        arena.bb().get(0, ba);
         System.out.println(Arrays.toString(ba));
     }
 
@@ -103,10 +77,10 @@ public class PQClient implements AutoCloseable {
         final Object[] prms = params.toArray(new Object[0]);
         final int[] oids = new int[] {23};
         final int[] formats = new int[] {1};
-        Encoder.encodeBB(bb, bbPtr, prms, oids, formats, 1);
+        Encoder.encodeBB(arena.bb(), arena.bbPtr(), prms, oids, formats, 1);
 
-        final long resPtr = Native.execWithParams(connPtr, sql, bbPtr);
-        if (resPtr == NULL) {
+        final long resPtr = Native.execWithParams(connPtr, sql, arena.bbPtr());
+        if (resPtr == arena.NULL()) {
             throw PQError.error("PQExec returned null (most likely no enough memory)");
         }
         int opStatus = Native.PQresultStatus(resPtr);
@@ -118,18 +92,18 @@ public class PQClient implements AutoCloseable {
                 throw PQError.error(message);
             }
         }
-        opStatus = Native.PGresultInfo(resPtr, bbPtr);
+        opStatus = Native.PGresultInfo(resPtr, arena.bbPtr());
         if (opStatus != 0) {
             Native.PQclear(resPtr);
             throw PQError.error("PGresultInfo returned non-zero status: %s", opStatus);
         }
-        return PGResult.of(this, bb);
+        return PGResult.of(arena);
 
     }
 
     public PGResult exec(final String sql) {
         final long resPtr = Native.PQexec(connPtr, sql);
-        if (resPtr == NULL) {
+        if (resPtr == arena.NULL()) {
             throw PQError.error("PQExec returned null (most likely no enough memory)");
         }
         int opStatus = Native.PQresultStatus(resPtr);
@@ -141,12 +115,12 @@ public class PQClient implements AutoCloseable {
                 throw PQError.error(message);
             }
         }
-        opStatus = Native.PGresultInfo(resPtr, bbPtr);
+        opStatus = Native.PGresultInfo(resPtr, arena.bbPtr());
         if (opStatus != 0) {
             Native.PQclear(resPtr);
             throw PQError.error("PGresultInfo returned non-zero status: %s", opStatus);
         }
-        return PGResult.of(this, bb);
+        return PGResult.of(arena);
     }
 
     private String getStmtName() {
@@ -155,9 +129,9 @@ public class PQClient implements AutoCloseable {
 
     public Stmt prepare(final String query) {
         final String stmtName = getStmtName();
-        Native._PQprepare(connPtr, stmtName, query, bbPtr);
-        final PGResult pgResult = PGResult.of(this, bb);
-        return new Stmt(this, stmtName, pgResult);
+        Native._PQprepare(connPtr, stmtName, query, arena.bbPtr());
+        final PGResult pgResult = PGResult.of(arena);
+        return new Stmt(connPtr, arena, stmtName, pgResult);
     }
 
     public void reset() {
