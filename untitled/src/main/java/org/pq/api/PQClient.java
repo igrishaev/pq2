@@ -9,20 +9,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-public class PQClient implements AutoCloseable {
-    protected final long connPtr;
-    private final String connInfo;
-    private final Arena arena;
-    private int counter = 0;
-
-    private PQClient(final long connPtr,
-                     final String connInfo,
-                     final Arena arena
-    ) {
-        this.connPtr = connPtr;
-        this.connInfo = connInfo;
-        this.arena = arena;
-    }
+public record PQClient (
+    long connPtr,
+    String connInfo,
+    Arena arena,
+    byte[] counter
+) implements AutoCloseable {
 
     public static PQClient of(final String connInfo) {
         final ByteBuffer bb = ByteBuffer.allocateDirect(CONST.BB_SIZE);
@@ -56,7 +48,8 @@ public class PQClient implements AutoCloseable {
             case OK -> new PQClient(
                     connPtr,
                     connInfo,
-                    arena
+                    arena,
+                    new byte[] {0}
             );
             case BAD -> {
                 final String message = Native.PQerrorMessage(connPtr);
@@ -66,7 +59,7 @@ public class PQClient implements AutoCloseable {
         };
     }
 
-    protected void bbDebug(final int len) {
+    void bbDebug(final int len) {
         final byte[] ba = new byte[len];
         arena.bb().get(0, ba);
         System.out.println(Arrays.toString(ba));
@@ -124,7 +117,7 @@ public class PQClient implements AutoCloseable {
     }
 
     private String getStmtName() {
-        return "s" + ++counter;
+        return "s" + ++counter[0];
     }
 
     public Stmt prepare(final String query) {
