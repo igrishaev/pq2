@@ -2,6 +2,7 @@ package org.pq.api;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 
 public record Arena (
         ByteBuffer bb,
@@ -18,5 +19,11 @@ public record Arena (
     }
     public void orderCPP() {
         bb.order(BO_CPP);
+    }
+    @SuppressWarnings("unused")
+    void debug(final int len) {
+        final byte[] ba = new byte[len];
+        bb().get(0, ba);
+        System.out.println(Arrays.toString(ba));
     }
 }

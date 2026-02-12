@@ -1,10 +1,10 @@
 package org.pq.codec;
 
+import org.pq.api.Arena;
 import org.pq.api.FORMAT;
 import org.pq.api.OID;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.List;
 import java.util.UUID;
 
@@ -49,62 +49,15 @@ public class Encoder {
         }
     }
 
-    public static void encodeBB(final ByteBuffer bb, long bbPtr, Object[] params, int[] oids, int[] formats, int resultFormat) {
+    public static void encodeExecParams(final Arena arena, final int nParams, final List<Object> params, int[] oids) {
 
-        bb.rewind();
-        bb.order(ByteOrder.LITTLE_ENDIAN);
+        arena.rewind();
+        arena.orderCPP();
 
-        int nParams = params.length;
+        final ByteBuffer bb = arena.bb();
+        final long bbPtr = arena.bbPtr();
 
-        // nParams
-        bb.putInt(nParams);
-
-        // paramTypes
-        for (int i = 0; i < nParams; i++) {
-            bb.putInt(oids[i]);
-        }
-
-        // paramValues
-        int posPtr = bb.position();
-        skip(bb, 8 * nParams);
-
-        // paramLengths
-        int posLen = bb.position();
-        skip(bb, 4 * nParams);
-
-        // paramFormats
-        for (int i = 0; i < nParams; i++) {
-            bb.putInt(formats[i]);
-        }
-
-        // resultFormat
-        bb.putInt(resultFormat);
-
-        // update lengths and pointers
-        int len;
-        int pos;
-        FORMAT format;
-        for (int i = 0; i < nParams; i++) {
-            format = FORMAT.of(formats[i]);
-            pos = bb.position();
-            bb.order(ByteOrder.BIG_ENDIAN);
-            switch (format) {
-                case TXT -> encodeText(oids[i], params[i], bb);
-                case BIN -> encodeBin(oids[i], params[i], bb);
-            }
-            len = bb.position() - pos;
-            bb.order(ByteOrder.LITTLE_ENDIAN);
-            bb.putInt(posLen + i * 4, len);
-            bb.putLong(posPtr + i * 8, bbPtr + pos);
-        }
-
-    }
-
-    public static void encodePrepared(final ByteBuffer bb, long bbPtr, final int nParams, final List<Object> params, int[] oids) {
-
-        bb.rewind();
-        bb.order(ByteOrder.LITTLE_ENDIAN);
-
+        // TODO: option
         final int format = 1;
 
         // nParams
@@ -131,20 +84,15 @@ public class Encoder {
         int pos;
         for (int i = 0; i < nParams; i++) {
             pos = bb.position();
-            bb.order(ByteOrder.BIG_ENDIAN);
+            arena.orderJVM();
             switch (FORMAT.of(format)) {
                 case TXT -> encodeText(oids[i], params.get(i), bb);
                 case BIN -> encodeBin(oids[i], params.get(i), bb);
             }
             len = bb.position() - pos;
-            bb.order(ByteOrder.LITTLE_ENDIAN);
+            arena.orderCPP();
             bb.putInt(posLen + i * 4, len);
             bb.putLong(posPtr + i * 8, bbPtr + pos);
         }
-
     }
-
-
-
-
 }

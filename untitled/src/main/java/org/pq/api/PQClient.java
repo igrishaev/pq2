@@ -59,41 +59,6 @@ public record PQClient (
         };
     }
 
-    void bbDebug(final int len) {
-        final byte[] ba = new byte[len];
-        arena.bb().get(0, ba);
-        System.out.println(Arrays.toString(ba));
-    }
-
-    public PGResult execWithParams(final String sql, final List<Object> params) {
-        final int len = params.size();
-        final Object[] prms = params.toArray(new Object[0]);
-        final int[] oids = new int[] {23};
-        final int[] formats = new int[] {1};
-        Encoder.encodeBB(arena.bb(), arena.bbPtr(), prms, oids, formats, 1);
-
-        final long resPtr = Native.execWithParams(connPtr, sql, arena.bbPtr());
-        if (resPtr == arena.NULL()) {
-            throw PQError.error("PQExec returned null (most likely no enough memory)");
-        }
-        int opStatus = Native.PQresultStatus(resPtr);
-        PGRES pgres = PGRES.of(opStatus);
-        switch (pgres) {
-            case FATAL_ERROR, NONFATAL_ERROR, BAD_RESPONSE -> {
-                Native.PQclear(resPtr);
-                String message = Native.PQerrorMessage(connPtr);
-                throw PQError.error(message);
-            }
-        }
-        opStatus = Native.PGresultInfo(resPtr, arena.bbPtr());
-        if (opStatus != 0) {
-            Native.PQclear(resPtr);
-            throw PQError.error("PGresultInfo returned non-zero status: %s", opStatus);
-        }
-        return PGResult.of(arena);
-
-    }
-
     public PGResult exec(final String sql) {
         final long resPtr = Native.PQexec(connPtr, sql);
         if (resPtr == arena.NULL()) {
@@ -147,7 +112,7 @@ public record PQClient (
     }
 
     public static void main(String... args) {
-        final String connInfo = "host=localhost port=15432 dbname=test user=test password=test";
+        final String connInfo = "host=localhost port=5432 dbname=book user=book password=book";
         final String query = "select $1::int4, $2::text, $3::uuid as foo";
         try (final PQClient client = PQClient.of(connInfo);
              final Stmt stmt = client.prepare(query);

@@ -18,14 +18,12 @@ public class BB {
         return bb;
     }
 
-    public static ByteBuffer putString(final ByteBuffer bb, final String value) {
+    public static void putString(final ByteBuffer bb, final String value) {
         bb.put(value.getBytes(StandardCharsets.UTF_8));
-        return bb;
     }
 
-    public static ByteBuffer skip(final ByteBuffer bb, final int len) {
+    public static void skip(final ByteBuffer bb, final int len) {
         final int pos = bb.position();
         bb.position(pos + len);
-        return bb;
     }
 }

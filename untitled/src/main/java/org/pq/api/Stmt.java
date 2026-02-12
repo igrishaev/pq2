@@ -26,7 +26,7 @@ public record Stmt (
             throw PQError.error("parameters mismatch: %s required, %s passed", result.nParams(), nParams);
         }
         final int[] oids = result.paramOids();
-        Encoder.encodePrepared(arena.bb(), arena.bbPtr(), nParams, params, oids);
+        Encoder.encodeExecParams(arena, nParams, params, oids);
 
         final long resPtr = Native._PQexecPrepared(connPtr, stmtName, arena.bbPtr());
         return PGResult.of(arena);
