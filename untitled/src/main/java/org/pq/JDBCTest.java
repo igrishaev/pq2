@@ -11,7 +11,7 @@ public class JDBCTest {
     private Connection conn;
 
     public JDBCTest() throws SQLException {
-        conn = DriverManager.getConnection("jdbc:postgresql://localhost:15432/test?user=test&password=test");
+        conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/book?user=book&password=book");
     }
 
     public static String sql = """
@@ -44,9 +44,15 @@ public class JDBCTest {
 
     public void bench() throws SQLException {
         long start = System.currentTimeMillis();
+        Runtime runtime = Runtime.getRuntime();
+        long usedMemoryBefore = runtime.totalMemory() - runtime.freeMemory();
+        System.out.println("Used Memory before: " + usedMemoryBefore / 1000000);
+        // working code here
         for (int i = 0; i < 1000; i++) {
             test();
         }
+        long usedMemoryAfter = runtime.totalMemory() - runtime.freeMemory();
+        System.out.println("Memory increased: " + (usedMemoryAfter-usedMemoryBefore) / 1000000);
         long end = System.currentTimeMillis();
         System.out.println(end - start);
     }

@@ -29,7 +29,7 @@ public class PQTest {
             """;
 
     public PQTest() {
-        this.client = PQClient.of("host=localhost port=15432 dbname=test user=test password=test");
+        this.client = PQClient.of("host=localhost port=5432 dbname=book user=book password=book");
     }
 
     public void test() {
@@ -52,6 +52,10 @@ public class PQTest {
     }
 
     public void bench() throws SQLException {
+        Runtime runtime = Runtime.getRuntime();
+        long usedMemoryBefore = runtime.totalMemory() - runtime.freeMemory();
+        System.out.println("Used Memory before: " + usedMemoryBefore / 1000000);
+
         long start = System.currentTimeMillis();
         for (int i = 0; i < 1000; i++) {
             test();
@@ -59,6 +63,8 @@ public class PQTest {
 //        var bb = ByteBuffer.allocateDirect(99);
 
         // System.out.println(Native.getBBAddress(bb));
+        long usedMemoryAfter = runtime.totalMemory() - runtime.freeMemory();
+        System.out.println("Memory increased: " + (usedMemoryAfter-usedMemoryBefore) / 1000000);
 
         long end = System.currentTimeMillis();
         System.out.println(end - start);
