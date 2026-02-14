@@ -112,16 +112,19 @@ public record PQClient (
     }
 
     public static void main(String... args) {
-        final String connInfo = "host=localhost port=5432 dbname=book user=book password=book";
+        final String connInfo = "host=localhost port=15432 dbname=test user=test password=test";
         final String query = "select $1::int4, $2::text, $3::uuid as foo";
         try (final PQClient client = PQClient.of(connInfo);
              final Stmt stmt = client.prepare(query);
              final PGResult  res = stmt.execute(List.of(555, "hello", UUID.randomUUID()))) {
-            for (int row: res.iterRows()) {
-                for (int col: res.iterCols()) {
-                    System.out.println(res.getObject(row, col));
-                }
+            for (Object[] row: res.iterTuples()) {
+                System.out.println(Arrays.toString(row));
             }
+//            for (int row: res.iterRows()) {
+//                for (int col: res.iterCols()) {
+//                    System.out.println(res.getObject(row, col));
+//                }
+//            }
         }
     }
 }

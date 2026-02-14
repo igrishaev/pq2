@@ -29,18 +29,21 @@ public class PQTest {
             """;
 
     public PQTest() {
-        this.client = PQClient.of("host=localhost port=5432 dbname=book user=book password=book");
+        this.client = PQClient.of("host=localhost port=15432 dbname=test user=test password=test");
     }
 
     public void test() {
 
         Object obj;
         try (PGResult res = client.exec(sql)) {
-            for (int row: res.iterRows()) {
-                for (int col = 1; col < 8; col++) {
-                    obj = res.getObject(row, col);
-                }
+            for (Object[] row: res.iterTuples()) {
+
             }
+//            for (int row: res.iterRows()) {
+//                for (int col = 1; col < 8; col++) {
+//                    obj = res.getObject(row, col);
+//                }
+//            }
         }
 
         // Decode.encodeValues(bb, ptr, new Object[]{999, 99, 3}, new int[]{23,23,23}, new int[]{1,1,1}, 0);

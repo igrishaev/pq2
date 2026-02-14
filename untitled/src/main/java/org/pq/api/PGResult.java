@@ -69,6 +69,46 @@ public record PGResult(
         throw error("missing column: %s", column);
     }
 
+    public Object[] parseRow(final int row) {
+
+        Native.fetchField(resPtr, arena.bbPtr(), row, -1);
+
+        // arena.debug(128);
+
+        arena.rewind();
+        arena.orderCPP();
+
+        ByteBuffer bb = arena.bb();
+
+        int nColumns = bb.getInt();
+        int isNull;
+        Object[] result = new Object[nColumns];
+        int oid;
+        int format;
+        int len;
+        Object el;
+        for (int i = 0; i < nColumns; i++) {
+            isNull = bb.getInt();
+            if (isNull == 1) {
+                result[i] = null;
+            } else {
+                oid = bb.getInt();
+                format = bb.getInt();
+                len = bb.getInt();
+                arena.orderJVM();
+                if (format == 0) {
+                    final byte[] ba = new byte[len];
+                    bb.get(ba);
+                    result[i] = Decoder.decodeTxt(oid, new String(ba, StandardCharsets.UTF_8));
+                } else {
+                    result[i] = Decoder.decodeBin(oid, len, bb);
+                }
+                arena.orderCPP();
+            }
+        }
+        return result;
+    }
+
     public Object getObject(final int row, final int col) {
 
         // TODO check row
@@ -109,6 +149,21 @@ public record PGResult(
     @Override
     public void close() {
         Native.PQclear(resPtr);
+    }
+
+    public Iterable<Object[]> iterTuples() {
+        return () -> new Iterator<>() {
+            private int i = -1;
+            @Override
+            public boolean hasNext() {
+                return i < nTuples - 1;
+            }
+
+            @Override
+            public Object[] next() {
+                return parseRow(++i);
+            }
+        };
     }
 
     public Iterable<Integer> iterRows() {

@@ -24,6 +24,41 @@ char* put_string(char* bb, char* string) {
     return pos;
 }
 
+char* PQ_serialize_row(PGresult* result, char* bb, int row) {
+
+    int nColumns = PQnfields(result);
+
+    bb = put_int32(bb, nColumns);
+
+    Oid oid;
+    int isNull;
+    int len;
+    int format;
+    char* value;
+
+    for (int col = 0; col < nColumns; col++) {
+        isNull = PQgetisnull(result, row, col);
+        bb = put_int32(bb, isNull);
+
+        if (isNull == 0) {
+            oid = PQftype(result, col);
+            format = PQfformat(result, col);
+            len = PQgetlength(result, row, col);
+            value = PQgetvalue(result, row, col);
+
+            bb = put_int32(bb, oid);
+            bb = put_int32(bb, format);
+            bb = put_int32(bb, len);
+            memcpy(bb, value, len);
+            bb += len;
+        }
+
+    }
+
+    return bb;
+
+}
+
 jclass Integer;
 jmethodID IntegerNew;
 
@@ -644,25 +679,7 @@ JNIEXPORT void JNICALL Java_org_pq_Native_writeBBPTR
      PGresult* result = getResult(jresult);
      char* bb = (char*) jbb;
 
-     int isnull = PQgetisnull(result, jrow, jcol);
-
-     bb = put_int32(bb, isnull);
-     if (isnull == 1) {
-         return 0;
-     }
-
-     Oid oid = PQftype(result, jcol);
-     int format = PQfformat(result, jcol);
-     int len = PQgetlength(result, jrow, jcol);
-     char* value = PQgetvalue(result, jrow, jcol);
-
-     // TODO: decode numberic values from text
-
-     bb = put_int32(bb, oid);
-     bb = put_int32(bb, format);
-     bb = put_int32(bb, len);
-     memcpy(bb, value, len);
-     bb += len;
+     PQ_serialize_row(result, bb, jrow);
 
      return 0;
 };
