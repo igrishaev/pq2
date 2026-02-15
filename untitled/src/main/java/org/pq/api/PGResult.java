@@ -59,7 +59,7 @@ public record PGResult(
                 nParams, paramOids
         );
     }
-    
+
     public int getColIndex(final String column) {
         for (int s = 0; s < nColumns; s++) {
             if (columns[s].equals(column)) {

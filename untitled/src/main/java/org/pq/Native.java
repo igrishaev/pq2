@@ -119,6 +119,9 @@ public class Native {
 
     /* CUSTOM */
 
+    public static native long nextResult(final long connPtr, final long bbPtr);
+
+    public static native int Abc(final long connPtr, final String sql, final long bbPtr);
 
     public static native int _PQprepare(final long connPtr, final String stmtName, final String sql, final long bbPtr);
 

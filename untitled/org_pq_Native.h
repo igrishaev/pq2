@@ -233,6 +233,22 @@ JNIEXPORT jint JNICALL Java_org_pq_Native_PQgetlength
 
 /*
  * Class:     org_pq_Native
+ * Method:    nextResult
+ * Signature: (JJ)J
+ */
+JNIEXPORT jlong JNICALL Java_org_pq_Native_nextResult
+  (JNIEnv *, jclass, jlong, jlong);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    Abc
+ * Signature: (JLjava/lang/String;J)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_Abc
+  (JNIEnv *, jclass, jlong, jstring, jlong);
+
+/*
+ * Class:     org_pq_Native
  * Method:    _PQprepare
  * Signature: (JLjava/lang/String;Ljava/lang/String;J)I
  */

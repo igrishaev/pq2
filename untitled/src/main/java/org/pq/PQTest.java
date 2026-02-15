@@ -29,7 +29,7 @@ public class PQTest {
             """;
 
     public PQTest() {
-        this.client = PQClient.of("host=localhost port=5432 dbname=book user=book password=book");
+        this.client = PQClient.of("host=localhost port=15432 dbname=test user=test password=test");
     }
 
     public void test() {

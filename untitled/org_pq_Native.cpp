@@ -762,8 +762,7 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_execWithParams
                                     paramValues,
                                     paramLengths,
                                     paramFormats,
-                                    resultFormat
-                                    );
+                                    resultFormat);
 
     // int *paramLengths = bb[3];
 
@@ -984,4 +983,109 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native__1PQexecPrepared
 
     return (long) bb;
 
+};
+
+
+
+
+/*
+ * Class:     org_pq_Native
+ * Method:    Abc
+ * Signature: (JLjava/lang/String;Ljava/lang/String;J)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_Abc
+  (JNIEnv* env, jclass, jlong jconn, jstring jsql, jlong jbb) {
+
+    PGconn* conn = (PGconn*) jconn;
+    char* bb = (char*) jbb;
+    const char* sql = env->GetStringUTFChars(jsql, NULL);
+
+    int off = 0;
+
+    int32_t nParams = *((int32_t*) (bb + off));
+    off += sizeof(int32_t);
+
+    Oid* paramTypes = (Oid*) (bb + off);
+    off += sizeof(Oid) * nParams;
+
+    char** paramValues = (char**) (bb + off);
+    off += sizeof(char*) * nParams;
+
+    int32_t* paramLengths = (int32_t*) (bb + off);
+    off += sizeof(int32_t) * nParams;;
+
+    int32_t* paramFormats = (int32_t*) (bb + off);
+    off += sizeof(int32_t) * nParams;;
+
+    int32_t resultFormat = *((int32_t*) (bb + off));
+    off += sizeof(int32_t);
+
+    printf("nParams: %d \n", nParams);
+
+    Oid* oid;
+    for (int i = 0; i < nParams; i++) {
+        oid = paramTypes + i;
+        printf("oid: %d \n", *oid);
+    }
+
+    char* ptr;
+    int val;
+    for (int i = 0; i < nParams; i++) {
+        ptr = paramValues[i];
+        val = *((int*) ptr);
+        printf("val: %d \n", htonl(val));
+    }
+
+    int* len;
+    for (int i = 0; i < nParams; i++) {
+        len = paramLengths + i;
+        printf("len: %d \n", *len);
+    }
+
+    int* fmt;
+    for (int i = 0; i < nParams; i++) {
+        fmt = paramFormats + i;
+        printf("format: %d \n", *fmt);
+    }
+
+    printf("resultFormat: %d \n", resultFormat);
+
+    int status;
+
+    status = PQsendQueryParams(conn,
+                               sql,
+                               nParams,
+                               paramTypes,
+                               paramValues,
+                               paramLengths,
+                               paramFormats,
+                               resultFormat);
+
+    printf("PQsendQueryPrepared: %d \n", status);
+
+    status = PQsetChunkedRowsMode(conn, 10);
+
+    printf("PQsetChunkedRowsMode: %d \n", status);
+
+    PGresult* result = PQgetResult(conn);
+
+    // todo check result
+
+    bb = PQ_dump_PGresult(result, bb);
+
+    return (long) bb;
+
+};
+
+JNIEXPORT jlong JNICALL Java_org_pq_Native_nextResult
+  (JNIEnv *, jclass, jlong jconn, jlong jbb) {
+
+    PGconn* conn = (PGconn*) jconn;
+    PGresult* result = PQgetResult(conn);
+    char* bb = (char*) jbb;
+
+    printf("is null?: %d \n", result == NULL);
+
+    bb = PQ_dump_PGresult(result, bb);
+    return (long) result;
 };

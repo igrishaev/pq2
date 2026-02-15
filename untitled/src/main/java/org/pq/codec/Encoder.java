@@ -63,6 +63,11 @@ public class Encoder {
         // nParams
         bb.putInt(nParams);
 
+        // paramTypes
+        for (int i = 0; i < nParams; i++) {
+            bb.putInt(oids[i]);
+        }
+
         // paramValues
         int posPtr = bb.position();
         skip(bb, 8 * nParams);

@@ -38,6 +38,7 @@ public record PQClient (
 
         final long connPtr = Native.PQconnectdb(connInfo);
         if (connPtr == NULL) {
+            // TODO: error message
             throw PQError.error("PQ connection returned null");
         }
 
@@ -92,6 +93,13 @@ public record PQClient (
         return new Stmt(connPtr, arena, stmtName, pgResult);
     }
 
+    public PGResult prepare2(final String sql) {
+        //Encoder.encodeExecParams(arena, 3, List.of(555, "hello", UUID.randomUUID()), new int[] {OID.INT4, OID.TEXT, OID.UUID});
+        Encoder.encodeExecParams(arena, 0, List.of(), new int[] {});
+        Native.Abc(connPtr, sql, arena.bbPtr());
+        return PGResult.of(arena);
+    }
+
     public void reset() {
         Native.PQreset(connPtr);
     }
@@ -113,18 +121,38 @@ public record PQClient (
 
     public static void main(String... args) {
         final String connInfo = "host=localhost port=15432 dbname=test user=test password=test";
-        final String query = "select $1::int4, $2::text, $3::uuid as foo";
-        try (final PQClient client = PQClient.of(connInfo);
-             final Stmt stmt = client.prepare(query);
-             final PGResult  res = stmt.execute(List.of(555, "hello", UUID.randomUUID()))) {
-            for (Object[] row: res.iterTuples()) {
+//        final String query = "select x from generate_series(1, 199) as seq(x)";
+//        try (final PQClient client = PQClient.of(connInfo);
+//             final Stmt stmt = client.prepare(query);
+//             final PGResult  res = stmt.execute(List.of(555, "hello", UUID.randomUUID()))) {
+//            for (Object[] row: res.iterTuples()) {
+//                System.out.println(Arrays.toString(row));
+//            }
+//        }
+        try (final PQClient client = PQClient.of(connInfo)) {
+            PGResult result;
+            long ptr = 42;
+
+            result = client.prepare2("select x from generate_series(1, 30) as seq(x)");
+            for (Object[] row: result.iterTuples()) {
                 System.out.println(Arrays.toString(row));
             }
-//            for (int row: res.iterRows()) {
-//                for (int col: res.iterCols()) {
-//                    System.out.println(res.getObject(row, col));
-//                }
-//            }
+            System.out.println("-----------------");
+
+            while (ptr != client.arena.NULL()) {
+                ptr = Native.nextResult(client.connPtr, client.arena.bbPtr());
+                System.out.println(ptr);
+                result = PGResult.of(client.arena);
+                for (Object[] row: result.iterTuples()) {
+                    System.out.println(Arrays.toString(row));
+                }
+                System.out.println(Native.PQresultStatus(ptr));
+                System.out.println("-----------------");
+            }
+
+
+
+
         }
     }
 }
