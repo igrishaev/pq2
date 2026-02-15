@@ -125,18 +125,24 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native2_prepare
 
 /*
  * Class:     org_pq_Native2
- * Method:    closeStatement
- * Signature: (JLjava/lang/String;)I
+ * Method:    describe
+ * Signature: (JLjava/lang/String;)J
  */
-JNIEXPORT jint JNICALL Java_org_pq_Native2_closeStatement
+JNIEXPORT jlong JNICALL Java_org_pq_Native2_describe
+(JNIEnv* env, jclass, jlong jconn, jstring jname) {
+    PGconn* conn = (PGconn*) jconn;
+    const char* stmtName = env->GetStringUTFChars(jname, NULL);
+    return (long) PQdescribePrepared(conn, stmtName);
+}
+
+/*
+ * Class:     org_pq_Native2
+ * Method:    closeStatement
+ * Signature: (JLjava/lang/String;)J
+ */
+JNIEXPORT jlong JNICALL Java_org_pq_Native2_closeStatement
 (JNIEnv* env, jclass, jlong jconn, jstring jstmtName) {
     PGconn* conn = (PGconn*) jconn;
     const char* stmtName = env->GetStringUTFChars(jstmtName, NULL);
-    PGresult* result = PQclosePrepared(conn, stmtName);
-    // TODO
-    // close result
-    if (result == NULL) {
-        return -1;
-    }
-    return 0;
+    return (long) PQclosePrepared(conn, stmtName);
 }

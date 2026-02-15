@@ -73,10 +73,18 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native2_prepare
 
 /*
  * Class:     org_pq_Native2
- * Method:    closeStatement
- * Signature: (JLjava/lang/String;)I
+ * Method:    describe
+ * Signature: (JLjava/lang/String;)J
  */
-JNIEXPORT jint JNICALL Java_org_pq_Native2_closeStatement
+JNIEXPORT jlong JNICALL Java_org_pq_Native2_describe
+  (JNIEnv *, jclass, jlong, jstring);
+
+/*
+ * Class:     org_pq_Native2
+ * Method:    closeStatement
+ * Signature: (JLjava/lang/String;)J
+ */
+JNIEXPORT jlong JNICALL Java_org_pq_Native2_closeStatement
   (JNIEnv *, jclass, jlong, jstring);
 
 #ifdef __cplusplus

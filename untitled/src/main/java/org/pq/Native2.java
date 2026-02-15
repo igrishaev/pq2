@@ -16,5 +16,6 @@ public class Native2 {
     public static native int initByteBuffer(final ByteBuffer bb);
     public static native void closeResult(final long resPtr);
     public static native long prepare(final long connPtr, final String name, final String query, final long bbPtr);
-    public static native int closeStatement(final long connPtr, final String stmt);
+    public static native long describe(final long connPtr, final String name);
+    public static native long closeStatement(final long connPtr, final String stmt);
 }

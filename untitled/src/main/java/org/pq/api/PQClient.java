@@ -10,6 +10,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
+import static org.pq.api.PQError.*;
+
 public record PQClient (
     long connPtr,
     String connInfo,
@@ -76,13 +78,42 @@ public record PQClient (
         return "s" + ++counter[0];
     }
 
-    public void prepare(final String query) {
-        final String stmtName = getStmtName();
-        // Encoder.encodeExecParams(arena, 0, List.of(), new int[] {});
-        final long result = Native2.prepare(connPtr, stmtName, query, arena.ptr());
-        System.out.println(result);
-        System.out.println(resStatus(result));
+    public void closeStatement(final String stmtName) {
+        final long result = Native2.closeStatement(connPtr, stmtName);
+        final PGRES status = resStatus(result);
+        // TODO: check
         Native2.closeResult(result);
+        System.out.println(result);
+        System.out.println(status);
+    }
+
+    public String prepare(final String query) {
+        final String stmtName = getStmtName();
+        long result;
+        PGRES status;
+        String message;
+
+        result = Native2.prepare(connPtr, stmtName, query, arena.ptr());
+        status = resStatus(result);
+        Native2.closeResult(result);
+        if (status != PGRES.COMMAND_OK) {
+            message = Native2.connError(connPtr);
+            throw error("prepare error: %s, query: %s", message, query);
+        }
+
+        result = Native2.describe(connPtr, stmtName);
+        status = resStatus(result);
+        Native2.closeResult(result);
+        if (status != PGRES.COMMAND_OK) {
+            message = Native2.connError(connPtr);
+            throw error("describe error: %s, statement: %s", message, stmtName);
+        }
+
+        return stmtName;
+
+
+
+
     }
 
 //    public Stmt prepare(final String query) {
@@ -129,7 +160,9 @@ public record PQClient (
 //            }
 //        }
         try (final PQClient client = PQClient.of(connInfo)) {
-            client.prepare("select 1 as foo");
+            var s = client.prepare("select 1 as foo");
+            System.out.println(s);
+            client.closeStatement(s);
 //            PGResult result;
 //            long ptr = 42;
 //
