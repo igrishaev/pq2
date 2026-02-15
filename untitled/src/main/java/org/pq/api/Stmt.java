@@ -28,7 +28,7 @@ public record Stmt (
         final int[] oids = result.paramOids();
         Encoder.encodeExecParams(arena, nParams, params, oids);
 
-        final long resPtr = Native._PQexecPrepared(connPtr, stmtName, arena.bbPtr());
+        final long resPtr = Native._PQexecPrepared(connPtr, stmtName, arena.ptr());
         return PGResult.of(arena);
     }
 }

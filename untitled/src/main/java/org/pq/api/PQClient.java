@@ -1,6 +1,7 @@
 package org.pq.api;
 
 import org.pq.Native;
+import org.pq.Native2;
 import org.pq.codec.Encoder;
 
 import java.nio.ByteBuffer;
@@ -16,36 +17,25 @@ public record PQClient (
     byte[] counter
 ) implements AutoCloseable {
 
+    public static CONNECTION connStatus(final long connPtr) {
+        return CONNECTION.of(Native2.connStatus(connPtr));
+    }
+
+    public static PGRES resStatus(final long resPtr) {
+        return PGRES.of(Native2.resStatus(resPtr));
+    }
+
     public static PQClient of(final String connInfo) {
-        final ByteBuffer bb = ByteBuffer.allocateDirect(CONST.BB_SIZE);
-        final int initStatus = Native.initBB(bb);
 
-        if (initStatus != 0) {
-            throw PQError.error("byte buffer init error, code: %s", initStatus);
-        }
+        final Arena arena = Arena.of(CONST.BB_SIZE);
 
-        final ByteOrder BO_JVM = ByteOrder.BIG_ENDIAN;
-
-        final byte lead = bb.get(0);
-        final ByteOrder BO_CPP = (lead == 1) ? ByteOrder.LITTLE_ENDIAN : ByteOrder.BIG_ENDIAN;
-        bb.order(BO_CPP);
-
-        bb.getLong();
-        final long bbPtr = bb.getLong();
-        final long NULL = bb.getLong();
-
-        final Arena arena = new Arena(bb, bbPtr, BO_JVM, BO_CPP, NULL);
-
-        final long connPtr = Native.PQconnectdb(connInfo);
-        if (connPtr == NULL) {
-            // TODO: error message
+        final long connPtr = Native2.connect(connInfo);
+        if (connPtr == arena.NULL()) {
             throw PQError.error("PQ connection returned null");
         }
+        final CONNECTION connStatus = connStatus(connPtr);
 
-        final int statusCode = Native.PQstatus(connPtr);
-        final CONNECTION status = CONNECTION.of(statusCode);
-
-        return switch (status) {
+        return switch (connStatus) {
             case OK -> new PQClient(
                     connPtr,
                     connInfo,
@@ -53,10 +43,10 @@ public record PQClient (
                     new byte[] {0}
             );
             case BAD -> {
-                final String message = Native.PQerrorMessage(connPtr);
+                final String message = Native2.connError(connPtr);
                 throw PQError.error(message);
             }
-            default -> throw PQError.error("wrong status: %s, code: %s", status, statusCode);
+            default -> throw PQError.error("wrong connection status: %s", connStatus);
         };
     }
 
@@ -74,7 +64,7 @@ public record PQClient (
                 throw PQError.error(message);
             }
         }
-        opStatus = Native.PGresultInfo(resPtr, arena.bbPtr());
+        opStatus = Native.PGresultInfo(resPtr, arena.ptr());
         if (opStatus != 0) {
             Native.PQclear(resPtr);
             throw PQError.error("PGresultInfo returned non-zero status: %s", opStatus);
@@ -86,19 +76,28 @@ public record PQClient (
         return "s" + ++counter[0];
     }
 
-    public Stmt prepare(final String query) {
+    public void prepare(final String query) {
         final String stmtName = getStmtName();
-        Native._PQprepare(connPtr, stmtName, query, arena.bbPtr());
-        final PGResult pgResult = PGResult.of(arena);
-        return new Stmt(connPtr, arena, stmtName, pgResult);
+        // Encoder.encodeExecParams(arena, 0, List.of(), new int[] {});
+        final long result = Native2.prepare(connPtr, stmtName, query, arena.ptr());
+        System.out.println(result);
+        System.out.println(resStatus(result));
+        Native2.closeResult(result);
     }
 
-    public PGResult prepare2(final String sql) {
-        //Encoder.encodeExecParams(arena, 3, List.of(555, "hello", UUID.randomUUID()), new int[] {OID.INT4, OID.TEXT, OID.UUID});
-        Encoder.encodeExecParams(arena, 0, List.of(), new int[] {});
-        Native.Abc(connPtr, sql, arena.bbPtr());
-        return PGResult.of(arena);
-    }
+//    public Stmt prepare(final String query) {
+//        final String stmtName = getStmtName();
+//        Native._PQprepare(connPtr, stmtName, query, arena.ptr());
+//        final PGResult pgResult = PGResult.of(arena);
+//        return new Stmt(connPtr, arena, stmtName, pgResult);
+//    }
+//
+//    public PGResult prepare2(final String sql) {
+//        //Encoder.encodeExecParams(arena, 3, List.of(555, "hello", UUID.randomUUID()), new int[] {OID.INT4, OID.TEXT, OID.UUID});
+//        Encoder.encodeExecParams(arena, 0, List.of(), new int[] {});
+//        Native.Abc(connPtr, sql, arena.ptr());
+//        return PGResult.of(arena);
+//    }
 
     public void reset() {
         Native.PQreset(connPtr);
@@ -116,11 +115,11 @@ public record PQClient (
 
     @Override
     public void close() {
-        Native.PQfinish(connPtr);
+        Native2.closeConnection(connPtr);
     }
 
     public static void main(String... args) {
-        final String connInfo = "host=localhost port=15432 dbname=test user=test password=test";
+        final String connInfo = "host=localhost port=5432 dbname=book user=book password=book";
 //        final String query = "select x from generate_series(1, 199) as seq(x)";
 //        try (final PQClient client = PQClient.of(connInfo);
 //             final Stmt stmt = client.prepare(query);
@@ -130,29 +129,26 @@ public record PQClient (
 //            }
 //        }
         try (final PQClient client = PQClient.of(connInfo)) {
-            PGResult result;
-            long ptr = 42;
-
-            result = client.prepare2("select x from generate_series(1, 30) as seq(x)");
-            for (Object[] row: result.iterTuples()) {
-                System.out.println(Arrays.toString(row));
-            }
-            System.out.println("-----------------");
-
-            while (ptr != client.arena.NULL()) {
-                ptr = Native.nextResult(client.connPtr, client.arena.bbPtr());
-                System.out.println(ptr);
-                result = PGResult.of(client.arena);
-                for (Object[] row: result.iterTuples()) {
-                    System.out.println(Arrays.toString(row));
-                }
-                System.out.println(Native.PQresultStatus(ptr));
-                System.out.println("-----------------");
-            }
-
-
-
-
+            client.prepare("select 1 as foo");
+//            PGResult result;
+//            long ptr = 42;
+//
+//            result = client.prepare2("select x from generate_series(1, 30) as seq(x)");
+//            for (Object[] row: result.iterTuples()) {
+//                System.out.println(Arrays.toString(row));
+//            }
+//            System.out.println("-----------------");
+//
+//            while (ptr != client.arena.NULL()) {
+//                ptr = Native.nextResult(client.connPtr, client.arena.ptr());
+//                System.out.println(ptr);
+//                result = PGResult.of(client.arena);
+//                for (Object[] row: result.iterTuples()) {
+//                    System.out.println(Arrays.toString(row));
+//                }
+//                System.out.println(Native.PQresultStatus(ptr));
+//                System.out.println("-----------------");
+//            }
         }
     }
 }

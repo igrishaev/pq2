@@ -71,7 +71,7 @@ public record PGResult(
 
     public Object[] parseRow(final int row) {
 
-        Native.fetchField(resPtr, arena.bbPtr(), row, -1);
+        Native.fetchField(resPtr, arena.ptr(), row, -1);
 
         // arena.debug(128);
 
@@ -114,7 +114,7 @@ public record PGResult(
         // TODO check row
         // TODO check col
 
-        final int opStatus = Native.fetchField(resPtr, arena.bbPtr(), row, col);
+        final int opStatus = Native.fetchField(resPtr, arena.ptr(), row, col);
         if (opStatus != 0) {
             throw error("fetchField returned non-zero status: %s, row: %s, column: %s",
                     opStatus, row, col);

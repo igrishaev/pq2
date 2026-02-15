@@ -55,7 +55,7 @@ public class Encoder {
         arena.orderCPP();
 
         final ByteBuffer bb = arena.bb();
-        final long bbPtr = arena.bbPtr();
+        final long bbPtr = arena.ptr();
 
         // TODO: option
         final int format = 1;
