@@ -28,10 +28,10 @@ public record Arena (
         bb.order(BO_CPP);
 
         bb.getInt();
-        final long bbPtr = bb.getLong();
+        final long ptr = bb.getLong();
         final long NULL = bb.getLong();
 
-        return new Arena(bb, bbPtr, BO_JVM, BO_CPP, NULL);
+        return new Arena(bb, ptr, BO_JVM, BO_CPP, NULL);
     }
 
     public void rewind() {
@@ -52,16 +52,32 @@ public record Arena (
     public void putInt(final int i) {
         bb.putInt(i);
     }
+    public void putInt(final int index, final int i) {
+        bb.putInt(index, i);
+    }
+    public void putLong(final int index, final long l) {
+        bb.putLong(index, l);
+    }
+    public int position() {
+        return bb.position();
+    }
+    public void skip(final int len) {
+        final int pos = bb.position();
+        bb.position(pos + len);
+    }
     public String getLenString() {
         final int len = bb.getInt();
         final byte[] ba = new byte[len];
         bb.get(ba);
         return new String(ba, StandardCharsets.UTF_8);
     }
+    public void get(final byte[] ba) {
+        bb.get(ba);
+    }
     @SuppressWarnings("unused")
     void debug(final int len) {
         final byte[] ba = new byte[len];
-        bb().get(0, ba);
+        bb.get(0, ba);
         System.out.println(Arrays.toString(ba));
     }
 }

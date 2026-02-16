@@ -21,6 +21,12 @@ char* put_string(char* bb, char* string) {
     return pos;
 }
 
+int get_int(char* bb, int& off) {
+    int i = *((int*) (bb + off));
+    off += 4;
+    return i;
+}
+
 char* PQ_dump_PGresult(PGresult* result, char* bb) {
 
     // self
@@ -139,7 +145,7 @@ JNIEXPORT jint JNICALL Java_org_pq_Native2_initByteBuffer
     char* bb = (char*) addr;
 
     bb = put_int(bb, 1);
-    bb = put_long(bb, (long) bb);
+    bb = put_long(bb, (long) addr);
     bb = put_long(bb, (long) NULL);
 
     return 0;
@@ -206,4 +212,128 @@ JNIEXPORT jint JNICALL Java_org_pq_Native2_serializePrepared
     char* bb = (char*) jbb;
     PQ_dump_PGresult(result, bb);
     return 0;
+}
+
+/*
+ * Class:     org_pq_Native2
+ * Method:    execPrepared
+ * Signature: (JLjava/lang/String;J)J
+ */
+JNIEXPORT jlong JNICALL Java_org_pq_Native2_execPrepared
+(JNIEnv* env, jclass, jlong jconn, jstring jstmt, jlong jbb) {
+    PGconn* conn = (PGconn*) jconn;
+    char* bb = (char*) jbb;
+
+    const char* stmtName = env->GetStringUTFChars(jstmt, NULL);
+
+    int off = 0;
+
+    // int nParams = get_int(bb, off);
+    // int* int_ptr = reinterpret_cast<int*>(bb);
+
+    int32_t nParams = *((int32_t*) (bb + off));
+    off += sizeof(int32_t);
+
+    // printf("nParams: %d, off: %d \n", nParams, off);
+
+    // Oid* paramTypes = (Oid*) (bb + off);
+    // off += sizeof(Oid) * nParams;
+
+    char** paramValues = (char**) (bb + off);
+    off += sizeof(char*) * nParams;
+
+    int32_t* paramLengths = (int32_t*) (bb + off);
+    off += sizeof(int32_t) * nParams;;
+
+    int32_t* paramFormats = (int32_t*) (bb + off);
+    off += sizeof(int32_t) * nParams;;
+
+    int32_t resultFormat = *((int32_t*) (bb + off));
+    off += sizeof(int32_t);
+
+    // Oid* oid;
+    // for (int i = 0; i < nParams; i++) {
+    //     oid = paramTypes + i;
+    //     printf("oid: %d \n", *oid);
+    // }
+
+    char* ptr;
+    int val;
+    for (int i = 0; i < nParams; i++) {
+        ptr = paramValues[i];
+        val = *((int*) ptr);
+        // printf("val: %d \n", htonl(val));
+    }
+
+    int* len;
+    for (int i = 0; i < nParams; i++) {
+        len = paramLengths + i;
+        // printf("len: %d \n", *len);
+    }
+
+    int* fmt;
+    for (int i = 0; i < nParams; i++) {
+        fmt = paramFormats + i;
+        // printf("format: %d \n", *fmt);
+    }
+
+    // printf("resultFormat: %d \n", resultFormat);
+
+    return (long) PQexecPrepared(conn,
+                                 stmtName,
+                                 nParams,
+                                 paramValues,
+                                 paramLengths,
+                                 paramFormats,
+                                 resultFormat);
+}
+
+/*
+ * Class:     org_pq_Native2
+ * Method:    resultInfo
+ * Signature: (JJ)V
+ */
+JNIEXPORT void JNICALL Java_org_pq_Native2_resultInfo
+(JNIEnv *, jclass, jlong jresult, jlong jbb) {
+
+    PGresult* result = (PGresult*) jresult;
+    char* bb = (char*) jbb;
+
+    int nTuples = PQntuples(result);
+    char* cmdStatus = PQcmdStatus(result);
+    char* cmdTuples = PQcmdTuples(result);
+    Oid oid = PQoidValue(result);
+
+    bb = put_int(bb, nTuples);
+    bb = put_int(bb, oid);
+    bb = put_string(bb, cmdStatus);
+    bb = put_string(bb, cmdTuples);
+}
+
+/*
+ * Class:     org_pq_Native2
+ * Method:    fetchField
+ * Signature: (JIIJ)V
+ */
+JNIEXPORT void JNICALL Java_org_pq_Native2_fetchField
+  (JNIEnv *, jclass, jlong jresult, jint row, jint col, jlong jbb) {
+
+    PGresult* result = (PGresult*) jresult;
+    char* bb = (char*) jbb;
+
+    int isNull  = PQgetisnull(result, row, col);
+    bb = put_int(bb, isNull);
+
+    if (isNull == 0) {
+        Oid oid     = PQftype(result, col);
+        int len     = PQgetlength(result, row, col);
+        int format  = PQfformat(result, col);
+        char* value = PQgetvalue(result, row, col);
+
+        bb = put_int(bb, oid);
+        bb = put_int(bb, len);
+        bb = put_int(bb, format);
+        memcpy(bb, value, len);
+        bb += len;
+    }
 }

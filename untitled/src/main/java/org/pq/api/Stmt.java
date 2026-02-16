@@ -15,7 +15,7 @@ public record Stmt (
     @Override
     public void close() {
         // TODO: close
-        // Native.PQclosePrepared(client.connPtr, stmtName);
+        // Native.PQclosePrepared(client.ptr, stmtName);
         // check PGRES_COMMAND_OK
     }
 

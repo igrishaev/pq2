@@ -69,12 +69,12 @@ public class Encoder {
 //        }
 
         // paramValues
-        int posPtr = bb.position();
-        skip(bb, 8 * nParams);
+        int posPtr = arena.position();
+        arena.skip(8 * nParams);
 
         // paramLengths
-        int posLen = bb.position();
-        skip(bb, 4 * nParams);
+        int posLen = arena.position();
+        arena.skip(4 * nParams);
 
         // paramFormats
         for (int i = 0; i < nParams; i++) {
@@ -88,16 +88,16 @@ public class Encoder {
         int len;
         int pos;
         for (int i = 0; i < nParams; i++) {
-            pos = bb.position();
+            pos = arena.position();
             arena.orderJVM();
             switch (FORMAT.of(format)) {
-                case TXT -> encodeText(oids[i], params.get(i), bb);
-                case BIN -> encodeBin(oids[i], params.get(i), bb);
+                case TXT -> encodeText(oids[i], params.get(i), arena.bb());
+                case BIN -> encodeBin(oids[i], params.get(i), arena.bb());
             }
-            len = bb.position() - pos;
+            len = arena.position() - pos;
             arena.orderCPP();
-            bb.putInt(posLen + i * 4, len);
-            bb.putLong(posPtr + i * 8, arena.ptr() + pos);
+            arena.putInt(posLen + i * 4, len);
+            arena.putLong(posPtr + i * 8, arena.ptr() + pos);
         }
     }
 }

@@ -2,14 +2,18 @@ package org.pq;
 
 import org.pq.api.PGResult;
 import org.pq.api.PQClient;
+import org.pq.api.Result;
+import org.pq.api.Stmt2;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.sql.SQLException;
+import java.util.List;
 
 public class PQTest {
 
     private PQClient client;
+    private Stmt2 statement;
 
     public static String sql = """
             select
@@ -30,25 +34,18 @@ public class PQTest {
 
     public PQTest() {
         this.client = PQClient.of("host=localhost port=15432 dbname=test user=test password=test");
+        this.statement = client.prepare(sql);
     }
 
     public void test() {
-
         Object obj;
-        try (PGResult res = client.exec(sql)) {
-            for (Object[] row: res.iterTuples()) {
-
+        try (final Result res = statement.execute(List.of())) {
+            while (res.next()) {
+                for (int col = 1; col < 8; col++) {
+                    obj = res.getColumn(col);
+                }
             }
-//            for (int row: res.iterRows()) {
-//                for (int col = 1; col < 8; col++) {
-//                    obj = res.getObject(row, col);
-//                }
-//            }
         }
-
-        // Decode.encodeValues(bb, ptr, new Object[]{999, 99, 3}, new int[]{23,23,23}, new int[]{1,1,1}, 0);
-        // long res = Native.execWithParams(conn, "select $1 as a, $2 as b, $3 as c", ptr);
-
     }
 
     public void bench() throws SQLException {

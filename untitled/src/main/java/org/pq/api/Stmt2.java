@@ -1,12 +1,15 @@
 package org.pq.api;
 
+import org.pq.Native2;
 import org.pq.codec.Encoder;
-
+import static org.pq.api.PQError.error;
 import java.util.List;
+
+import static org.pq.api.PGRES.TUPLES_OK;
 
 public record Stmt2 (
         PQClient client,
-        String name,
+        String stmtName,
         String query,
         int nTuples,
         int nColumns,
@@ -17,12 +20,13 @@ public record Stmt2 (
         int[] typeMods,
         int nParams,
         int[] paramOids
-) {
+) implements AutoCloseable {
     public static Stmt2 of(final PQClient client, final String name, final String query, final Arena arena) {
         arena.rewind();
         arena.orderCPP();
 
-        final long resPtr = arena.getLong();
+        // ptr
+        arena.getLong();
 
         final int nTuples = arena.getInt();
         final int nColumns = arena.getInt();
@@ -53,14 +57,31 @@ public record Stmt2 (
         );
     }
 
-    public void execute(final List<Object> params) {
+    public Result execute(final List<Object> params) {
         final int size = params.size();
+        final Arena arena = client.arena();
         if (size != this.nParams) {
             throw PQError.error("parameters mismatch: %s required, %s passed", nParams, size);
         }
-        Encoder.encodeExecParams(client.arena(), nParams, params, paramOids);
+        Encoder.encodeExecParams(arena, nParams, params, paramOids);
+        final long ptr = Native2.execPrepared(client.ptr(), stmtName, arena.ptr());
+        final PGRES status = PQClient.resStatus(ptr);
+        if (status != TUPLES_OK) {
+            Native2.closeResult(ptr);
+            final String message = Native2.connError(client.ptr());
+            throw error(message);
+        } else {
+            return Result.of(ptr, this);
+        }
 
-        final long resPtr = Native._PQexecPrepared(connPtr, stmtName, arena.ptr());
-        return PGResult.of(arena);
+
+
+//        final long resPtr = Native._PQexecPrepared(ptr, stmtName, arena.ptr());
+//        return PGResult.of(arena);
+    }
+
+    @Override
+    public void close() {
+        client.closeStatement(this);
     }
 }

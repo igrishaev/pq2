@@ -95,6 +95,30 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native2_closeStatement
 JNIEXPORT jint JNICALL Java_org_pq_Native2_serializePrepared
   (JNIEnv *, jclass, jlong, jlong);
 
+/*
+ * Class:     org_pq_Native2
+ * Method:    execPrepared
+ * Signature: (JLjava/lang/String;J)J
+ */
+JNIEXPORT jlong JNICALL Java_org_pq_Native2_execPrepared
+  (JNIEnv *, jclass, jlong, jstring, jlong);
+
+/*
+ * Class:     org_pq_Native2
+ * Method:    resultInfo
+ * Signature: (JJ)V
+ */
+JNIEXPORT void JNICALL Java_org_pq_Native2_resultInfo
+  (JNIEnv *, jclass, jlong, jlong);
+
+/*
+ * Class:     org_pq_Native2
+ * Method:    fetchField
+ * Signature: (JIIJ)V
+ */
+JNIEXPORT void JNICALL Java_org_pq_Native2_fetchField
+  (JNIEnv *, jclass, jlong, jint, jint, jlong);
+
 #ifdef __cplusplus
 }
 #endif

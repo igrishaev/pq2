@@ -19,4 +19,7 @@ public class Native2 {
     public static native long describe(final long connPtr, final String name);
     public static native long closeStatement(final long connPtr, final String stmt);
     public static native int serializePrepared(final long resPtr, final long bbPtr);
+    public static native long execPrepared(final long connPtr, final String stmtName, final long bbPtr);
+    public static native void resultInfo(final long resPtr, final long bbPtr);
+    public static native void fetchField(final long resPtr, final int row, final int col, final long bbPtr);
 }
