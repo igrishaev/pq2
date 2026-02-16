@@ -78,71 +78,59 @@ public record PQClient (
         return "s" + ++counter[0];
     }
 
-    public void closeStatement(final String stmtName) {
-        final long result = Native2.closeStatement(connPtr, stmtName);
-        final PGRES status = resStatus(result);
-        // TODO: check
-        Native2.closeResult(result);
-        System.out.println(result);
-        System.out.println(status);
+    public void closeStatement(final Stmt2 stmt) {
+        closeStatement(stmt.name());
     }
 
-    public String prepare(final String query) {
+    public void closeStatement(final String stmtName) {
+        final long resPtr = Native2.closeStatement(connPtr, stmtName);
+        final PGRES status = resStatus(resPtr);
+        Native2.closeResult(resPtr);
+        if (status != PGRES.COMMAND_OK) {
+            throw error("failed to close statement: %s, code: %s", stmtName, status);
+        }
+    }
+
+    public Stmt2 prepare(final String query) {
         final String stmtName = getStmtName();
-        long result;
+        long resPtr;
         PGRES status;
         String message;
 
-        result = Native2.prepare(connPtr, stmtName, query, arena.ptr());
-        status = resStatus(result);
-        Native2.closeResult(result);
+        resPtr = Native2.prepare(connPtr, stmtName, query);
+        status = resStatus(resPtr);
+        Native2.closeResult(resPtr);
         if (status != PGRES.COMMAND_OK) {
             message = Native2.connError(connPtr);
             throw error("prepare error: %s, query: %s", message, query);
         }
 
-        result = Native2.describe(connPtr, stmtName);
-        status = resStatus(result);
-        Native2.closeResult(result);
-        if (status != PGRES.COMMAND_OK) {
+        resPtr = Native2.describe(connPtr, stmtName);
+        status = resStatus(resPtr);
+        if (status == PGRES.COMMAND_OK) {
+            Native2.serializePrepared(resPtr, arena.ptr());
+            Native2.closeResult(resPtr);
+            return Stmt2.of(this, stmtName, query, arena);
+        } else {
+            Native2.closeResult(resPtr);
             message = Native2.connError(connPtr);
             throw error("describe error: %s, statement: %s", message, stmtName);
         }
-
-        return stmtName;
-
-
-
-
     }
 
-//    public Stmt prepare(final String query) {
-//        final String stmtName = getStmtName();
-//        Native._PQprepare(connPtr, stmtName, query, arena.ptr());
-//        final PGResult pgResult = PGResult.of(arena);
-//        return new Stmt(connPtr, arena, stmtName, pgResult);
-//    }
-//
-//    public PGResult prepare2(final String sql) {
-//        //Encoder.encodeExecParams(arena, 3, List.of(555, "hello", UUID.randomUUID()), new int[] {OID.INT4, OID.TEXT, OID.UUID});
-//        Encoder.encodeExecParams(arena, 0, List.of(), new int[] {});
-//        Native.Abc(connPtr, sql, arena.ptr());
-//        return PGResult.of(arena);
+//    public void reset() {
+//        Native.PQreset(connPtr);
 //    }
 
-    public void reset() {
-        Native.PQreset(connPtr);
-    }
+//    public CONNECTION status() {
+//        final int result = Native.PQstatus(connPtr);
+//        return CONNECTION.of(result);
+//    }
 
-    public CONNECTION status() {
-        final int result = Native.PQstatus(connPtr);
-        return CONNECTION.of(result);
-    }
-
-    public PQTRANS transactionStatus() {
-        final int result = Native.PQtransactionStatus(connPtr);
-        return PQTRANS.of(result);
-    }
+//    public PQTRANS transactionStatus() {
+//        final int result = Native.PQtransactionStatus(connPtr);
+//        return PQTRANS.of(result);
+//    }
 
     @Override
     public void close() {

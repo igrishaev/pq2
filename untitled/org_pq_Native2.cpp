@@ -13,6 +13,61 @@ char* put_long(char* bb, long value) {
     return bb += 8;
 }
 
+char* put_string(char* bb, char* string) {
+    char* pos = stpcpy(bb + 4, string);
+    int len = pos - bb - 4;
+    put_int(bb, len);
+    memcpy(bb, &len, 4);
+    return pos;
+}
+
+char* PQ_dump_PGresult(PGresult* result, char* bb) {
+
+    // self
+    bb = put_long(bb, (long) result);
+
+    int nTuples = PQntuples(result);
+    bb = put_int(bb, nTuples);
+
+    // n of columns
+    int nColumns = PQnfields(result);
+    bb = put_int(bb, nColumns);
+
+    // columns
+    char* column;
+    Oid tableOid;
+    int format;
+    Oid oid;
+    int typeMod;
+    for (int i = 0; i < nColumns; i++) {
+
+        oid = PQftype(result, i);
+        bb = put_int(bb, oid);
+
+        format = PQfformat(result, i);
+        bb = put_int(bb, format);
+
+        tableOid = PQftable(result, i);
+        bb = put_int(bb, tableOid);
+
+        typeMod = PQfmod(result, i);
+        bb = put_int(bb, typeMod);
+
+        column = PQfname(result, i);
+        bb = put_string(bb, column);
+    }
+
+    // params
+    int nParams = PQnparams(result);
+    bb = put_int(bb, nParams);
+    for (int i = 0; i < nParams; i++) {
+        oid = PQparamtype(result, i);
+        bb = put_int(bb, oid);
+    }
+
+    return bb;
+}
+
 /*
  * Class:     org_pq_Native2
  * Method:    connect
@@ -104,23 +159,14 @@ JNIEXPORT void JNICALL Java_org_pq_Native2_closeResult
 /*
  * Class:     org_pq_Native2
  * Method:    prepare
- * Signature: (JLjava/lang/String;Ljava/lang/String;J)J
+ * Signature: (JLjava/lang/String;Ljava/lang/String;)J
  */
 JNIEXPORT jlong JNICALL Java_org_pq_Native2_prepare
-(JNIEnv* env, jclass, jlong jconn, jstring jname, jstring jquery, jlong jbb) {
+(JNIEnv* env, jclass, jlong jconn, jstring jname, jstring jquery) {
     PGconn* conn = (PGconn*) jconn;
     const char* stmtName = env->GetStringUTFChars(jname, NULL);
     const char* query = env->GetStringUTFChars(jquery, NULL);
     return (long) PQprepare(conn, stmtName, query, 0, NULL);
-
-    // result =
-    // status = PQresultStatus(result);
-    // // TODO: check result
-    // result = PQdescribePrepared(conn, stmtName);
-    // status = PQresultStatus(result);
-    // // TODO: check result
-    // // bb = PQ_dump_PGresult(result, bb);
-    // return 0;
 }
 
 /*
@@ -145,4 +191,19 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native2_closeStatement
     PGconn* conn = (PGconn*) jconn;
     const char* stmtName = env->GetStringUTFChars(jstmtName, NULL);
     return (long) PQclosePrepared(conn, stmtName);
+}
+
+
+
+/*
+ * Class:     org_pq_Native2
+ * Method:    serializePrepared
+ * Signature: (JJ)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native2_serializePrepared
+  (JNIEnv *, jclass, jlong jresult, jlong jbb) {
+    PGresult* result = (PGresult*) jresult;
+    char* bb = (char*) jbb;
+    PQ_dump_PGresult(result, bb);
+    return 0;
 }

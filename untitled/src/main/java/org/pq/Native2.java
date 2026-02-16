@@ -15,7 +15,8 @@ public class Native2 {
     public static native String connError(final long connPtr);
     public static native int initByteBuffer(final ByteBuffer bb);
     public static native void closeResult(final long resPtr);
-    public static native long prepare(final long connPtr, final String name, final String query, final long bbPtr);
+    public static native long prepare(final long connPtr, final String name, final String query);
     public static native long describe(final long connPtr, final String name);
     public static native long closeStatement(final long connPtr, final String stmt);
+    public static native int serializePrepared(final long resPtr, final long bbPtr);
 }

@@ -54,19 +54,19 @@ public class Encoder {
         arena.rewind();
         arena.orderCPP();
 
-        final ByteBuffer bb = arena.bb();
-        final long bbPtr = arena.ptr();
+//        final ByteBuffer bb = arena.bb();
+//        final long bbPtr = arena.ptr();
 
         // TODO: option
         final int format = 1;
 
         // nParams
-        bb.putInt(nParams);
+        arena.putInt(nParams);
 
         // paramTypes
-        for (int i = 0; i < nParams; i++) {
-            bb.putInt(oids[i]);
-        }
+//        for (int i = 0; i < nParams; i++) {
+//            bb.putInt(oids[i]);
+//        }
 
         // paramValues
         int posPtr = bb.position();
@@ -78,11 +78,11 @@ public class Encoder {
 
         // paramFormats
         for (int i = 0; i < nParams; i++) {
-            bb.putInt(format);
+            arena.putInt(format);
         }
 
         // resultFormat
-        bb.putInt(format);
+        arena.putInt(format);
 
         // update lengths and pointers
         int len;
@@ -97,7 +97,7 @@ public class Encoder {
             len = bb.position() - pos;
             arena.orderCPP();
             bb.putInt(posLen + i * 4, len);
-            bb.putLong(posPtr + i * 8, bbPtr + pos);
+            bb.putLong(posPtr + i * 8, arena.ptr() + pos);
         }
     }
 }

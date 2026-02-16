@@ -4,6 +4,7 @@ import org.pq.Native2;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 public record Arena (
@@ -47,6 +48,15 @@ public record Arena (
     }
     public long getLong() {
         return bb.getLong();
+    }
+    public void putInt(final int i) {
+        bb.putInt(i);
+    }
+    public String getLenString() {
+        final int len = bb.getInt();
+        final byte[] ba = new byte[len];
+        bb.get(ba);
+        return new String(ba, StandardCharsets.UTF_8);
     }
     @SuppressWarnings("unused")
     void debug(final int len) {
