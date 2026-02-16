@@ -25,21 +25,21 @@ public record PQClient (
 
         final Arena arena = Arena.of(CONST.BB_SIZE);
 
-        final long connPtr = Native2.connect(connInfo);
-        if (connPtr == arena.NULL()) {
+        final long ptr = Native2.connect(connInfo);
+        if (ptr == arena.NULL()) {
             throw PQError.error("PQ connection returned null");
         }
-        final CONNECTION connStatus = connStatus(connPtr);
+        final CONNECTION connStatus = connStatus(ptr);
 
         return switch (connStatus) {
             case OK -> new PQClient(
-                    connPtr,
+                    ptr,
                     connInfo,
                     arena,
                     new byte[] {0}
             );
             case BAD -> {
-                final String message = Native2.connError(connPtr);
+                final String message = Native2.connError(ptr);
                 throw PQError.error(message);
             }
             default -> throw PQError.error("wrong connection status: %s", connStatus);
@@ -132,7 +132,7 @@ public record PQClient (
     }
 
     public static void main(String... args) {
-        final String connInfo = "host=localhost port=15432 dbname=test user=test password=test";
+        final String connInfo = "host=localhost port=5432 dbname=book user=book password=book";
         try (final PQClient client = PQClient.of(connInfo);
              final Stmt2 stmt = client.prepare("select x, x + $1::int4 from generate_series(1, 3) as seq(x)");
              final Result res = stmt.execute(List.of(55))) {

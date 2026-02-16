@@ -113,11 +113,51 @@ JNIEXPORT void JNICALL Java_org_pq_Native2_resultInfo
 
 /*
  * Class:     org_pq_Native2
- * Method:    fetchField
+ * Method:    fieldValue
  * Signature: (JIIJ)V
  */
-JNIEXPORT void JNICALL Java_org_pq_Native2_fetchField
+JNIEXPORT void JNICALL Java_org_pq_Native2_fieldValue
   (JNIEnv *, jclass, jlong, jint, jint, jlong);
+
+/*
+ * Class:     org_pq_Native2
+ * Method:    fieldIsNull
+ * Signature: (JII)Z
+ */
+JNIEXPORT jboolean JNICALL Java_org_pq_Native2_fieldIsNull
+  (JNIEnv *, jclass, jlong, jint, jint);
+
+/*
+ * Class:     org_pq_Native2
+ * Method:    fieldOid
+ * Signature: (JI)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native2_fieldOid
+  (JNIEnv *, jclass, jlong, jint);
+
+/*
+ * Class:     org_pq_Native2
+ * Method:    fieldFormat
+ * Signature: (JI)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native2_fieldFormat
+  (JNIEnv *, jclass, jlong, jint);
+
+/*
+ * Class:     org_pq_Native2
+ * Method:    fieldLength
+ * Signature: (JII)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native2_fieldLength
+  (JNIEnv *, jclass, jlong, jint, jint);
+
+/*
+ * Class:     org_pq_Native2
+ * Method:    nTuples
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native2_nTuples
+  (JNIEnv *, jclass, jlong);
 
 #ifdef __cplusplus
 }

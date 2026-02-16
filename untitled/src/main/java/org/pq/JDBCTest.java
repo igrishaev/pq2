@@ -11,7 +11,7 @@ public class JDBCTest {
     private Connection conn;
 
     public JDBCTest() throws SQLException {
-        conn = DriverManager.getConnection("jdbc:postgresql://localhost:15432/test?user=test&password=test");
+        conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/book?user=book&password=book");
     }
 
     public static String sql = """
@@ -48,7 +48,7 @@ public class JDBCTest {
         long usedMemoryBefore = runtime.totalMemory() - runtime.freeMemory();
         System.out.println("Used Memory before: " + usedMemoryBefore / 1000000);
         // working code here
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 2000; i++) {
             test();
         }
         long usedMemoryAfter = runtime.totalMemory() - runtime.freeMemory();

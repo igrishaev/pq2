@@ -4,6 +4,7 @@ import org.pq.Native2;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
@@ -73,6 +74,16 @@ public record Arena (
     }
     public void get(final byte[] ba) {
         bb.get(ba);
+    }
+    public String getString(final int len) {
+        final byte[] ba = new byte[len];
+        bb.get(ba);
+        return new String(ba, StandardCharsets.UTF_8);
+    }
+    public String getString(final int index, final int len) {
+        final byte[] ba = new byte[len];
+        bb.get(index, ba);
+        return new String(ba, StandardCharsets.UTF_8);
     }
     @SuppressWarnings("unused")
     void debug(final int len) {

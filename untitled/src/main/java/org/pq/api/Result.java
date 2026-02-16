@@ -3,7 +3,6 @@ package org.pq.api;
 import org.pq.Native2;
 import org.pq.codec.Decoder;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 
 import static org.pq.api.PQError.error;
@@ -47,26 +46,26 @@ public class Result implements AutoCloseable {
         if (!(0 <= row && row < nTuples)) {
             throw error("row is out of bounds: %s", row);
         }
-        final Arena arena = statement.client().arena();
-        Native2.fetchField(ptr, row, col, arena.ptr());
 
-        arena.rewind();
-        arena.orderCPP();
+        final boolean isNull = Native2.fieldIsNull(ptr, row, col);
 
-        final int isNull = arena.getInt();
-        if (isNull == 1) {
+        if (isNull) {
             return null;
         }
 
-        final int oid = arena.getInt();
-        final int format = arena.getInt();
-        final int len = arena.getInt();
-        arena.orderJVM();
+        final int oid = Native2.fieldOid(ptr, col);
+        final int format = Native2.fieldFormat(ptr, col);
+        final int len = Native2.fieldLength(ptr, row, col);
+
+        final Arena arena = statement.client().arena();
+        Native2.fieldValue(ptr, row, col, arena.ptr());
+
         if (format == 0) {
-            final byte[] ba = new byte[len];
-            arena.get(ba);
-            return Decoder.decodeTxt(oid, new String(ba, StandardCharsets.UTF_8));
+            final String string = arena.getString(0, len);
+            return Decoder.decodeTxt(oid, string);
         } else {
+            arena.rewind();
+            arena.orderJVM();
             return Decoder.decodeBin(oid, len, arena.bb());
         }
     }

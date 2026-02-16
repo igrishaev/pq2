@@ -21,5 +21,10 @@ public class Native2 {
     public static native int serializePrepared(final long resPtr, final long bbPtr);
     public static native long execPrepared(final long connPtr, final String stmtName, final long bbPtr);
     public static native void resultInfo(final long resPtr, final long bbPtr);
-    public static native void fetchField(final long resPtr, final int row, final int col, final long bbPtr);
+    public static native void fieldValue(final long resPtr, final int row, final int col, final long bbPtr);
+    public static native boolean fieldIsNull(long resPtr, int row, int col);
+    public static native int fieldOid(long resPtr, int col);
+    public static native int fieldFormat(long resPtr, int col);
+    public static native int fieldLength(long resPtr, int row, int col);
+    public static native int nTuples(long resPtr);
 }

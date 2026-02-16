@@ -33,7 +33,7 @@ public class PQTest {
             """;
 
     public PQTest() {
-        this.client = PQClient.of("host=localhost port=15432 dbname=test user=test password=test");
+        this.client = PQClient.of("host=localhost port=5432 dbname=book user=book password=book");
         this.statement = client.prepare(sql);
     }
 
@@ -54,7 +54,7 @@ public class PQTest {
         System.out.println("Used Memory before: " + usedMemoryBefore / 1000000);
 
         long start = System.currentTimeMillis();
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 2000; i++) {
             test();
         }
 //        var bb = ByteBuffer.allocateDirect(99);

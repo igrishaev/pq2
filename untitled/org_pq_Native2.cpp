@@ -312,28 +312,64 @@ JNIEXPORT void JNICALL Java_org_pq_Native2_resultInfo
 
 /*
  * Class:     org_pq_Native2
- * Method:    fetchField
+ * Method:    fieldValue
  * Signature: (JIIJ)V
  */
-JNIEXPORT void JNICALL Java_org_pq_Native2_fetchField
+JNIEXPORT void JNICALL Java_org_pq_Native2_fieldValue
   (JNIEnv *, jclass, jlong jresult, jint row, jint col, jlong jbb) {
-
     PGresult* result = (PGresult*) jresult;
     char* bb = (char*) jbb;
+    char* value = PQgetvalue(result, row, col);
+    int len = PQgetlength(result, row, col);
+    memcpy(bb, value, len);
+}
 
-    int isNull  = PQgetisnull(result, row, col);
-    bb = put_int(bb, isNull);
+JNIEXPORT jboolean JNICALL Java_org_pq_Native2_fieldIsNull
+(JNIEnv *, jclass, jlong jresult, jint row, jint col) {
+    PGresult* result = (PGresult*) jresult;
+    return PQgetisnull(result, row, col);
+}
 
-    if (isNull == 0) {
-        Oid oid     = PQftype(result, col);
-        int len     = PQgetlength(result, row, col);
-        int format  = PQfformat(result, col);
-        char* value = PQgetvalue(result, row, col);
+/*
+ * Class:     org_pq_Native2
+ * Method:    fieldOid
+ * Signature: (JI)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native2_fieldOid
+(JNIEnv *, jclass, jlong jresult, jint col) {
+    PGresult* result = (PGresult*) jresult;
+    return PQftype(result, col);
+}
 
-        bb = put_int(bb, oid);
-        bb = put_int(bb, len);
-        bb = put_int(bb, format);
-        memcpy(bb, value, len);
-        bb += len;
-    }
+/*
+ * Class:     org_pq_Native2
+ * Method:    fieldFormat
+ * Signature: (JI)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native2_fieldFormat
+(JNIEnv *, jclass, jlong jresult, jint col) {
+    PGresult* result = (PGresult*) jresult;
+    return PQfformat(result, col);
+}
+
+/*
+ * Class:     org_pq_Native2
+ * Method:    fieldLength
+ * Signature: (JII)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native2_fieldLength
+(JNIEnv *, jclass, jlong jresult, jint row, jint col) {
+    PGresult* result = (PGresult*) jresult;
+    return PQgetlength(result, row, col);
+}
+
+/*
+ * Class:     org_pq_Native2
+ * Method:    nTuples
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native2_nTuples
+(JNIEnv *, jclass, jlong jresult) {
+    PGresult* result = (PGresult*) jresult;
+    return PQntuples(result);
 }
