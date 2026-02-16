@@ -85,6 +85,15 @@ public record PQClient (
         }
     }
 
+    public Result query(final String query) {
+        final long resPtr = Native2.query(this.ptr, query);
+        final PGRES status = resStatus(resPtr);
+        if (status != PGRES.TUPLES_OK) {
+            throw error("query has failed: code: %s, SQL: %s", status, query);
+        }
+        return Result.of(resPtr, arena);
+    }
+
     public Stmt2 prepare(final String query) {
         final String stmtName = getStmtName();
         long resPtr;
@@ -136,38 +145,17 @@ public record PQClient (
         try (final PQClient client = PQClient.of(connInfo);
              final Stmt2 stmt = client.prepare("select x, x + $1::int4 from generate_series(1, 3) as seq(x)");
              final Result res = stmt.execute(List.of(55))) {
-
-            // System.out.println(res.getColumn(0));
-
             while (res.next()) {
                 for (int col: res.iterCols()) {
                     System.out.println(res.getColumn(col));
                 }
-
-                // System.out.println(res.getColumn(1));
-                // System.out.println(res.getColumn(3));
             }
 
-
-//            PGResult result;
-//            long ptr = 42;
-//
-//            result = client.prepare2("select x from generate_series(1, 30) as seq(x)");
-//            for (Object[] row: result.iterTuples()) {
-//                System.out.println(Arrays.toString(row));
-//            }
-//            System.out.println("-----------------");
-//
-//            while (ptr != client.arena.NULL()) {
-//                ptr = Native.nextResult(client.ptr, client.arena.ptr());
-//                System.out.println(ptr);
-//                result = PGResult.of(client.arena);
-//                for (Object[] row: result.iterTuples()) {
-//                    System.out.println(Arrays.toString(row));
-//                }
-//                System.out.println(Native.PQresultStatus(ptr));
-//                System.out.println("-----------------");
-//            }
+            try (final Result r = client.query("select x * 1000 from generate_series(1, 3) as seq(x)")) {
+                while (r.next()) {
+                    System.out.println(r.getColumn(0));
+                }
+            }
         }
     }
 }

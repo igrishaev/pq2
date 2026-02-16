@@ -10,37 +10,27 @@ import static org.pq.api.PQError.error;
 public class Result implements AutoCloseable {
 
     private final long ptr;
-    private final Stmt2 statement;
+    private final Arena arena;
+    private final int nColumns;
     private final int nTuples;
-    private final int oid;
-    private final String cmdStatus;
-    private final String cmdTuples;
     private int row;
 
-    private Result(long ptr, Stmt2 statement, int nTuples, int oid, String cmdStatus, String cmdTuples) {
+    private Result(long ptr, Arena arena, int nTuples, int nColumns) {
         this.ptr = ptr;
+        this.arena = arena;
         this.nTuples = nTuples;
-        this.oid = oid;
-        this.statement = statement;
-        this.cmdStatus = cmdStatus;
-        this.cmdTuples = cmdTuples;
+        this.nColumns = nColumns;
         this.row = -1;
     }
 
-    public static Result of(long ptr, Stmt2 statement) {
-        Arena arena = statement.client().arena();
-        Native2.resultInfo(ptr, arena.ptr());
-        arena.rewind();
-        arena.orderCPP();
-        final int nTuples = arena.getInt();
-        final int oid = arena.getInt();
-        final String cmdStatus = arena.getLenString();
-        final String cmdTuples = arena.getLenString();
-        return new Result(ptr, statement, nTuples, oid, cmdStatus, cmdTuples);
+    public static Result of(long ptr, Arena arena) {
+        final int nTuples = Native2.nTuples(ptr);
+        final int nColumns = Native2.nColumns(ptr);
+        return new Result(ptr, arena, nTuples, nColumns);
     }
 
     public Object getColumn(final int col) {
-        if (!(0 <= col && col < statement.nColumns())) {
+        if (!(0 <= col && col < nColumns)) {
             throw error("column is out of bounds: %s", col);
         }
         if (!(0 <= row && row < nTuples)) {
@@ -57,7 +47,6 @@ public class Result implements AutoCloseable {
         final int format = Native2.fieldFormat(ptr, col);
         final int len = Native2.fieldLength(ptr, row, col);
 
-        final Arena arena = statement.client().arena();
         Native2.fieldValue(ptr, row, col, arena.ptr());
 
         if (format == 0) {
@@ -82,13 +71,10 @@ public class Result implements AutoCloseable {
     public Iterable<Integer> iterCols() {
         return () -> new Iterator<>() {
             private int i = -1;
-            private final int nColumns = statement.nColumns();
-
             @Override
             public boolean hasNext() {
                 return i <  nColumns - 1;
             }
-
             @Override
             public Integer next() {
                 return ++i;

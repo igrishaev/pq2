@@ -290,28 +290,6 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native2_execPrepared
 
 /*
  * Class:     org_pq_Native2
- * Method:    resultInfo
- * Signature: (JJ)V
- */
-JNIEXPORT void JNICALL Java_org_pq_Native2_resultInfo
-(JNIEnv *, jclass, jlong jresult, jlong jbb) {
-
-    PGresult* result = (PGresult*) jresult;
-    char* bb = (char*) jbb;
-
-    int nTuples = PQntuples(result);
-    char* cmdStatus = PQcmdStatus(result);
-    char* cmdTuples = PQcmdTuples(result);
-    Oid oid = PQoidValue(result);
-
-    bb = put_int(bb, nTuples);
-    bb = put_int(bb, oid);
-    bb = put_string(bb, cmdStatus);
-    bb = put_string(bb, cmdTuples);
-}
-
-/*
- * Class:     org_pq_Native2
  * Method:    fieldValue
  * Signature: (JIIJ)V
  */
@@ -372,4 +350,27 @@ JNIEXPORT jint JNICALL Java_org_pq_Native2_nTuples
 (JNIEnv *, jclass, jlong jresult) {
     PGresult* result = (PGresult*) jresult;
     return PQntuples(result);
+}
+
+/*
+ * Class:     org_pq_Native2
+ * Method:    query
+ * Signature: (JLjava/lang/String;)J
+ */
+JNIEXPORT jlong JNICALL Java_org_pq_Native2_query
+(JNIEnv* env, jclass, jlong jconn, jstring jquery) {
+    PGconn* conn = (PGconn*) jconn;
+    const char* query = env->GetStringUTFChars(jquery, NULL);
+    return (long) PQexec(conn, query);
+}
+
+/*
+ * Class:     org_pq_Native2
+ * Method:    nColumns
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native2_nColumns
+(JNIEnv *, jclass, jlong jresult) {
+    PGresult* result = (PGresult*) jresult;
+    return PQnfields(result);
 }

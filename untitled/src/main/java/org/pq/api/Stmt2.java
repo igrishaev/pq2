@@ -71,7 +71,7 @@ public record Stmt2 (
             final String message = Native2.connError(client.ptr());
             throw error(message);
         } else {
-            return Result.of(ptr, this);
+            return Result.of(ptr, arena);
         }
 
 

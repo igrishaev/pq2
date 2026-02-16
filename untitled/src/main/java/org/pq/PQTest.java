@@ -5,8 +5,6 @@ import org.pq.api.PQClient;
 import org.pq.api.Result;
 import org.pq.api.Stmt2;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.sql.SQLException;
 import java.util.List;
 

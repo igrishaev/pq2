@@ -105,14 +105,6 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native2_execPrepared
 
 /*
  * Class:     org_pq_Native2
- * Method:    resultInfo
- * Signature: (JJ)V
- */
-JNIEXPORT void JNICALL Java_org_pq_Native2_resultInfo
-  (JNIEnv *, jclass, jlong, jlong);
-
-/*
- * Class:     org_pq_Native2
  * Method:    fieldValue
  * Signature: (JIIJ)V
  */
@@ -157,6 +149,22 @@ JNIEXPORT jint JNICALL Java_org_pq_Native2_fieldLength
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL Java_org_pq_Native2_nTuples
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     org_pq_Native2
+ * Method:    query
+ * Signature: (JLjava/lang/String;)J
+ */
+JNIEXPORT jlong JNICALL Java_org_pq_Native2_query
+  (JNIEnv *, jclass, jlong, jstring);
+
+/*
+ * Class:     org_pq_Native2
+ * Method:    nColumns
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native2_nColumns
   (JNIEnv *, jclass, jlong);
 
 #ifdef __cplusplus
