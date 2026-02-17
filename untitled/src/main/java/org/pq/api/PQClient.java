@@ -3,6 +3,7 @@ package org.pq.api;
 import org.pq.Native;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.pq.api.PQError.error;
 
@@ -10,13 +11,15 @@ public record PQClient (
     long ptr,
     String connInfo,
     Arena arena,
-    byte[] counter
+    AtomicInteger counter
 ) implements AutoCloseable {
 
+    // TODO
     public static CONNECTION connStatus(final long connPtr) {
         return CONNECTION.of(Native.connStatus(connPtr));
     }
 
+    // TODO
     public static PGRES resStatus(final long resPtr) {
         return PGRES.of(Native.resStatus(resPtr));
     }
@@ -36,7 +39,7 @@ public record PQClient (
                     ptr,
                     connInfo,
                     arena,
-                    new byte[] {0}
+                    new AtomicInteger()
             );
             case BAD -> {
                 final String message = Native.connError(ptr);
@@ -47,7 +50,7 @@ public record PQClient (
     }
 
     private String getStmtName() {
-        return "s" + ++counter[0];
+        return "s" + counter.incrementAndGet();
     }
 
     public PQResult query(final String query) {
@@ -57,6 +60,24 @@ public record PQClient (
             throw error("query has failed: code: %s, SQL: %s", status, query);
         }
         return new PQResult(this.ptr, resPtr, arena, false);
+    }
+
+    public PQResult queryMulti(final String query, int size) {
+        int status;
+        status = Native.sendQuery(ptr, query);
+        if (status == 0) {
+            System.out.println(status);
+            final String message = Native.connError(ptr);
+            throw error(message);
+        }
+        Native.setChunkedRowsMode(ptr, size);
+        final long resPtr = Native.getResult(ptr);
+        final PGRES pgres = resStatus(resPtr);
+        if (pgres != PGRES.TUPLES_CHUNK) {
+            Native.closeResult(resPtr);
+            throw error("wrong status: %s", pgres);
+        }
+        return new PQResult(ptr, resPtr, arena, true);
     }
 
     public PQStatement prepare(final String query) {
@@ -110,21 +131,40 @@ public record PQClient (
     }
 
     public static void main(String... args) {
-        final String connInfo = "host=localhost port=15432 dbname=test user=test password=test";
+        final String connInfo = "host=localhost port=5432 dbname=book user=book password=book";
         try (final PQClient client = PQClient.of(connInfo);
              final PQStatement stmt = client.prepare("select x, x + $1::int4 from generate_series(1, 3) as seq(x)");
              final PQResult res = stmt.execute(List.of(55))) {
-            while (res.next()) {
-                for (int col: res.iterCols()) {
-                    System.out.println(res.getColumn(col));
-                }
-            }
+//            while (res.next()) {
+//                for (int col: res.iterCols()) {
+//                    System.out.println(res.getColumn(col));
+//                }
+//            }
 
-            try (final PQResult r = client.query("select x * 1000 from generate_series(1, 3) as seq(x)")) {
+//            try (final PQResult r = client.query("select x * 1000 from generate_series(1, 3) as seq(x)")) {
+//                while (r.next()) {
+//                    System.out.println(r.getColumn(0));
+//                }
+//            }
+
+            try (final PQResult r = client.queryMulti("select x from generate_series(1, 33) as seq(x)", 10)) {
                 while (r.next()) {
                     System.out.println(r.getColumn(0));
                 }
             }
+
+//            PQResult r = client.queryMulti("select x from generate_series(1, 33) as seq(x)", 10);
+//            while (r.next()) {
+//                System.out.println(r.getColumn(0));
+//            }
+//            r.close();
+
+//            PQResult r2 = client.queryMulti("select x from generate_series(1, 99) as seq(x)");
+//            while (r2.next()) {
+//                System.out.println(r2.getColumn(0));
+//            }
+//            r2.close();
+            // System.out.println(r);
         }
     }
 }

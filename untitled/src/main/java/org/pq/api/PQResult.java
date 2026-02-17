@@ -14,27 +14,24 @@ public class PQResult implements AutoCloseable {
     private final Arena arena;
     private int row;
     private final boolean isMulti;
+    private final int nColumns;
+    private int nTuples;
 
     public PQResult(long connPtr, long resPtr, Arena arena, boolean isMulti) {
         this.connPtr = connPtr;
         this.resPtr = resPtr;
         this.arena = arena;
         this.isMulti = isMulti;
-    }
-
-    private int nColumns() {
-        return Native.nColumns(resPtr);
-    }
-
-    private int nTuples() {
-        return Native.nTuples(resPtr);
+        this.row = -1;
+        this.nColumns = Native.nColumns(resPtr);
+        this.nTuples = Native.nTuples(resPtr);
     }
 
     public Object getColumn(final int col) {
-        if (!(0 <= col && col < nColumns())) {
+        if (!(0 <= col && col < nColumns)) {
             throw error("column is out of bounds: %s", col);
         }
-        if (!(0 <= row && row < nTuples())) {
+        if (!(0 <= row && row < nTuples)) {
             throw error("row is out of bounds: %s", row);
         }
 
@@ -62,21 +59,22 @@ public class PQResult implements AutoCloseable {
 
     public boolean next() {
 
-        final boolean isEnd = (row == nTuples() - 1);
+        final boolean isEnd = (row == nTuples - 1);
         if (isEnd && isMulti) {
             Native.closeResult(resPtr);
             final long newPtr = Native.getResult(connPtr);
             final PGRES status = PQClient.resStatus(newPtr);
-            if (status != PGRES.COMMAND_OK) {
-                Native.closeResult(newPtr);
-                throw error("wrong result status: %s", status);
-            } else {
-                resPtr = newPtr;
-                row = -1;
+            switch (status) {
+                case TUPLES_CHUNK, TUPLES_OK -> {
+                    resPtr = newPtr;
+                    row = -1;
+                    nTuples = Native.nTuples(newPtr);
+                }
+                default -> throw error("wrong result status: %s", status);
             }
         }
 
-        if (row < nTuples() - 1) {
+        if (row < nTuples - 1) {
             row++;
             return true;
         } else {
@@ -89,7 +87,7 @@ public class PQResult implements AutoCloseable {
             private int i = -1;
             @Override
             public boolean hasNext() {
-                return i <  nColumns() - 1;
+                return i <  nColumns - 1;
             }
             @Override
             public Integer next() {
@@ -100,6 +98,13 @@ public class PQResult implements AutoCloseable {
 
     @Override
     public void close() {
-        Native.closeResult(resPtr);
+        if (isMulti) {
+            while (resPtr != 0) {
+                Native.closeResult(resPtr);
+                resPtr = Native.getResult(connPtr);
+            }
+        } else {
+            Native.closeResult(resPtr);
+        }
     }
 }

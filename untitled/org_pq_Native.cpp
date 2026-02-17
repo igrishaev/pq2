@@ -304,18 +304,26 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_query
 
 /*
  * Class:     org_pq_Native
- * Method:    queryAsync
- * Signature: (JLjava/lang/String;I)J
+ * Method:    sendQuery
+ * Signature: (JLjava/lang/String;I)I
  */
-JNIEXPORT jlong JNICALL Java_org_pq_Native_queryAsync
-(JNIEnv* env, jclass, jlong jconn, jstring jquery, jint size) {
+JNIEXPORT int JNICALL Java_org_pq_Native_sendQuery
+(JNIEnv* env, jclass, jlong jconn, jstring jquery) {
     PGconn* conn = (PGconn*) jconn;
     const char* query = env->GetStringUTFChars(jquery, NULL);
-    return (long) PQsendQuery(conn, query);
-    // int PQsetSingleRowMode(PGconn *conn);
-    // int PQsetChunkedRowsMode(PGconn *conn, int chunkSize);
+    return (int) PQsendQuery(conn, query);
 }
 
+/*
+ * Class:     org_pq_Native
+ * Method:    setChunkedRowsMode
+ * Signature: (JI)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_setChunkedRowsMode
+(JNIEnv *, jclass, jlong jconn, jint size) {
+    PGconn* conn = (PGconn*) jconn;
+    return PQsetChunkedRowsMode(conn, size);
+}
 
 /*
  * Class:     org_pq_Native

@@ -26,7 +26,8 @@ public class Native {
     public static native int fieldLength(long resPtr, int row, int col);
     public static native int nTuples(long resPtr);
     public static native long query(long connPtr, String query);
-    public static native long queryAsync(long connPtr, String query, int size);
+    public static native int sendQuery(long connPtr, String query);
+    public static native int setChunkedRowsMode(long conn, int size);
     public static native int nColumns(long resPtr);
     public static native int nParams(long resPtr);
     public static native int paramOid(long resPtr, int i);
