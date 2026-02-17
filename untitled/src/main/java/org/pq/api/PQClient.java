@@ -46,43 +46,8 @@ public record PQClient (
         };
     }
 
-//    public PGResult exec(final String sql) {
-//        final long resPtr = Native.PQexec(ptr, sql);
-//        if (resPtr == arena.NULL()) {
-//            throw PQError.error("PQExec returned null (most likely no enough memory)");
-//        }
-//        int opStatus = Native.PQresultStatus(resPtr);
-//        PGRES pgres = PGRES.of(opStatus);
-//        switch (pgres) {
-//            case FATAL_ERROR, NONFATAL_ERROR, BAD_RESPONSE -> {
-//                Native.PQclear(resPtr);
-//                String message = Native.PQerrorMessage(ptr);
-//                throw PQError.error(message);
-//            }
-//        }
-//        opStatus = Native.PGresultInfo(resPtr, arena.ptr());
-//        if (opStatus != 0) {
-//            Native.PQclear(resPtr);
-//            throw PQError.error("PGresultInfo returned non-zero status: %s", opStatus);
-//        }
-//        return PGResult.of(arena);
-//    }
-
     private String getStmtName() {
         return "s" + ++counter[0];
-    }
-
-    public void closeStatement(final Stmt2 stmt) {
-        closeStatement(stmt.stmtName());
-    }
-
-    public void closeStatement(final String stmtName) {
-        final long resPtr = Native2.closeStatement(ptr, stmtName);
-        final PGRES status = resStatus(resPtr);
-        Native2.closeResult(resPtr);
-        if (status != PGRES.COMMAND_OK) {
-            throw error("failed to close statement: %s, code: %s", stmtName, status);
-        }
     }
 
     public Result query(final String query) {

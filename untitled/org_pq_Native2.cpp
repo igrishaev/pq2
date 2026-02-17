@@ -27,6 +27,7 @@ int get_int(char* bb, int& off) {
     return i;
 }
 
+// TODO: do we need it?
 char* PQ_dump_PGresult(PGresult* result, char* bb) {
 
     // self
@@ -373,4 +374,15 @@ JNIEXPORT jint JNICALL Java_org_pq_Native2_nColumns
 (JNIEnv *, jclass, jlong jresult) {
     PGresult* result = (PGresult*) jresult;
     return PQnfields(result);
+}
+
+/*
+ * Class:     org_pq_Native2
+ * Method:    nParams
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native2_nParams
+(JNIEnv *, jclass, jlong jresult) {
+    PGresult* result = (PGresult*) jresult;
+    return PQnparams(result);
 }

@@ -28,4 +28,5 @@ public class Native2 {
     public static native int nTuples(long resPtr);
     public static native long query(long connPtr, String query);
     public static native int nColumns(long resPtr);
+    public static native int nParams(long resPtr);
 }

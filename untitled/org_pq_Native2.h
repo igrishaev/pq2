@@ -167,6 +167,14 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native2_query
 JNIEXPORT jint JNICALL Java_org_pq_Native2_nColumns
   (JNIEnv *, jclass, jlong);
 
+/*
+ * Class:     org_pq_Native2
+ * Method:    nParams
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native2_nParams
+  (JNIEnv *, jclass, jlong);
+
 #ifdef __cplusplus
 }
 #endif
