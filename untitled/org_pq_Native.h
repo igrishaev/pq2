@@ -153,6 +153,14 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_query
 
 /*
  * Class:     org_pq_Native
+ * Method:    queryAsync
+ * Signature: (JLjava/lang/String;I)J
+ */
+JNIEXPORT jlong JNICALL Java_org_pq_Native_queryAsync
+  (JNIEnv *, jclass, jlong, jstring, jint);
+
+/*
+ * Class:     org_pq_Native
  * Method:    nColumns
  * Signature: (J)I
  */
@@ -174,6 +182,14 @@ JNIEXPORT jint JNICALL Java_org_pq_Native_nParams
  */
 JNIEXPORT jint JNICALL Java_org_pq_Native_paramOid
   (JNIEnv *, jclass, jlong, jint);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    getResult
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL Java_org_pq_Native_getResult
+  (JNIEnv *, jclass, jlong);
 
 #ifdef __cplusplus
 }

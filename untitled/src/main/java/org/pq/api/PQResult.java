@@ -9,45 +9,46 @@ import static org.pq.api.PQError.error;
 
 public class PQResult implements AutoCloseable {
 
-    private final long ptr;
+    private final long connPtr;
+    private long resPtr;
     private final Arena arena;
-    private final int nColumns;
-    private final int nTuples;
     private int row;
+    private final boolean isMulti;
 
-    private PQResult(long ptr, Arena arena, int nTuples, int nColumns) {
-        this.ptr = ptr;
+    public PQResult(long connPtr, long resPtr, Arena arena, boolean isMulti) {
+        this.connPtr = connPtr;
+        this.resPtr = resPtr;
         this.arena = arena;
-        this.nTuples = nTuples;
-        this.nColumns = nColumns;
-        this.row = -1;
+        this.isMulti = isMulti;
     }
 
-    public static PQResult of(long ptr, Arena arena) {
-        final int nTuples = Native.nTuples(ptr);
-        final int nColumns = Native.nColumns(ptr);
-        return new PQResult(ptr, arena, nTuples, nColumns);
+    private int nColumns() {
+        return Native.nColumns(resPtr);
+    }
+
+    private int nTuples() {
+        return Native.nTuples(resPtr);
     }
 
     public Object getColumn(final int col) {
-        if (!(0 <= col && col < nColumns)) {
+        if (!(0 <= col && col < nColumns())) {
             throw error("column is out of bounds: %s", col);
         }
-        if (!(0 <= row && row < nTuples)) {
+        if (!(0 <= row && row < nTuples())) {
             throw error("row is out of bounds: %s", row);
         }
 
-        final boolean isNull = Native.fieldIsNull(ptr, row, col);
+        final boolean isNull = Native.fieldIsNull(resPtr, row, col);
 
         if (isNull) {
             return null;
         }
 
-        final int oid = Native.fieldOid(ptr, col);
-        final int format = Native.fieldFormat(ptr, col);
-        final int len = Native.fieldLength(ptr, row, col);
+        final int oid = Native.fieldOid(resPtr, col);
+        final int format = Native.fieldFormat(resPtr, col);
+        final int len = Native.fieldLength(resPtr, row, col);
 
-        Native.fieldValue(ptr, row, col, arena.ptr());
+        Native.fieldValue(resPtr, row, col, arena.ptr());
 
         if (format == 0) {
             final String string = arena.getString(0, len);
@@ -60,7 +61,22 @@ public class PQResult implements AutoCloseable {
     }
 
     public boolean next() {
-        if (row < nTuples - 1) {
+
+        final boolean isEnd = (row == nTuples() - 1);
+        if (isEnd && isMulti) {
+            Native.closeResult(resPtr);
+            final long newPtr = Native.getResult(connPtr);
+            final PGRES status = PQClient.resStatus(newPtr);
+            if (status != PGRES.COMMAND_OK) {
+                Native.closeResult(newPtr);
+                throw error("wrong result status: %s", status);
+            } else {
+                resPtr = newPtr;
+                row = -1;
+            }
+        }
+
+        if (row < nTuples() - 1) {
             row++;
             return true;
         } else {
@@ -73,7 +89,7 @@ public class PQResult implements AutoCloseable {
             private int i = -1;
             @Override
             public boolean hasNext() {
-                return i <  nColumns - 1;
+                return i <  nColumns() - 1;
             }
             @Override
             public Integer next() {
@@ -84,6 +100,6 @@ public class PQResult implements AutoCloseable {
 
     @Override
     public void close() {
-        Native.closeResult(ptr);
+        Native.closeResult(resPtr);
     }
 }

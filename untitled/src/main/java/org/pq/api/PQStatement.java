@@ -23,14 +23,14 @@ public record PQStatement(
             throw PQError.error("parameters mismatch: %s required, %s passed", nParams, size);
         }
         Encoder.encodeExecParams(arena, nParams, params, paramOids);
-        final long ptr = Native.execPrepared(connPtr, stmtName, arena.ptr());
-        final PGRES status = PQClient.resStatus(ptr);
+        final long resPtr = Native.execPrepared(connPtr, stmtName, arena.ptr());
+        final PGRES status = PQClient.resStatus(resPtr);
         if (status != TUPLES_OK) {
-            Native.closeResult(ptr);
+            Native.closeResult(resPtr);
             final String message = Native.connError(connPtr);
             throw error(message);
         } else {
-            return PQResult.of(ptr, arena);
+            return new PQResult(connPtr, resPtr, arena, false);
         }
     }
 

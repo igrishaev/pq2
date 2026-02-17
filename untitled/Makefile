@@ -1,10 +1,10 @@
 
-all: cleanup headers compile link
+all: cleanup headers compile link classes
 
-
+classes:
+	find . -name '*.class' -delete
 
 cleanup:
-	find . -name '*.class' -delete
 	rm -f org_pq_Native.o libfoo.dylib
 
 compile:

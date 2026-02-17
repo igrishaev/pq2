@@ -56,7 +56,7 @@ public record PQClient (
         if (status != PGRES.TUPLES_OK) {
             throw error("query has failed: code: %s, SQL: %s", status, query);
         }
-        return PQResult.of(resPtr, arena);
+        return new PQResult(this.ptr, resPtr, arena, false);
     }
 
     public PQStatement prepare(final String query) {
