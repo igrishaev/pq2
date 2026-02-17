@@ -1,10 +1,10 @@
 package org.pq.api;
 
-import org.pq.Native2;
+import org.pq.Native;
 
 import java.util.List;
 
-import static org.pq.api.PQError.*;
+import static org.pq.api.PQError.error;
 
 public record PQClient (
     long ptr,
@@ -14,18 +14,18 @@ public record PQClient (
 ) implements AutoCloseable {
 
     public static CONNECTION connStatus(final long connPtr) {
-        return CONNECTION.of(Native2.connStatus(connPtr));
+        return CONNECTION.of(Native.connStatus(connPtr));
     }
 
     public static PGRES resStatus(final long resPtr) {
-        return PGRES.of(Native2.resStatus(resPtr));
+        return PGRES.of(Native.resStatus(resPtr));
     }
 
     public static PQClient of(final String connInfo) {
 
-        final Arena arena = Arena.of(CONST.BB_SIZE);
+        final Arena arena = Arena.of(Const.BB_SIZE);
 
-        final long ptr = Native2.connect(connInfo);
+        final long ptr = Native.connect(connInfo);
         if (ptr == arena.NULL()) {
             throw PQError.error("PQ connection returned null");
         }
@@ -39,7 +39,7 @@ public record PQClient (
                     new byte[] {0}
             );
             case BAD -> {
-                final String message = Native2.connError(ptr);
+                final String message = Native.connError(ptr);
                 throw PQError.error(message);
             }
             default -> throw PQError.error("wrong connection status: %s", connStatus);
@@ -50,38 +50,42 @@ public record PQClient (
         return "s" + ++counter[0];
     }
 
-    public Result query(final String query) {
-        final long resPtr = Native2.query(this.ptr, query);
+    public PQResult query(final String query) {
+        final long resPtr = Native.query(this.ptr, query);
         final PGRES status = resStatus(resPtr);
         if (status != PGRES.TUPLES_OK) {
             throw error("query has failed: code: %s, SQL: %s", status, query);
         }
-        return Result.of(resPtr, arena);
+        return PQResult.of(resPtr, arena);
     }
 
-    public Stmt2 prepare(final String query) {
+    public PQStatement prepare(final String query) {
         final String stmtName = getStmtName();
         long resPtr;
         PGRES status;
         String message;
 
-        resPtr = Native2.prepare(ptr, stmtName, query);
+        resPtr = Native.prepare(ptr, stmtName, query);
         status = resStatus(resPtr);
-        Native2.closeResult(resPtr);
+        Native.closeResult(resPtr);
         if (status != PGRES.COMMAND_OK) {
-            message = Native2.connError(ptr);
+            message = Native.connError(ptr);
             throw error("prepare error: %s, query: %s", message, query);
         }
 
-        resPtr = Native2.describe(ptr, stmtName);
+        resPtr = Native.describe(ptr, stmtName);
         status = resStatus(resPtr);
         if (status == PGRES.COMMAND_OK) {
-            Native2.serializePrepared(resPtr, arena.ptr());
-            Native2.closeResult(resPtr);
-            return Stmt2.of(this, stmtName, query, arena);
+            final int nParams = Native.nParams(resPtr);
+            final int[] paramOids = new int[nParams];
+            for (int i = 0; i < nParams; i++) {
+                paramOids[i] = Native.paramOid(resPtr, i);
+            }
+            Native.closeResult(resPtr);
+            return new PQStatement(ptr, arena, stmtName, query, nParams, paramOids);
         } else {
-            Native2.closeResult(resPtr);
-            message = Native2.connError(ptr);
+            Native.closeResult(resPtr);
+            message = Native.connError(ptr);
             throw error("describe error: %s, statement: %s", message, stmtName);
         }
     }
@@ -102,21 +106,21 @@ public record PQClient (
 
     @Override
     public void close() {
-        Native2.closeConnection(ptr);
+        Native.closeConnection(ptr);
     }
 
     public static void main(String... args) {
-        final String connInfo = "host=localhost port=5432 dbname=book user=book password=book";
+        final String connInfo = "host=localhost port=15432 dbname=test user=test password=test";
         try (final PQClient client = PQClient.of(connInfo);
-             final Stmt2 stmt = client.prepare("select x, x + $1::int4 from generate_series(1, 3) as seq(x)");
-             final Result res = stmt.execute(List.of(55))) {
+             final PQStatement stmt = client.prepare("select x, x + $1::int4 from generate_series(1, 3) as seq(x)");
+             final PQResult res = stmt.execute(List.of(55))) {
             while (res.next()) {
                 for (int col: res.iterCols()) {
                     System.out.println(res.getColumn(col));
                 }
             }
 
-            try (final Result r = client.query("select x * 1000 from generate_series(1, 3) as seq(x)")) {
+            try (final PQResult r = client.query("select x * 1000 from generate_series(1, 3) as seq(x)")) {
                 while (r.next()) {
                     System.out.println(r.getColumn(0));
                 }

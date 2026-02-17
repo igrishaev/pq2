@@ -2,6 +2,7 @@
 all: cleanup gen-h compile link
 
 cleanup:
+	find . -name '*.class' -delete
 	rm -f org_pq_Native.o libfoo.dylib
 
 compile:

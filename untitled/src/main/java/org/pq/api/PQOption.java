@@ -1,6 +1,6 @@
 package org.pq.api;
 
-public record PQconninfoOption(
+public record PQOption(
         String keyword,
         String envvar,
         String compiled,

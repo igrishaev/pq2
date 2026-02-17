@@ -1,9 +1,8 @@
 package org.pq;
 
-import org.pq.api.PGResult;
 import org.pq.api.PQClient;
-import org.pq.api.Result;
-import org.pq.api.Stmt2;
+import org.pq.api.PQResult;
+import org.pq.api.PQStatement;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -11,7 +10,7 @@ import java.util.List;
 public class PQTest {
 
     private PQClient client;
-    private Stmt2 statement;
+    private PQStatement statement;
 
     public static String sql = """
             select
@@ -31,13 +30,13 @@ public class PQTest {
             """;
 
     public PQTest() {
-        this.client = PQClient.of("host=localhost port=5432 dbname=book user=book password=book");
+        this.client = PQClient.of("host=localhost port=15432 dbname=test user=test password=test");
         this.statement = client.prepare(sql);
     }
 
     public void test() {
         Object obj;
-        try (final Result res = statement.execute(List.of())) {
+        try (final PQResult res = statement.execute(List.of())) {
             while (res.next()) {
                 for (int col = 1; col < 8; col++) {
                     obj = res.getColumn(col);

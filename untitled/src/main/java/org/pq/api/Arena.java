@@ -1,10 +1,9 @@
 package org.pq.api;
 
-import org.pq.Native2;
+import org.pq.Native;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
@@ -18,7 +17,7 @@ public record Arena (
 
     public static Arena of(final int size) {
         final ByteBuffer bb = ByteBuffer.allocateDirect(size);
-        final int initStatus = Native2.initByteBuffer(bb);
+        final int initStatus = Native.initByteBuffer(bb);
         if (initStatus != 0) {
             throw PQError.error("byte buffer init error, code: %s", initStatus);
         }

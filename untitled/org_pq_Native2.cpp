@@ -27,54 +27,6 @@ int get_int(char* bb, int& off) {
     return i;
 }
 
-// TODO: do we need it?
-char* PQ_dump_PGresult(PGresult* result, char* bb) {
-
-    // self
-    bb = put_long(bb, (long) result);
-
-    int nTuples = PQntuples(result);
-    bb = put_int(bb, nTuples);
-
-    // n of columns
-    int nColumns = PQnfields(result);
-    bb = put_int(bb, nColumns);
-
-    // columns
-    char* column;
-    Oid tableOid;
-    int format;
-    Oid oid;
-    int typeMod;
-    for (int i = 0; i < nColumns; i++) {
-
-        oid = PQftype(result, i);
-        bb = put_int(bb, oid);
-
-        format = PQfformat(result, i);
-        bb = put_int(bb, format);
-
-        tableOid = PQftable(result, i);
-        bb = put_int(bb, tableOid);
-
-        typeMod = PQfmod(result, i);
-        bb = put_int(bb, typeMod);
-
-        column = PQfname(result, i);
-        bb = put_string(bb, column);
-    }
-
-    // params
-    int nParams = PQnparams(result);
-    bb = put_int(bb, nParams);
-    for (int i = 0; i < nParams; i++) {
-        oid = PQparamtype(result, i);
-        bb = put_int(bb, oid);
-    }
-
-    return bb;
-}
-
 /*
  * Class:     org_pq_Native2
  * Method:    connect
@@ -198,21 +150,6 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native2_closeStatement
     PGconn* conn = (PGconn*) jconn;
     const char* stmtName = env->GetStringUTFChars(jstmtName, NULL);
     return (long) PQclosePrepared(conn, stmtName);
-}
-
-
-
-/*
- * Class:     org_pq_Native2
- * Method:    serializePrepared
- * Signature: (JJ)I
- */
-JNIEXPORT jint JNICALL Java_org_pq_Native2_serializePrepared
-  (JNIEnv *, jclass, jlong jresult, jlong jbb) {
-    PGresult* result = (PGresult*) jresult;
-    char* bb = (char*) jbb;
-    PQ_dump_PGresult(result, bb);
-    return 0;
 }
 
 /*
@@ -385,4 +322,15 @@ JNIEXPORT jint JNICALL Java_org_pq_Native2_nParams
 (JNIEnv *, jclass, jlong jresult) {
     PGresult* result = (PGresult*) jresult;
     return PQnparams(result);
+}
+
+/*
+ * Class:     org_pq_Native2
+ * Method:    paramOid
+ * Signature: (JI)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native2_paramOid
+(JNIEnv *, jclass, jlong jresult, jint i) {
+    PGresult* result = (PGresult*) jresult;
+    return PQparamtype(result, i);
 }

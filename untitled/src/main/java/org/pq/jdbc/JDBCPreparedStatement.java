@@ -1,6 +1,5 @@
 package org.pq.jdbc;
 
-import org.pq.api.PGResult;
 import org.pq.Native;
 
 import java.io.InputStream;
@@ -12,7 +11,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.util.Calendar;
 
-public class PQPreparedStatement implements java.sql.PreparedStatement {
+public class JDBCPreparedStatement implements java.sql.PreparedStatement {
 
     private long conn;
     private long result;
@@ -130,8 +129,7 @@ public class PQPreparedStatement implements java.sql.PreparedStatement {
 
     @Override
     public boolean execute() throws SQLException {
-        result = Native.PQexec(conn, sql);
-        return true;
+        return false;
     }
 
     @Override
@@ -165,7 +163,7 @@ public class PQPreparedStatement implements java.sql.PreparedStatement {
     }
 
     @Override
-    public PQResultSetMetaData getMetaData() throws SQLException {
+    public JDBCResultSetMetaData getMetaData() throws SQLException {
         return null;
     }
 

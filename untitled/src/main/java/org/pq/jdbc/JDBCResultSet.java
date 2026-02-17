@@ -1,7 +1,5 @@
 package org.pq.jdbc;
 
-import org.pq.api.PGResult;
-
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -10,19 +8,7 @@ import java.sql.*;
 import java.util.Calendar;
 import java.util.Map;
 
-public class PQResultSet implements java.sql.ResultSet, AutoCloseable {
-
-    private final PGResult PGResult;
-    private final int currentRow;
-
-    private PQResultSet(PGResult PGResult) {
-        this.PGResult = PGResult;
-        this.currentRow = 0;
-    }
-
-    public static PQResultSet of(PGResult PGResult) {
-        return new PQResultSet(PGResult);
-    }
+public class JDBCResultSet implements java.sql.ResultSet, AutoCloseable {
 
     @Override
     public boolean next() throws SQLException {
@@ -143,14 +129,12 @@ public class PQResultSet implements java.sql.ResultSet, AutoCloseable {
 
     @Override
     public int getInt(String columnLabel) {
-        final int i = PGResult.getColIndex(columnLabel);
-        return getInt(i);
+        return 0;
     }
 
     @Override
     public long getLong(String columnLabel) {
-        final int i = PGResult.getColIndex(columnLabel);
-        return getLong(i);
+        return 0;
     }
 
     @Override
@@ -219,7 +203,7 @@ public class PQResultSet implements java.sql.ResultSet, AutoCloseable {
     }
 
     @Override
-    public PQResultSetMetaData getMetaData() throws SQLException {
+    public JDBCResultSetMetaData getMetaData() throws SQLException {
         return null;
     }
 
@@ -589,7 +573,7 @@ public class PQResultSet implements java.sql.ResultSet, AutoCloseable {
     }
 
     @Override
-    public PQStatement getStatement() throws SQLException {
+    public JDBCStatement getStatement() throws SQLException {
         return null;
     }
 
