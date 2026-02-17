@@ -25,7 +25,7 @@ public class PQTest {
               -- time
               null                     as nil
             from
-              generate_series(1,9999) as s(x)
+              generate_series(1,99999) as s(x)
             
             """;
 
@@ -36,7 +36,7 @@ public class PQTest {
 
     public void test() {
         Object obj;
-        try (final PQResult res = statement.execute(List.of())) {
+        try (final PQResult res = statement.executeMulti(List.of(), 100)) {
             while (res.next()) {
                 for (int col = 1; col < 8; col++) {
                     obj = res.getColumn(col);
@@ -51,7 +51,7 @@ public class PQTest {
         System.out.println("Used Memory before: " + usedMemoryBefore / 1000000);
 
         long start = System.currentTimeMillis();
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 100; i++) {
             test();
         }
 //        var bb = ByteBuffer.allocateDirect(99);

@@ -27,7 +27,7 @@ public class JDBCTest {
               -- time
               null                     as nil
             from
-              generate_series(1,9999) as s(x)
+              generate_series(1,99999) as s(x)
             
             """;
 
@@ -48,7 +48,7 @@ public class JDBCTest {
         long usedMemoryBefore = runtime.totalMemory() - runtime.freeMemory();
         System.out.println("Used Memory before: " + usedMemoryBefore / 1000000);
         // working code here
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 100; i++) {
             test();
         }
         long usedMemoryAfter = runtime.totalMemory() - runtime.freeMemory();
