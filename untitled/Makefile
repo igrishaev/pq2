@@ -18,7 +18,7 @@ link:
 
 
 headers:
-	javac -h . src/main/java/org/pq/Native.java
+	javac -h . src/main/java/org/pq/Native.java src/main/java/org/pq/api/PGRES.java
 
 # javac -h . src/main/java/org/pq/Native.java src/main/java/org/pq/api/PQconninfoOption.java
 # src/main/java/org/pq/Decode.java src/main/java/org/pq/api/OID.java

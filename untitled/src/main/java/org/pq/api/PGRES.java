@@ -1,6 +1,6 @@
 package org.pq.api;
 
-enum PGRES {
+public enum PGRES {
     EMPTY_QUERY,
     COMMAND_OK,
     TUPLES_OK,

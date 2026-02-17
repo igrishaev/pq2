@@ -1,5 +1,7 @@
 package org.pq;
 
+import org.pq.api.PGRES;
+
 import java.nio.ByteBuffer;
 
 public class Native {
@@ -11,7 +13,7 @@ public class Native {
     public static native long connect(String connInfo);
     public static native void closeConnection (long conn);
     public static native int connStatus(long conn);
-    public static native int resStatus(long result);
+    public static native int resStatus(long result); // TODO
     public static native String connError(long conn);
     public static native int initByteBuffer(ByteBuffer bb);
     public static native void closeResult(long result);
@@ -33,4 +35,8 @@ public class Native {
     public static native int nParams(long result);
     public static native int paramOid(long result, int i);
     public static native long getResult(long conn);
+
+    public static PGRES resultStatus(final long result) {
+        return PGRES.of(resStatus(result));
+    }
 }

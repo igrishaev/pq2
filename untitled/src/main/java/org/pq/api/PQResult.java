@@ -63,7 +63,7 @@ public class PQResult implements AutoCloseable {
         if (isEnd && isMulti) {
             Native.closeResult(resPtr);
             final long newPtr = Native.getResult(connPtr);
-            final PGRES status = PQClient.resStatus(newPtr);
+            final PGRES status = Native.resultStatus(newPtr);
             switch (status) {
                 case TUPLES_CHUNK, TUPLES_OK -> {
                     resPtr = newPtr;

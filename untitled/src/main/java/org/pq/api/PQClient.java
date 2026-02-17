@@ -19,11 +19,6 @@ public record PQClient (
         return CONNECTION.of(Native.connStatus(connPtr));
     }
 
-    // TODO
-    public static PGRES resStatus(final long resPtr) {
-        return PGRES.of(Native.resStatus(resPtr));
-    }
-
     public static PQClient of(final String connInfo) {
 
         final Arena arena = Arena.of(Const.BB_SIZE);
@@ -55,9 +50,10 @@ public record PQClient (
 
     public PQResult query(final String query) {
         final long resPtr = Native.query(this.ptr, query);
-        final PGRES status = resStatus(resPtr);
-        if (status != PGRES.TUPLES_OK) {
-            throw error("query has failed: code: %s, SQL: %s", status, query);
+        final PGRES pgres = Native.resultStatus(resPtr);
+        switch (pgres) {
+            case TUPLES_OK -> {}
+            default -> throw error("query has failed: code: %s, SQL: %s", pgres, query);
         }
         return new PQResult(this.ptr, resPtr, arena, false);
     }
@@ -71,10 +67,13 @@ public record PQClient (
         }
         Native.setChunkedRowsMode(ptr, chunkSize);
         final long resPtr = Native.getResult(ptr);
-        final PGRES pgres = resStatus(resPtr);
-        if (pgres != PGRES.TUPLES_CHUNK) {
-            Native.closeResult(resPtr);
-            throw error("wrong status: %s", pgres);
+        final PGRES pgres = Native.resultStatus(resPtr);
+        switch (pgres) {
+            case TUPLES_CHUNK -> {}
+            default -> {
+                Native.closeResult(resPtr);
+                throw error("wrong result status: %s", pgres);
+            }
         }
         return new PQResult(ptr, resPtr, arena, true);
     }
@@ -86,27 +85,32 @@ public record PQClient (
         String message;
 
         resPtr = Native.prepare(ptr, stmtName, query);
-        status = resStatus(resPtr);
+        status = Native.resultStatus(resPtr);
         Native.closeResult(resPtr);
-        if (status != PGRES.COMMAND_OK) {
-            message = Native.connError(ptr);
-            throw error("prepare error: %s, query: %s", message, query);
-        }
-
-        resPtr = Native.describe(ptr, stmtName);
-        status = resStatus(resPtr);
-        if (status == PGRES.COMMAND_OK) {
-            final int nParams = Native.nParams(resPtr);
-            final int[] paramOids = new int[nParams];
-            for (int i = 0; i < nParams; i++) {
-                paramOids[i] = Native.paramOid(resPtr, i);
+        switch (status) {
+            case COMMAND_OK -> {}
+            default -> {
+                message = Native.connError(ptr);
+                throw error("prepare error: %s, query: %s", message, query);
             }
-            Native.closeResult(resPtr);
-            return new PQStatement(ptr, arena, stmtName, query, nParams, paramOids);
-        } else {
-            Native.closeResult(resPtr);
-            message = Native.connError(ptr);
-            throw error("describe error: %s, statement: %s", message, stmtName);
+        }
+        resPtr = Native.describe(ptr, stmtName);
+        status = Native.resultStatus(resPtr);
+        switch (status) {
+            case COMMAND_OK -> {
+                final int nParams = Native.nParams(resPtr);
+                final int[] paramOids = new int[nParams];
+                for (int i = 0; i < nParams; i++) {
+                    paramOids[i] = Native.paramOid(resPtr, i);
+                }
+                Native.closeResult(resPtr);
+                return new PQStatement(ptr, arena, stmtName, query, nParams, paramOids);
+            }
+            default -> {
+                Native.closeResult(resPtr);
+                message = Native.connError(ptr);
+                throw error("describe error: %s, statement: %s", message, stmtName);
+            }
         }
     }
 
@@ -136,7 +140,7 @@ public record PQClient (
              final PQResult res = stmt.executeMulti(List.of(10), 10)) {
             while (res.next()) {
                 for (int col: res.iterCols()) {
-                    System.out.println(res.getColumn(0));
+                    System.out.println(res.getColumn(col));
                 }
             }
 
