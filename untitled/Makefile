@@ -1,5 +1,7 @@
 
-all: cleanup gen-h compile link
+all: cleanup headers compile link
+
+
 
 cleanup:
 	find . -name '*.class' -delete
@@ -9,14 +11,15 @@ compile:
 	g++ -c -fPIC \
 		-I${JAVA_HOME}/include \
 		-I/opt/homebrew/opt/libpq/include \
-		org_pq_Native2.cpp -o org_pq_Native2.o
+		org_pq_Native.cpp -o org_pq_Native.o
 
 link:
-	g++ -dynamiclib -o libfoo2.dylib org_pq_Native2.o -lc -lpq -L/opt/homebrew/opt/libpq/lib
+	g++ -dynamiclib -o libfoo.dylib org_pq_Native.o -lc -lpq -L/opt/homebrew/opt/libpq/lib
 
 
-gen-h:
-	javac -h . src/main/java/org/pq/Native2.java
+headers:
+	javac -h . src/main/java/org/pq/Native.java
+
 # javac -h . src/main/java/org/pq/Native.java src/main/java/org/pq/api/PQconninfoOption.java
 # src/main/java/org/pq/Decode.java src/main/java/org/pq/api/OID.java
 

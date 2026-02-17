@@ -2,10 +2,8 @@
 #include <iostream>
 #include "libpq-fe.h"
 #include "org_pq_Native.h"
-#include "macro.h"
-#include "oid.h"
 
-char* put_int32(char* bb, int value) {
+char* put_int(char* bb, int value) {
     memcpy(bb, &value, 4);
     return bb += 4;
 }
@@ -15,905 +13,152 @@ char* put_long(char* bb, long value) {
     return bb += 8;
 }
 
-
 char* put_string(char* bb, char* string) {
     char* pos = stpcpy(bb + 4, string);
     int len = pos - bb - 4;
-    put_int32(bb, len);
+    put_int(bb, len);
     memcpy(bb, &len, 4);
     return pos;
 }
 
-char* PQ_serialize_row(PGresult* result, char* bb, int row) {
-
-    int nColumns = PQnfields(result);
-
-    bb = put_int32(bb, nColumns);
-
-    Oid oid;
-    int isNull;
-    int len;
-    int format;
-    char* value;
-
-    for (int col = 0; col < nColumns; col++) {
-        isNull = PQgetisnull(result, row, col);
-        bb = put_int32(bb, isNull);
-
-        if (isNull == 0) {
-            oid = PQftype(result, col);
-            format = PQfformat(result, col);
-            len = PQgetlength(result, row, col);
-            value = PQgetvalue(result, row, col);
-
-            bb = put_int32(bb, oid);
-            bb = put_int32(bb, format);
-            bb = put_int32(bb, len);
-            memcpy(bb, value, len);
-            bb += len;
-        }
-
-    }
-
-    return bb;
-
+int get_int(char* bb, int& off) {
+    int i = *((int*) (bb + off));
+    off += 4;
+    return i;
 }
-
-jclass Integer;
-jmethodID IntegerNew;
-
-// Is automatically called once the native code is loaded via System.loadLibary(...);
-jint JNI_OnLoad(JavaVM* vm, void* reserved) {
-    JNIEnv *env;
-
-    if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_8) != JNI_OK) {
-        return JNI_ERR; // JVM version not supported
-    }
-
-    Integer = env->FindClass("java/lang/Integer");
-    IntegerNew = env->GetMethodID(Integer, "<init>", "(I)V");
-
-    return JNI_VERSION_1_8;
-
-}
-
 
 /*
  * Class:     org_pq_Native
- * Method:    PQconnectdb
+ * Method:    connect
  * Signature: (Ljava/lang/String;)J
  */
-JNIEXPORT jlong JNICALL Java_org_pq_Native_PQconnectdb
+JNIEXPORT jlong JNICALL Java_org_pq_Native_connect
 (JNIEnv* env, jclass, jstring jconninfo) {
     const char* conninfo = env->GetStringUTFChars(jconninfo, 0);
-    PGconn* conn = PQconnectdb(conninfo);
-    return jPtr(conn);
-};
-
-jobjectArray PQ_read_options(JNIEnv* env, PQconninfoOption* opt) {
-
-    jstring keyword, envvar, compiled, val, label, dispchar;
-    int dispsize;
-    jobject jEl;
-
-    int len = 0;
-    while ((opt + len)->keyword != NULL) {
-        len++;
-    }
-
-    defClass(PQconninfoOption, env, "org/pq/PQconninfoOption");
-    defMethod(Init, env, PQconninfoOption, "<init>", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)V");
-
-    jobjectArray jarr = env->NewObjectArray(len, PQconninfoOption, NULL);
-
-    for (int i = 0; i < len; i++) {
-        keyword = jString(env, (opt + i)->keyword);
-        envvar = jString(env, (opt + i)->envvar);
-        compiled = jString(env, (opt + i)->compiled);
-        val = jString(env, (opt + i)->val);
-        label = jString(env, (opt + i)->label);
-        dispchar = jString(env, (opt + i)->dispchar);
-        dispsize = (opt + i)->dispsize;
-        jEl = env->NewObject(PQconninfoOption, Init, keyword, envvar, compiled, val, label, dispchar, dispsize);
-        env->SetObjectArrayElement(jarr, i, jEl);
-    }
-
-    return jarr;
-
+    return (long) PQconnectdb(conninfo);
 }
 
 /*
  * Class:     org_pq_Native
- * Method:    PQconndefaults
- * Signature: ()[Lorg/pq/PQconninfoOption;
- */
-JNIEXPORT jobjectArray JNICALL Java_org_pq_Native_PQconndefaults
-(JNIEnv* env, jclass) {
-    PQconninfoOption* opt = PQconndefaults();
-    return PQ_read_options(env, opt);
-};
-
-/*
- * Class:     org_pq_Native
- * Method:    PQconninfo
- * Signature: (J)[Lorg/pq/PQconninfoOption;
- */
-JNIEXPORT jobjectArray JNICALL Java_org_pq_Native_PQconninfo
-(JNIEnv* env, jclass, jlong jconn) {
-    PGconn* conn = getConn(jconn);
-    PQconninfoOption* opt = PQconninfo(conn);
-    return PQ_read_options(env, opt);
-};
-
-/*
- * Class:     org_pq_Native
- * Method:    PQfinish
+ * Method:    closeConnection
  * Signature: (J)V
  */
-JNIEXPORT void JNICALL Java_org_pq_Native_PQfinish
-(JNIEnv* env, jclass, jlong jconn) {
-    PGconn* conn = getConn(jconn);
-    PQfinish(conn);
-};
-
-/*
- * Class:     org_pq_Native
- * Method:    PQreset
- * Signature: (J)V
- */
-JNIEXPORT void JNICALL Java_org_pq_Native_PQreset
-(JNIEnv* env, jclass, jlong jconn) {
-    PGconn* conn = getConn(jconn);
-    PQreset(conn);
-};
-
-/*
- * Class:     org_pq_Native
- * Method:    PQping
- * Signature: (Ljava/lang/String;)J
- */
-JNIEXPORT jint JNICALL Java_org_pq_Native_PQping
-(JNIEnv* env, jclass, jstring jconninfo) {
-    const char* conninfo = cString(env, jconninfo);
-    return PQping(conninfo);
-};
-
-/*
- * Class:     org_pq_Native
- * Method:    PQstatus
- * Signature: (J)I
- */
-JNIEXPORT jint JNICALL Java_org_pq_Native_PQstatus
-(JNIEnv* env, jclass, jlong jconn) {
-    PGconn* conn = getConn(jconn);
-    return PQstatus(conn);
-};
-
-
-/*
- * Class:     org_pq_Native
- * Method:    PQtransactionStatus
- * Signature: (J)I
- */
-JNIEXPORT jint JNICALL Java_org_pq_Native_PQtransactionStatus
-(JNIEnv* env, jclass, jlong jconn) {
-    PGconn* conn = getConn(jconn);
-    return PQtransactionStatus(conn);
-};
-
-/*
- * Class:     org_pq_Native
- * Method:    PQerrorMessage
- * Signature: (J)Ljava/lang/String;
- */
-JNIEXPORT jstring JNICALL Java_org_pq_Native_PQerrorMessage
-(JNIEnv* env, jclass, jlong jconn) {
-    PGconn* conn = getConn(jconn);
-    char* ptr = PQerrorMessage(conn);
-    return jString(env, ptr);
-};
-
-/*
- * Class:     org_pq_Native
- * Method:    PQexec
- * Signature: (JLjava/lang/String;)J
- */
-JNIEXPORT jlong JNICALL Java_org_pq_Native_PQexec
-(JNIEnv* env, jclass, jlong jconn, jstring jcommand) {
-    PGconn* conn = getConn(jconn);
-    const char* command = cString(env, jcommand);
-
-    PGresult* result = PQexecParams(conn,
-                                    command,
-                                    0,
-                                    NULL,
-                                    NULL,
-                                    NULL,
-                                    NULL,
-                                    1
-                                    // 0
-                                    );
-
-    // PGresult* result = PQexec(conn, command);
-    return jPtr(result);
-};
-
-/*
- * Class:     org_pq_Native
- * Method:    PQresultStatus
- * Signature: (J)I
- */
-JNIEXPORT jint JNICALL Java_org_pq_Native_PQresultStatus
-(JNIEnv* env, jclass, jlong jresult) {
-    PGresult* result = getResult(jresult);
-    return PQresultStatus(result);
-};
-
-/*
- * Class:     org_pq_Native
- * Method:    PQresStatus
- * Signature: (I)Ljava/lang/String;
- */
-JNIEXPORT jstring JNICALL Java_org_pq_Native_PQresStatus
-(JNIEnv* env, jclass, jint jcode) {
-    char* message = PQresStatus((ExecStatusType) jcode);
-    return jString(env, message);
-};
-
-/*
- * Class:     org_pq_Native
- * Method:    PQresultErrorMessage
- * Signature: (J)Ljava/lang/String;
- */
-JNIEXPORT jstring JNICALL Java_org_pq_Native_PQresultErrorMessage
-(JNIEnv* env, jclass, jlong jresult) {
-    PGresult* result = getResult(jresult);
-    char* message = PQresultErrorMessage(result);
-    return jString(env, message);
-};
-
-/*
- * Class:     org_pq_Native
- * Method:    PQclear
- * Signature: (J)V
- */
-JNIEXPORT void JNICALL Java_org_pq_Native_PQclear
-(JNIEnv* env, jclass, jlong jresult) {
-    PGresult* result = getResult(jresult);
-    PQclear(result);
-};
-
-/*
- * Class:     org_pq_Native
- * Method:    PQntuples
- * Signature: (J)I
- */
-JNIEXPORT jint JNICALL Java_org_pq_Native_PQntuples
-    (JNIEnv* env, jclass, jlong jresult) {
-    PGresult* result = getResult(jresult);
-    return  PQntuples(result);
-};
-
-/*
- * Class:     org_pq_Native
- * Method:    PQnfields
- * Signature: (J)I
- */
-JNIEXPORT jint JNICALL Java_org_pq_Native_PQnfields
-(JNIEnv* env, jclass, jlong jresult) {
-    PGresult* result = getResult(jresult);
-    return PQnfields(result);
-};
-
-
-/*
- * Class:     org_pq_Native
- * Method:    PQgetvalue
- * Signature: (JII)Ljava/lang/String;
- */
-JNIEXPORT jstring JNICALL Java_org_pq_Native_PQgetvalue
-(JNIEnv* env, jclass, jlong jresult, jint jrow, jint jcol) {
-    PGresult* result = getResult(jresult);
-    char* ptr = PQgetvalue(result, jrow, jcol);
-    return jString(env, ptr);
-};
-
-/*
- * Class:     org_pq_Native
- * Method:    PQgetisnull
- * Signature: (JII)Z
- */
-JNIEXPORT jboolean JNICALL Java_org_pq_Native_PQgetisnull
-(JNIEnv* env, jclass, jlong jresult, jint jrow, jint jcol) {
-    PGresult* result = getResult(jresult);
-    return PQgetisnull(result, jrow, jcol);
-};
-
-/*
- * Class:     org_pq_Native
- * Method:    PQgetlength
- * Signature: (JII)I
- */
-JNIEXPORT jint JNICALL Java_org_pq_Native_PQgetlength
-(JNIEnv* env, jclass, jlong jresult, jint jrow, jint jcol) {
-    PGresult* result = getResult(jresult);
-    return PQgetlength(result, jrow, jcol);
-};
-
-short PQparseInt2(char* val, int format) {
-    if (format == 0) {
-        return std::stoi(val);
-    } else {
-        return ntohs(*((short*) val));
-    }
-}
-
-int PQparseInt4(char* val, int format) {
-    if (format == 0) {
-        return std::stoi(val);
-    } else {
-        return /*ntohl(*/ *((int*) val) /*)*/ ;
-    }
-}
-
-long PQparseInt8(char* val, int format) {
-    if (format == 0) {
-        return std::stol(val);
-    } else {
-        return ntohll(*((long*) val));
-    }
-}
-
-jobject PQJavaUUID(JNIEnv* env, char* raw, int format) {
-
-    defClass(jUUID, env, "java/util/UUID");
-    defStaticMethod(fromString, env, jUUID, "fromString", "(Ljava/lang/String;)Ljava/util/UUID;");
-    defMethod(jInit, env, jUUID, "<init>", "(JJ)V");
-
-    jstring payload;
-    long bits_low, bits_hi;
-
-    if (format == 0) {
-        payload = jString(env, raw);
-        return env->CallStaticObjectMethod(jUUID, fromString, payload);
-    } else {
-        bits_hi = ntohll(*((long*) raw));
-        bits_low = ntohll(*((long*) (raw + 8)));
-        return env->NewObject(jUUID, jInit, bits_hi, bits_low);
-        return NULL;
-    }
-}
-
-jobject PQJavaShort(JNIEnv* env, short val) {
-    defClass(jClass, env, "java/lang/Short");
-    defMethod(jInit, env, jClass, "<init>", "(S)V");
-    return env->NewObject(jClass, jInit, val);
-}
-
-jobject PQJavaInteger(JNIEnv* env, int val) {
-    // defClass(jClass, env, "java/lang/Integer");
-    // defMethod(jInit, env, jClass, "<init>", "(I)V");
-    // return env->NewObject(jClass, jInit, val);
-    return env->NewObject(Integer, IntegerNew, val);
-}
-
-jobject PQJavaLong(JNIEnv* env, long val) {
-    defClass(jClass, env, "java/lang/Long");
-    defMethod(jInit, env, jClass, "<init>", "(J)V");
-    return env->NewObject(jClass, jInit, val);
-}
-
-
-/*
- * Class:     org_pq_Native
- * Method:    getValue
- * Signature: (JII)Ljava/lang/Object;
- */
-JNIEXPORT jobject JNICALL Java_org_pq_Native_getValue
-(JNIEnv* env, jclass, jlong jresult, jint jrow, jint jcol) {
-    PGresult* result = getResult(jresult);
-    int isNull = PQgetisnull(result, jrow, jcol);
-    if (isNull == 1) {
-        return NULL;
-    }
-    char* val = PQgetvalue(result, jrow, jcol);
-    int format = PQfformat(result, jcol);
-    Oid oid = PQftype(result, jcol);
-
-    switch ((int) oid) {
-    case OID_INT2: {
-        short parsed = PQparseInt2(val, format);
-        return PQJavaShort(env, parsed);
-    }
-    case OID_INT4: {
-        int parsed = PQparseInt4(val, format);
-        return PQJavaInteger(env, parsed);
-    }
-    case OID_INT8: {
-        long parsed = PQparseInt8(val, format);
-        return PQJavaLong(env, parsed);
-    }
-    case OID_UUID: {
-        return PQJavaUUID(env, val, format);
-    }
-    case OID_TEXT: {
-        return jString(env, val);
-    }
-    default: {
-        return jString(env, val);
-    }}
-};
-
-
-/*
- * Class:     org_pq_Native
- * Method:    getInt
- * Signature: (J)I
- */
-JNIEXPORT jint JNICALL Java_org_pq_Native_getInt
-    (JNIEnv* env, jclass, jlong jresult, jint jrow, jint jcol) {
-    PGresult* result = getResult(jresult);
-
-    int isNull = PQgetisnull(result, jrow, jcol);
-    if (isNull == 1) {
-        return -1;
-    }
-    char* val = PQgetvalue(result, jrow, jcol);
-    int format = PQfformat(result, jcol);
-    Oid oid = PQftype(result, jcol);
-
-    switch ((int) oid) {
-    case OID_INT2: {
-        return -1;
-    }
-    case OID_INT4: {
-        return PQparseInt4(val, format);
-        // return 42;
-    }
-    case OID_INT8: {
-        return -1;
-    }
-    case OID_UUID: {
-        return -1;
-    }
-    case OID_TEXT: {
-        return -1;
-    }
-    default: {
-        return -1;
-    }}
-
-    return 42;
-
-};
-
-JNIEXPORT jstring JNICALL Java_org_pq_Native_getString
-  (JNIEnv *env, jclass, jlong jresult, jint jrow, jint jcol) {
-
-    PGresult* result = getResult(jresult);
-
-    int isNull = PQgetisnull(result, jrow, jcol);
-    if (isNull == 1) {
-        return NULL;
-    }
-    char* val = PQgetvalue(result, jrow, jcol);
-    int format = PQfformat(result, jcol);
-    Oid oid = PQftype(result, jcol);
-
-    // return NULL;
-    return jString(env, val);
-};
-
-/*
- * Class:     org_pq_Native
- * Method:    getBytes
- * Signature: (JII)[B
- */
-JNIEXPORT jbyteArray JNICALL Java_org_pq_Native_getBytes
-  (JNIEnv *env, jclass, jlong jresult, jint jrow, jint jcol) {
-
-    PGresult* result = getResult(jresult);
-
-    // int isNull = PQgetisnull(result, jrow, jcol);
-    // if (isNull == 1) {
-    //     return NULL;
-    // }
-    char* val = PQgetvalue(result, jrow, jcol);
-    // int format = PQfformat(result, jcol);
-    // Oid oid = PQftype(result, jcol);
-
-    int len = PQgetlength(result, jrow, jcol);
-
-    jbyteArray array = env->NewByteArray(len);
-    env->SetByteArrayRegion(array, 0, len, (jbyte*) val);
-    return array;
-
-};
-
-/*
- * Class:     org_pq_Native
- * Method:    getBB
- * Signature: (JII)Ljava/nio/ByteBuffer;
- */
-JNIEXPORT jobject JNICALL Java_org_pq_Native_getBB
-  (JNIEnv *env, jclass, jlong jresult, jint jrow, jint jcol) {
-
-    PGresult* result = getResult(jresult);
-
-    // int isNull = PQgetisnull(result, jrow, jcol);
-    // if (isNull == 1) {
-    //     return NULL;
-    // }
-    char* val = PQgetvalue(result, jrow, jcol);
-    // int format = PQfformat(result, jcol);
-    // Oid oid = PQftype(result, jcol);
-
-    int len = PQgetlength(result, jrow, jcol);
-
-    return env->NewDirectByteBuffer(val, len);
-
-};
-
-
-
-/*
- * Class:     org_pq_Native
- * Method:    getTuple
- * Signature: (JI)[Ljava/lang/Object;
- */
-JNIEXPORT jobjectArray JNICALL Java_org_pq_Native_getTuple
-    (JNIEnv* env, jclass, jlong jresult, jint jrow) {
-
-    PGresult* result = getResult(jresult);
-
-    jobjectArray jarr = env->NewObjectArray(3, env->FindClass("java/lang/Object"), NULL);
-
-    char* val;
-    int format;
-    Oid oid;
-    int isNull;
-    jobject obj;
-    int parsed;
-
-    jclass jInt = env->FindClass("java/lang/Integer");
-    jmethodID jInit = env->GetMethodID(jInt, "<init>", "(I)V");
-
-
-    for (int i = 0; i < 3; i++) {
-
-        format = PQfformat(result, i);
-        oid = PQftype(result, i);
-
-        isNull = PQgetisnull(result, jrow, i);
-        if (isNull == 1) {
-            env->SetObjectArrayElement(jarr, i, NULL);
-        } else {
-            val = PQgetvalue(result, jrow, i);
-            parsed = PQparseInt4(val, format);
-            obj = env->NewObject(jInt, jInit, parsed);
-
-            env->SetObjectArrayElement(jarr, i, obj);
-        }
-    }
-
-    return jarr;
-};
-
-
-
-/*
- * Class:     org_pq_Native
- * Method:    asLong
- * Signature: (JII)J
- */
-JNIEXPORT jlong JNICALL Java_org_pq_Native_asLong__JII
-(JNIEnv* env, jclass, jlong jresult, jint jrow, jint jcol) {
-    PGresult* result = getResult(jresult);
-    char* val = PQgetvalue(result, jrow, jcol);
-    return ntohll(*((long*) val));
-};
-
-/*
- * Class:     org_pq_Native
- * Method:    asLong
- * Signature: (JIII)J
- */
-JNIEXPORT jlong JNICALL Java_org_pq_Native_asLong__JIII
-    (JNIEnv* env, jclass, jlong jresult, jint jrow, jint jcol, jint joffset) {
-    PGresult* result = getResult(jresult);
-    char* val = PQgetvalue(result, jrow, jcol);
-    return ntohll(*((long*) (val + joffset)));
-};
-
-
- /*
- * Class:     org_pq_Native
- * Method:    writeBB
- * Signature: (Ljava/nio/ByteBuffer;)V
- */
-JNIEXPORT void JNICALL Java_org_pq_Native_writeBB
-  (JNIEnv *env, jclass, jobject bb) {
-    void* bufferPtr = env->GetDirectBufferAddress(bb);
-    // jlong capacity = env->GetDirectBufferCapacity(bb);
-    const char* sourceData = "Hello from JNI";
-    size_t dataSize = strlen(sourceData);
-    memcpy(bufferPtr, sourceData, dataSize);
-
-    // char source[] = "Hello, World!";
-    // memcpy(mem, source, 10);
-};
-
- /*
- * Class:     org_pq_Native
- * Method:    getBBAddress
- * Signature: (Ljava/nio/ByteBuffer;)J
- */
-JNIEXPORT jlong JNICALL Java_org_pq_Native_getBBAddress
-  (JNIEnv *env, jclass, jobject bb) {
-    return (jlong) env->GetDirectBufferAddress(bb);
-};
-
-
- /*
- * Class:     org_pq_Native
- * Method:    writeBBPTR
- * Signature: (J)V
- */
-JNIEXPORT void JNICALL Java_org_pq_Native_writeBBPTR
-  (JNIEnv *env, jclass, jlong jptr) {
-    void* bb = (void*) jptr;
-    const char* sourceData = "Hello from JNI";
-    size_t dataSize = strlen(sourceData);
-    memcpy(bb, sourceData, dataSize);
-};
-
-
- /*
- * Class:     org_pq_Native
- * Method:    fetchField
- * Signature: (JJ)I
- */
- JNIEXPORT jint JNICALL Java_org_pq_Native_fetchField
-     (JNIEnv *, jclass, jlong jresult, jlong jbb, jint jrow, jint jcol) {
-
-     PGresult* result = getResult(jresult);
-     char* bb = (char*) jbb;
-
-     PQ_serialize_row(result, bb, jrow);
-
-     return 0;
-};
-
-
-/*
- * Class:     org_pq_Native
- * Method:    execWithParams
- * Signature: (JJ)J
- */
-JNIEXPORT jlong JNICALL Java_org_pq_Native_execWithParams
-(JNIEnv* env, jclass, jlong jconn, jstring jsql, jlong jbb) {
+JNIEXPORT void JNICALL Java_org_pq_Native_closeConnection
+(JNIEnv *, jclass, jlong jconn) {
     PGconn* conn = (PGconn*) jconn;
-
-    char* bb = (char*) jbb;
-
-    const char* sql = env->GetStringUTFChars(jsql, NULL);
-
-    // int nParams,
-    // Oid *paramTypes,
-    // char * const *paramValues,
-    // int *paramLengths,
-    // int *paramFormats,
-    // int resultFormat
-
-    int off = 0;
-
-    int32_t nParams = *((int32_t*) (bb + off));
-    off += sizeof(int32_t);
-
-    Oid* paramTypes = (Oid*) (bb + off);
-    off += sizeof(Oid) * nParams;
-
-    char** paramValues = (char**) (bb + off);
-    off += sizeof(char*) * nParams;
-
-    int32_t* paramLengths = (int32_t*) (bb + off);
-    off += sizeof(int32_t) * nParams;;
-
-    int32_t* paramFormats = (int32_t*) (bb + off);
-    off += sizeof(int32_t) * nParams;;
-
-    int32_t resultFormat = *((int32_t*) (bb + off));
-    off += sizeof(int32_t);
-
-    printf("nParams: %d \n", nParams);
-
-    Oid* oid;
-    for (int i = 0; i < nParams; i++) {
-        oid = paramTypes + i;
-        printf("oid: %d \n", *oid);
-    }
-
-    char* ptr;
-    int val;
-    for (int i = 0; i < nParams; i++) {
-        ptr = paramValues[i];
-        val = *((int*) ptr);
-        printf("val: %d \n", htonl(val));
-    }
-
-    int* len;
-    for (int i = 0; i < nParams; i++) {
-        len = paramLengths + i;
-        printf("len: %d \n", *len);
-    }
-
-    int* fmt;
-    for (int i = 0; i < nParams; i++) {
-        fmt = paramFormats + i;
-        printf("format: %d \n", *fmt);
-    }
-
-    printf("resultFormat: %d \n", resultFormat);
-
-    PGresult* result = PQexecParams(conn,
-                                    sql,
-                                    nParams,
-                                    paramTypes,
-                                    paramValues,
-                                    paramLengths,
-                                    paramFormats,
-                                    resultFormat);
-
-    // int *paramLengths = bb[3];
-
-
-    // int resultFormat = *bb[1];
-    // Oid *paramTypes = *bb[2];
-    // int *paramFormats = *bb[2 + nParams];
-    // int *paramLengths = *bb[2 + nParams + nParams];
-
-
-    // char * const *paramValues
-
-    return (long) result;
-
-};
-
+    PQfinish(conn);
+}
 
 /*
  * Class:     org_pq_Native
- * Method:    initBB
+ * Method:    connStatus
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_connStatus
+(JNIEnv *, jclass, jlong jconn) {
+    PGconn* conn = (PGconn*) jconn;
+    return PQstatus(conn);
+}
+
+/*
+ * Class:     org_pq_Native
+ * Method:    resStatus
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_resStatus
+(JNIEnv *, jclass, jlong jresult) {
+    PGresult* result = (PGresult*) jresult;
+    return PQresultStatus(result);
+}
+
+/*
+ * Class:     org_pq_Native
+ * Method:    connError
+ * Signature: (J)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_org_pq_Native_connError
+(JNIEnv* env, jclass, jlong jconn) {
+    PGconn* conn = (PGconn*) jconn;
+    char* ptr = PQerrorMessage(conn);
+    return env->NewStringUTF(ptr);
+}
+
+/*
+ * Class:     org_pq_Native
+ * Method:    initByteBuffer
  * Signature: (Ljava/nio/ByteBuffer;)I
  */
-JNIEXPORT jint JNICALL Java_org_pq_Native_initBB
-  (JNIEnv* env, jclass, jobject jbb) {
-
+JNIEXPORT jint JNICALL Java_org_pq_Native_initByteBuffer
+(JNIEnv* env, jclass, jobject jbb) {
     void* addr = env->GetDirectBufferAddress(jbb);
     if (addr == NULL) {
         return -1;
     }
 
-    long* bb = (long*) addr;
+    char* bb = (char*) addr;
 
-    bb[0] = 1;
-    bb[1] = (long) bb;
-    bb[2] = (long) NULL;
+    bb = put_int(bb, 1);
+    bb = put_long(bb, (long) addr);
+    bb = put_long(bb, (long) NULL);
 
     return 0;
-};
-
-
-char* PQ_dump_PGresult(PGresult* result, char* bb) {
-
-    // self
-    bb = put_long(bb, (long) result);
-
-    int nTuples = PQntuples(result);
-    bb = put_int32(bb, nTuples);
-
-    // n of columns
-    int nColumns = PQnfields(result);
-    bb = put_int32(bb, nColumns);
-
-    // columns
-    char* column;
-    Oid tableOid;
-    int format;
-    Oid oid;
-    int typeMod;
-    for (int i = 0; i < nColumns; i++) {
-
-        oid = PQftype(result, i);
-        bb = put_int32(bb, oid);
-
-        format = PQfformat(result, i);
-        bb = put_int32(bb, format);
-
-        tableOid = PQftable(result, i);
-        bb = put_int32(bb, tableOid);
-
-        typeMod = PQfmod(result, i);
-        bb = put_int32(bb, typeMod);
-
-        column = PQfname(result, i);
-        bb = put_string(bb, column);
-    }
-
-    // params
-    int nParams = PQnparams(result);
-    bb = put_int32(bb, nParams);
-    for (int i = 0; i < nParams; i++) {
-        oid = PQparamtype(result, i);
-        bb = put_int32(bb, oid);
-    }
-
-    return bb;
 }
 
+/*
+ * Class:     org_pq_Native
+ * Method:    closeResult
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_org_pq_Native_closeResult
+(JNIEnv *, jclass, jlong jresult) {
+    PGresult* result = (PGresult*) jresult;
+    PQclear(result);
+}
 
 /*
  * Class:     org_pq_Native
- * Method:    PGresultInfo
- * Signature: (JLjava/nio/ByteBuffer;)I
+ * Method:    prepare
+ * Signature: (JLjava/lang/String;Ljava/lang/String;)J
  */
-JNIEXPORT jint JNICALL Java_org_pq_Native_PGresultInfo
-  (JNIEnv *, jclass, jlong jresult, jlong jbb) {
-
-    PGresult* result = getResult(jresult);
-    char* bb = (char*) jbb;
-
-    bb = PQ_dump_PGresult(result, bb);
-
-    return 0;
-
-};
-
-
-/*
- * Class:     org_pq_Native
- * Method:    _PQprepare
- * Signature: (JLjava/lang/String;Ljava/lang/String;)I
- */
-JNIEXPORT jint JNICALL Java_org_pq_Native__1PQprepare
-  (JNIEnv* env, jclass, jlong jconn, jstring jname, jstring jsql, jlong jbb) {
-
+JNIEXPORT jlong JNICALL Java_org_pq_Native_prepare
+(JNIEnv* env, jclass, jlong jconn, jstring jname, jstring jquery) {
     PGconn* conn = (PGconn*) jconn;
-    char* bb = (char*) jbb;
-
     const char* stmtName = env->GetStringUTFChars(jname, NULL);
-    const char* query = env->GetStringUTFChars(jsql, NULL);
-
-
-    // const char *stmtName
-    // int nParams
-    // const char * const *paramValues
-    // const int *paramLengths
-    // const int *paramFormats
-    // int resultFormat
-
-    PGresult* result;
-
-    result = PQprepare(conn, stmtName, query, 0, NULL);
-    // TODO: check result
-
-    result = PQdescribePrepared(conn, stmtName);
-    // TODO: check result
-
-    bb = PQ_dump_PGresult(result, bb);
-
-    return 0;
-
-
-};
+    const char* query = env->GetStringUTFChars(jquery, NULL);
+    return (long) PQprepare(conn, stmtName, query, 0, NULL);
+}
 
 /*
  * Class:     org_pq_Native
- * Method:    _PQexecPrepared
- * Signature: (JLjava/lang/String;J)I
+ * Method:    describe
+ * Signature: (JLjava/lang/String;)J
  */
-JNIEXPORT jlong JNICALL Java_org_pq_Native__1PQexecPrepared
-  (JNIEnv* env, jclass, jlong jconn, jstring jstmt, jlong jbb) {
+JNIEXPORT jlong JNICALL Java_org_pq_Native_describe
+(JNIEnv* env, jclass, jlong jconn, jstring jname) {
+    PGconn* conn = (PGconn*) jconn;
+    const char* stmtName = env->GetStringUTFChars(jname, NULL);
+    return (long) PQdescribePrepared(conn, stmtName);
+}
 
+/*
+ * Class:     org_pq_Native
+ * Method:    closeStatement
+ * Signature: (JLjava/lang/String;)J
+ */
+JNIEXPORT jlong JNICALL Java_org_pq_Native_closeStatement
+(JNIEnv* env, jclass, jlong jconn, jstring jstmtName) {
+    PGconn* conn = (PGconn*) jconn;
+    const char* stmtName = env->GetStringUTFChars(jstmtName, NULL);
+    return (long) PQclosePrepared(conn, stmtName);
+}
+
+/*
+ * Class:     org_pq_Native
+ * Method:    execPrepared
+ * Signature: (JLjava/lang/String;J)J
+ */
+JNIEXPORT jlong JNICALL Java_org_pq_Native_execPrepared
+(JNIEnv* env, jclass, jlong jconn, jstring jstmt, jlong jbb) {
     PGconn* conn = (PGconn*) jconn;
     char* bb = (char*) jbb;
 
@@ -921,8 +166,13 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native__1PQexecPrepared
 
     int off = 0;
 
+    // int nParams = get_int(bb, off);
+    // int* int_ptr = reinterpret_cast<int*>(bb);
+
     int32_t nParams = *((int32_t*) (bb + off));
     off += sizeof(int32_t);
+
+    // printf("nParams: %d, off: %d \n", nParams, off);
 
     // Oid* paramTypes = (Oid*) (bb + off);
     // off += sizeof(Oid) * nParams;
@@ -939,8 +189,6 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native__1PQexecPrepared
     int32_t resultFormat = *((int32_t*) (bb + off));
     off += sizeof(int32_t);
 
-    printf("nParams: %d \n", nParams);
-
     // Oid* oid;
     // for (int i = 0; i < nParams; i++) {
     //     oid = paramTypes + i;
@@ -952,140 +200,137 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native__1PQexecPrepared
     for (int i = 0; i < nParams; i++) {
         ptr = paramValues[i];
         val = *((int*) ptr);
-        printf("val: %d \n", htonl(val));
+        // printf("val: %d \n", htonl(val));
     }
 
     int* len;
     for (int i = 0; i < nParams; i++) {
         len = paramLengths + i;
-        printf("len: %d \n", *len);
+        // printf("len: %d \n", *len);
     }
 
     int* fmt;
     for (int i = 0; i < nParams; i++) {
         fmt = paramFormats + i;
-        printf("format: %d \n", *fmt);
+        // printf("format: %d \n", *fmt);
     }
 
-    printf("resultFormat: %d \n", resultFormat);
+    // printf("resultFormat: %d \n", resultFormat);
 
-    PGresult* result = PQexecPrepared(conn,
-                                      stmtName,
-                                      nParams,
-                                      paramValues,
-                                      paramLengths,
-                                      paramFormats,
-                                      resultFormat);
-
-    // todo check result
-
-    bb = PQ_dump_PGresult(result, bb);
-
-    return (long) bb;
-
-};
-
-
-
+    return (long) PQexecPrepared(conn,
+                                 stmtName,
+                                 nParams,
+                                 paramValues,
+                                 paramLengths,
+                                 paramFormats,
+                                 resultFormat);
+}
 
 /*
  * Class:     org_pq_Native
- * Method:    Abc
- * Signature: (JLjava/lang/String;Ljava/lang/String;J)I
+ * Method:    fieldValue
+ * Signature: (JIIJ)V
  */
-JNIEXPORT jint JNICALL Java_org_pq_Native_Abc
-  (JNIEnv* env, jclass, jlong jconn, jstring jsql, jlong jbb) {
-
-    PGconn* conn = (PGconn*) jconn;
+JNIEXPORT void JNICALL Java_org_pq_Native_fieldValue
+  (JNIEnv *, jclass, jlong jresult, jint row, jint col, jlong jbb) {
+    PGresult* result = (PGresult*) jresult;
     char* bb = (char*) jbb;
-    const char* sql = env->GetStringUTFChars(jsql, NULL);
+    char* value = PQgetvalue(result, row, col);
+    int len = PQgetlength(result, row, col);
+    memcpy(bb, value, len);
+}
 
-    int off = 0;
+JNIEXPORT jboolean JNICALL Java_org_pq_Native_fieldIsNull
+(JNIEnv *, jclass, jlong jresult, jint row, jint col) {
+    PGresult* result = (PGresult*) jresult;
+    return PQgetisnull(result, row, col);
+}
 
-    int32_t nParams = *((int32_t*) (bb + off));
-    off += sizeof(int32_t);
+/*
+ * Class:     org_pq_Native
+ * Method:    fieldOid
+ * Signature: (JI)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_fieldOid
+(JNIEnv *, jclass, jlong jresult, jint col) {
+    PGresult* result = (PGresult*) jresult;
+    return PQftype(result, col);
+}
 
-    Oid* paramTypes = (Oid*) (bb + off);
-    off += sizeof(Oid) * nParams;
+/*
+ * Class:     org_pq_Native
+ * Method:    fieldFormat
+ * Signature: (JI)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_fieldFormat
+(JNIEnv *, jclass, jlong jresult, jint col) {
+    PGresult* result = (PGresult*) jresult;
+    return PQfformat(result, col);
+}
 
-    char** paramValues = (char**) (bb + off);
-    off += sizeof(char*) * nParams;
+/*
+ * Class:     org_pq_Native
+ * Method:    fieldLength
+ * Signature: (JII)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_fieldLength
+(JNIEnv *, jclass, jlong jresult, jint row, jint col) {
+    PGresult* result = (PGresult*) jresult;
+    return PQgetlength(result, row, col);
+}
 
-    int32_t* paramLengths = (int32_t*) (bb + off);
-    off += sizeof(int32_t) * nParams;;
+/*
+ * Class:     org_pq_Native
+ * Method:    nTuples
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_nTuples
+(JNIEnv *, jclass, jlong jresult) {
+    PGresult* result = (PGresult*) jresult;
+    return PQntuples(result);
+}
 
-    int32_t* paramFormats = (int32_t*) (bb + off);
-    off += sizeof(int32_t) * nParams;;
-
-    int32_t resultFormat = *((int32_t*) (bb + off));
-    off += sizeof(int32_t);
-
-    printf("nParams: %d \n", nParams);
-
-    Oid* oid;
-    for (int i = 0; i < nParams; i++) {
-        oid = paramTypes + i;
-        printf("oid: %d \n", *oid);
-    }
-
-    char* ptr;
-    int val;
-    for (int i = 0; i < nParams; i++) {
-        ptr = paramValues[i];
-        val = *((int*) ptr);
-        printf("val: %d \n", htonl(val));
-    }
-
-    int* len;
-    for (int i = 0; i < nParams; i++) {
-        len = paramLengths + i;
-        printf("len: %d \n", *len);
-    }
-
-    int* fmt;
-    for (int i = 0; i < nParams; i++) {
-        fmt = paramFormats + i;
-        printf("format: %d \n", *fmt);
-    }
-
-    printf("resultFormat: %d \n", resultFormat);
-
-    int status;
-
-    status = PQsendQueryParams(conn,
-                               sql,
-                               nParams,
-                               paramTypes,
-                               paramValues,
-                               paramLengths,
-                               paramFormats,
-                               resultFormat);
-
-    printf("PQsendQueryPrepared: %d \n", status);
-
-    status = PQsetChunkedRowsMode(conn, 10);
-
-    printf("PQsetChunkedRowsMode: %d \n", status);
-
-    PGresult* result = PQgetResult(conn);
-
-    // todo check result
-
-    bb = PQ_dump_PGresult(result, bb);
-
-    return (long) bb;
-
-};
-
-JNIEXPORT jlong JNICALL Java_org_pq_Native_nextResult
-  (JNIEnv *, jclass, jlong jconn, jlong jbb) {
-
+/*
+ * Class:     org_pq_Native
+ * Method:    query
+ * Signature: (JLjava/lang/String;)J
+ */
+JNIEXPORT jlong JNICALL Java_org_pq_Native_query
+(JNIEnv* env, jclass, jlong jconn, jstring jquery) {
     PGconn* conn = (PGconn*) jconn;
-    PGresult* result = PQgetResult(conn);
-    char* bb = (char*) jbb;
+    const char* query = env->GetStringUTFChars(jquery, NULL);
+    return (long) PQexec(conn, query);
+}
 
-    printf("is null?: %d \n", result == NULL);
+/*
+ * Class:     org_pq_Native
+ * Method:    nColumns
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_nColumns
+(JNIEnv *, jclass, jlong jresult) {
+    PGresult* result = (PGresult*) jresult;
+    return PQnfields(result);
+}
 
-    bb = PQ_dump_PGresult(result, bb);
-    return (long) result;
-};
+/*
+ * Class:     org_pq_Native
+ * Method:    nParams
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_nParams
+(JNIEnv *, jclass, jlong jresult) {
+    PGresult* result = (PGresult*) jresult;
+    return PQnparams(result);
+}
+
+/*
+ * Class:     org_pq_Native
+ * Method:    paramOid
+ * Signature: (JI)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_paramOid
+(JNIEnv *, jclass, jlong jresult, jint i) {
+    PGresult* result = (PGresult*) jresult;
+    return PQparamtype(result, i);
+}

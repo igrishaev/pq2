@@ -6,7 +6,7 @@ public class Native {
 
     static {
         System.load("/opt/homebrew/opt/libpq/lib/libpq.dylib");
-        System.load(String.format("/Users/%s/work/pq2/untitled/libfoo2.dylib", System.getenv("USER")));
+        System.load(String.format("/Users/%s/work/pq2/untitled/libfoo.dylib", System.getenv("USER")));
     }
     public static native long connect(final String connInfo);
     public static native void closeConnection (final long connPtr);

@@ -9,379 +9,171 @@ extern "C" {
 #endif
 /*
  * Class:     org_pq_Native
- * Method:    PQconnectdb
+ * Method:    connect
  * Signature: (Ljava/lang/String;)J
  */
-JNIEXPORT jlong JNICALL Java_org_pq_Native_PQconnectdb
+JNIEXPORT jlong JNICALL Java_org_pq_Native_connect
   (JNIEnv *, jclass, jstring);
 
 /*
  * Class:     org_pq_Native
- * Method:    PQconndefaults
- * Signature: ()[Lorg/pq/api/PQconninfoOption;
- */
-JNIEXPORT jobjectArray JNICALL Java_org_pq_Native_PQconndefaults
-  (JNIEnv *, jclass);
-
-/*
- * Class:     org_pq_Native
- * Method:    PQconninfo
- * Signature: (J)[Lorg/pq/api/PQconninfoOption;
- */
-JNIEXPORT jobjectArray JNICALL Java_org_pq_Native_PQconninfo
-  (JNIEnv *, jclass, jlong);
-
-/*
- * Class:     org_pq_Native
- * Method:    PQfinish
+ * Method:    closeConnection
  * Signature: (J)V
  */
-JNIEXPORT void JNICALL Java_org_pq_Native_PQfinish
+JNIEXPORT void JNICALL Java_org_pq_Native_closeConnection
   (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     org_pq_Native
- * Method:    PQreset
- * Signature: (J)V
- */
-JNIEXPORT void JNICALL Java_org_pq_Native_PQreset
-  (JNIEnv *, jclass, jlong);
-
-/*
- * Class:     org_pq_Native
- * Method:    PQping
- * Signature: (Ljava/lang/String;)I
- */
-JNIEXPORT jint JNICALL Java_org_pq_Native_PQping
-  (JNIEnv *, jclass, jstring);
-
-/*
- * Class:     org_pq_Native
- * Method:    PQstatus
+ * Method:    connStatus
  * Signature: (J)I
  */
-JNIEXPORT jint JNICALL Java_org_pq_Native_PQstatus
+JNIEXPORT jint JNICALL Java_org_pq_Native_connStatus
   (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     org_pq_Native
- * Method:    PQtransactionStatus
+ * Method:    resStatus
  * Signature: (J)I
  */
-JNIEXPORT jint JNICALL Java_org_pq_Native_PQtransactionStatus
+JNIEXPORT jint JNICALL Java_org_pq_Native_resStatus
   (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     org_pq_Native
- * Method:    PQerrorMessage
+ * Method:    connError
  * Signature: (J)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_org_pq_Native_PQerrorMessage
+JNIEXPORT jstring JNICALL Java_org_pq_Native_connError
   (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     org_pq_Native
- * Method:    PQexec
- * Signature: (JLjava/lang/String;)J
- */
-JNIEXPORT jlong JNICALL Java_org_pq_Native_PQexec
-  (JNIEnv *, jclass, jlong, jstring);
-
-/*
- * Class:     org_pq_Native
- * Method:    PQresultStatus
- * Signature: (J)I
- */
-JNIEXPORT jint JNICALL Java_org_pq_Native_PQresultStatus
-  (JNIEnv *, jclass, jlong);
-
-/*
- * Class:     org_pq_Native
- * Method:    PQresStatus
- * Signature: (I)Ljava/lang/String;
- */
-JNIEXPORT jstring JNICALL Java_org_pq_Native_PQresStatus
-  (JNIEnv *, jclass, jint);
-
-/*
- * Class:     org_pq_Native
- * Method:    PQresultErrorMessage
- * Signature: (J)Ljava/lang/String;
- */
-JNIEXPORT jstring JNICALL Java_org_pq_Native_PQresultErrorMessage
-  (JNIEnv *, jclass, jlong);
-
-/*
- * Class:     org_pq_Native
- * Method:    PQclear
- * Signature: (J)V
- */
-JNIEXPORT void JNICALL Java_org_pq_Native_PQclear
-  (JNIEnv *, jclass, jlong);
-
-/*
- * Class:     org_pq_Native
- * Method:    PQntuples
- * Signature: (J)I
- */
-JNIEXPORT jint JNICALL Java_org_pq_Native_PQntuples
-  (JNIEnv *, jclass, jlong);
-
-/*
- * Class:     org_pq_Native
- * Method:    PQnfields
- * Signature: (J)I
- */
-JNIEXPORT jint JNICALL Java_org_pq_Native_PQnfields
-  (JNIEnv *, jclass, jlong);
-
-/*
- * Class:     org_pq_Native
- * Method:    PQfname
- * Signature: (JI)Ljava/lang/String;
- */
-JNIEXPORT jstring JNICALL Java_org_pq_Native_PQfname
-  (JNIEnv *, jclass, jlong, jint);
-
-/*
- * Class:     org_pq_Native
- * Method:    PQfnumber
- * Signature: (JLjava/lang/String;)I
- */
-JNIEXPORT jint JNICALL Java_org_pq_Native_PQfnumber
-  (JNIEnv *, jclass, jlong, jstring);
-
-/*
- * Class:     org_pq_Native
- * Method:    PQftable
- * Signature: (JI)I
- */
-JNIEXPORT jint JNICALL Java_org_pq_Native_PQftable
-  (JNIEnv *, jclass, jlong, jint);
-
-/*
- * Class:     org_pq_Native
- * Method:    PQftablecol
- * Signature: (JLjava/lang/String;)I
- */
-JNIEXPORT jint JNICALL Java_org_pq_Native_PQftablecol
-  (JNIEnv *, jclass, jlong, jstring);
-
-/*
- * Class:     org_pq_Native
- * Method:    PQfformat
- * Signature: (JI)I
- */
-JNIEXPORT jint JNICALL Java_org_pq_Native_PQfformat
-  (JNIEnv *, jclass, jlong, jint);
-
-/*
- * Class:     org_pq_Native
- * Method:    PQftype
- * Signature: (JI)I
- */
-JNIEXPORT jint JNICALL Java_org_pq_Native_PQftype
-  (JNIEnv *, jclass, jlong, jint);
-
-/*
- * Class:     org_pq_Native
- * Method:    PQfmod
- * Signature: (JI)I
- */
-JNIEXPORT jint JNICALL Java_org_pq_Native_PQfmod
-  (JNIEnv *, jclass, jlong, jint);
-
-/*
- * Class:     org_pq_Native
- * Method:    PQfsize
- * Signature: (JI)I
- */
-JNIEXPORT jint JNICALL Java_org_pq_Native_PQfsize
-  (JNIEnv *, jclass, jlong, jint);
-
-/*
- * Class:     org_pq_Native
- * Method:    PQbinaryTuples
- * Signature: (J)I
- */
-JNIEXPORT jint JNICALL Java_org_pq_Native_PQbinaryTuples
-  (JNIEnv *, jclass, jlong);
-
-/*
- * Class:     org_pq_Native
- * Method:    PQgetvalue
- * Signature: (JII)Ljava/lang/String;
- */
-JNIEXPORT jstring JNICALL Java_org_pq_Native_PQgetvalue
-  (JNIEnv *, jclass, jlong, jint, jint);
-
-/*
- * Class:     org_pq_Native
- * Method:    PQgetisnull
- * Signature: (JII)Z
- */
-JNIEXPORT jboolean JNICALL Java_org_pq_Native_PQgetisnull
-  (JNIEnv *, jclass, jlong, jint, jint);
-
-/*
- * Class:     org_pq_Native
- * Method:    PQgetlength
- * Signature: (JII)I
- */
-JNIEXPORT jint JNICALL Java_org_pq_Native_PQgetlength
-  (JNIEnv *, jclass, jlong, jint, jint);
-
-/*
- * Class:     org_pq_Native
- * Method:    nextResult
- * Signature: (JJ)J
- */
-JNIEXPORT jlong JNICALL Java_org_pq_Native_nextResult
-  (JNIEnv *, jclass, jlong, jlong);
-
-/*
- * Class:     org_pq_Native
- * Method:    Abc
- * Signature: (JLjava/lang/String;J)I
- */
-JNIEXPORT jint JNICALL Java_org_pq_Native_Abc
-  (JNIEnv *, jclass, jlong, jstring, jlong);
-
-/*
- * Class:     org_pq_Native
- * Method:    _PQprepare
- * Signature: (JLjava/lang/String;Ljava/lang/String;J)I
- */
-JNIEXPORT jint JNICALL Java_org_pq_Native__1PQprepare
-  (JNIEnv *, jclass, jlong, jstring, jstring, jlong);
-
-/*
- * Class:     org_pq_Native
- * Method:    _PQexecPrepared
- * Signature: (JLjava/lang/String;J)J
- */
-JNIEXPORT jlong JNICALL Java_org_pq_Native__1PQexecPrepared
-  (JNIEnv *, jclass, jlong, jstring, jlong);
-
-/*
- * Class:     org_pq_Native
- * Method:    initBB
+ * Method:    initByteBuffer
  * Signature: (Ljava/nio/ByteBuffer;)I
  */
-JNIEXPORT jint JNICALL Java_org_pq_Native_initBB
+JNIEXPORT jint JNICALL Java_org_pq_Native_initByteBuffer
   (JNIEnv *, jclass, jobject);
 
 /*
  * Class:     org_pq_Native
- * Method:    PGresultInfo
- * Signature: (JJ)I
- */
-JNIEXPORT jint JNICALL Java_org_pq_Native_PGresultInfo
-  (JNIEnv *, jclass, jlong, jlong);
-
-/*
- * Class:     org_pq_Native
- * Method:    execWithParams
- * Signature: (JLjava/lang/String;J)J
- */
-JNIEXPORT jlong JNICALL Java_org_pq_Native_execWithParams
-  (JNIEnv *, jclass, jlong, jstring, jlong);
-
-/*
- * Class:     org_pq_Native
- * Method:    writeBB
- * Signature: (Ljava/nio/ByteBuffer;)V
- */
-JNIEXPORT void JNICALL Java_org_pq_Native_writeBB
-  (JNIEnv *, jclass, jobject);
-
-/*
- * Class:     org_pq_Native
- * Method:    writeBBPTR
+ * Method:    closeResult
  * Signature: (J)V
  */
-JNIEXPORT void JNICALL Java_org_pq_Native_writeBBPTR
+JNIEXPORT void JNICALL Java_org_pq_Native_closeResult
   (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     org_pq_Native
- * Method:    getBBAddress
- * Signature: (Ljava/nio/ByteBuffer;)J
+ * Method:    prepare
+ * Signature: (JLjava/lang/String;Ljava/lang/String;)J
  */
-JNIEXPORT jlong JNICALL Java_org_pq_Native_getBBAddress
-  (JNIEnv *, jclass, jobject);
+JNIEXPORT jlong JNICALL Java_org_pq_Native_prepare
+  (JNIEnv *, jclass, jlong, jstring, jstring);
 
 /*
  * Class:     org_pq_Native
- * Method:    getValue
- * Signature: (JII)Ljava/lang/Object;
+ * Method:    describe
+ * Signature: (JLjava/lang/String;)J
  */
-JNIEXPORT jobject JNICALL Java_org_pq_Native_getValue
+JNIEXPORT jlong JNICALL Java_org_pq_Native_describe
+  (JNIEnv *, jclass, jlong, jstring);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    closeStatement
+ * Signature: (JLjava/lang/String;)J
+ */
+JNIEXPORT jlong JNICALL Java_org_pq_Native_closeStatement
+  (JNIEnv *, jclass, jlong, jstring);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    execPrepared
+ * Signature: (JLjava/lang/String;J)J
+ */
+JNIEXPORT jlong JNICALL Java_org_pq_Native_execPrepared
+  (JNIEnv *, jclass, jlong, jstring, jlong);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    fieldValue
+ * Signature: (JIIJ)V
+ */
+JNIEXPORT void JNICALL Java_org_pq_Native_fieldValue
+  (JNIEnv *, jclass, jlong, jint, jint, jlong);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    fieldIsNull
+ * Signature: (JII)Z
+ */
+JNIEXPORT jboolean JNICALL Java_org_pq_Native_fieldIsNull
   (JNIEnv *, jclass, jlong, jint, jint);
 
 /*
  * Class:     org_pq_Native
- * Method:    getInt
- * Signature: (JII)I
+ * Method:    fieldOid
+ * Signature: (JI)I
  */
-JNIEXPORT jint JNICALL Java_org_pq_Native_getInt
-  (JNIEnv *, jclass, jlong, jint, jint);
-
-/*
- * Class:     org_pq_Native
- * Method:    asLong
- * Signature: (JII)J
- */
-JNIEXPORT jlong JNICALL Java_org_pq_Native_asLong__JII
-  (JNIEnv *, jclass, jlong, jint, jint);
-
-/*
- * Class:     org_pq_Native
- * Method:    asLong
- * Signature: (JIII)J
- */
-JNIEXPORT jlong JNICALL Java_org_pq_Native_asLong__JIII
-  (JNIEnv *, jclass, jlong, jint, jint, jint);
-
-/*
- * Class:     org_pq_Native
- * Method:    getString
- * Signature: (JII)Ljava/lang/String;
- */
-JNIEXPORT jstring JNICALL Java_org_pq_Native_getString
-  (JNIEnv *, jclass, jlong, jint, jint);
-
-/*
- * Class:     org_pq_Native
- * Method:    getBB
- * Signature: (JII)Ljava/nio/ByteBuffer;
- */
-JNIEXPORT jobject JNICALL Java_org_pq_Native_getBB
-  (JNIEnv *, jclass, jlong, jint, jint);
-
-/*
- * Class:     org_pq_Native
- * Method:    getBytes
- * Signature: (JII)[B
- */
-JNIEXPORT jbyteArray JNICALL Java_org_pq_Native_getBytes
-  (JNIEnv *, jclass, jlong, jint, jint);
-
-/*
- * Class:     org_pq_Native
- * Method:    getTuple
- * Signature: (JI)[Ljava/lang/Object;
- */
-JNIEXPORT jobjectArray JNICALL Java_org_pq_Native_getTuple
+JNIEXPORT jint JNICALL Java_org_pq_Native_fieldOid
   (JNIEnv *, jclass, jlong, jint);
 
 /*
  * Class:     org_pq_Native
- * Method:    fetchField
- * Signature: (JJII)I
+ * Method:    fieldFormat
+ * Signature: (JI)I
  */
-JNIEXPORT jint JNICALL Java_org_pq_Native_fetchField
-  (JNIEnv *, jclass, jlong, jlong, jint, jint);
+JNIEXPORT jint JNICALL Java_org_pq_Native_fieldFormat
+  (JNIEnv *, jclass, jlong, jint);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    fieldLength
+ * Signature: (JII)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_fieldLength
+  (JNIEnv *, jclass, jlong, jint, jint);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    nTuples
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_nTuples
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    query
+ * Signature: (JLjava/lang/String;)J
+ */
+JNIEXPORT jlong JNICALL Java_org_pq_Native_query
+  (JNIEnv *, jclass, jlong, jstring);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    nColumns
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_nColumns
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    nParams
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_nParams
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    paramOid
+ * Signature: (JI)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_paramOid
+  (JNIEnv *, jclass, jlong, jint);
 
 #ifdef __cplusplus
 }
