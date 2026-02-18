@@ -23,7 +23,9 @@ jobs:
       run: echo $PROGRAMFILES
       shell: bash
     - name: foo2
-      run: echo $PROGRAMFILES\PostgreSQL\
+      run: dir C:/PROGRA~1/POSTGR~1/18/lib
+    - name: foo3
+      run: dir C:/PROGRA~1/POSTGR~1/18/include
       
   build:
     name: "Mac OS Build"
