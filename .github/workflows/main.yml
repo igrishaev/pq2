@@ -8,13 +8,13 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v4
+    - name: java
+      run: tree $JAVA_HOME\include
+      shell: bash
     - name: Set up MinGW
       uses: egor-tensin/setup-mingw@v3
       with:
         platform: x64
-    - name: java
-      run: echo $JAVA_HOME
-      shell: bash
     - name: aaa
       run: g++
     - name: Setup PostgreSQL
