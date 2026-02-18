@@ -9,7 +9,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: java
-      run: tree $JAVA_HOME\include
+      run: dir $JAVA_HOME/include
       shell: bash
     - name: Set up MinGW
       uses: egor-tensin/setup-mingw@v3
