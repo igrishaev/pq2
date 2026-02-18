@@ -8,6 +8,12 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v4
+    - name: Set up MinGW
+      uses: egor-tensin/setup-mingw@v3
+      with:
+        platform: x64
+    - name: aaa
+      run: gcc
     - name: Setup PostgreSQL
       uses: ikalnytskyi/action-setup-postgres@v8
       with:
