@@ -15,6 +15,11 @@ jobs:
         brew install gh # Installs the GitHub CLI
       # Homebrew is located in the PATH, so 'brew' commands work directly
 
-    - name: Install a cask (e.g., Microsoft Edge)
+    - name: Install libpq
       run: |
-        brew install --cask microsoft-edge # Installs the Microsoft Edge application
+        brew install libpq
+
+    - name: compile
+      run: |
+        cd untitled && make
+        
