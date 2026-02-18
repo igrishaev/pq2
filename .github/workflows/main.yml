@@ -16,10 +16,10 @@ jobs:
         # username: ci
         # password: sw0rdfish
         # database: test
-    - name: Run tests
-      run: psql -U postgres -c "SELECT 1"
+    - name: bar
+      run: echo %PG_LIBDIR%
     - name: foo
-      run: echo %programfiles%
+      run: echo %programfiles%\PostgreSQL\
       
   build:
     name: "Mac OS Build"
