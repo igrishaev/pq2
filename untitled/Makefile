@@ -15,7 +15,7 @@ compile:
 		org_pq_Native.cpp -o org_pq_Native.o
 
 link:
-	g++ -dynamiclib -o libfoo.dylib org_pq_Native.o -lc -lpq -L/opt/homebrew/opt/libpq/lib
+	g++ -dynamiclib -o libfoo.dylib org_pq_Native.o -lc -lpq -L/usr/local/opt/libpq/lib
 
 
 headers:
@@ -27,3 +27,4 @@ headers:
 # export LDFLAGS="-L/opt/homebrew/opt/libpq/lib"
 # export CPPFLAGS="-I/opt/homebrew/opt/libpq/include"
 # echo 'export PATH="/opt/homebrew/opt/libpq/bin:$PATH"' >> ~/.zshrc
+# HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
