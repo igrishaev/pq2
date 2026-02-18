@@ -17,9 +17,11 @@ jobs:
         # password: sw0rdfish
         # database: test
     - name: bar
-      run: echo %PG_LIBDIR%
+      run: echo $PG_LIBDIR
     - name: foo
-      run: echo %programfiles%\PostgreSQL\
+      run: echo $programfiles\PostgreSQL\
+    - name: foo2
+      run: echo $PROGRAMFILES\PostgreSQL\
       
   build:
     name: "Mac OS Build"
