@@ -8,8 +8,18 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v4
+    - name: Setup PostgreSQL
+      uses: ikalnytskyi/action-setup-postgres@v8
+      with:
+        postgresql-version: '15' # Specify your desired version
+        # Other optional parameters:
+        # username: ci
+        # password: sw0rdfish
+        # database: test
+    - name: Run tests
+      run: psql -U postgres -c "SELECT 1"
     - name: foo
-      run: dir $PROGRAMFILES/PostgreSQL/libraries
+      run: echo %programfiles%
       
   build:
     name: "Mac OS Build"
