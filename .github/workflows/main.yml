@@ -4,8 +4,11 @@ on: [push]
 jobs:
   build:
     runs-on: macos-latest # Specifies a GitHub-hosted macOS runner
-
+    
     steps:
+    - name: foo
+      run: tree ${JAVA_HOME}include
+      
     - name: Check out repository code
       uses: actions/checkout@v4 # Use actions/checkout@v4 (or a later version)
 
