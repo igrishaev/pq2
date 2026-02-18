@@ -8,8 +8,8 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v4
-    - name: java
-      run: dir $JAVA_HOME/include
+    - name: compile
+      run: cd untitled && g++ -c -fPIC -I${JAVA_HOME}/include -I${JAVA_HOME}/include/win32 -IC:/PROGRA~1/POSTGR~1/18/include org_pq_Native.cpp -o org_pq_Native.o
       shell: bash
     - name: Set up MinGW
       uses: egor-tensin/setup-mingw@v3
