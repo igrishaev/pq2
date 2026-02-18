@@ -13,7 +13,7 @@ jobs:
       with:
         platform: x64
     - name: aaa
-      run: g++
+      run: g++ --version
     - name: Setup PostgreSQL
       uses: ikalnytskyi/action-setup-postgres@v8
       with:
