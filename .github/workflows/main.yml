@@ -3,7 +3,7 @@ on: [push]
 
 jobs:
 
-build2:
+  build2:
     name: windows
     runs-on: windows-latest
     steps:
@@ -16,8 +16,8 @@ build2:
         PGPORT: 5432
         PGUSER: postgres
     - name: foo
-      run: "dir C:\Program Files\PostgreSQL\libraries"
-
+      run: dir $PROGRAMFILES/PostgreSQL/libraries
+      
   build:
     name: "Mac OS Build"
     runs-on: macos-15-intel # macos-26 macos-15-intel
