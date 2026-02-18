@@ -12,8 +12,11 @@ jobs:
       uses: egor-tensin/setup-mingw@v3
       with:
         platform: x64
+    - name: java
+      run: echo $JAVA_HOME
+      shell: bash
     - name: aaa
-      run: gcc
+      run: g++
     - name: Setup PostgreSQL
       uses: ikalnytskyi/action-setup-postgres@v8
       with:
