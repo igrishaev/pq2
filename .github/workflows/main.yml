@@ -18,8 +18,10 @@ jobs:
         # database: test
     - name: bar
       run: echo $PG_LIBDIR
+      shell: bash
     - name: foo
-      run: echo $programfiles\PostgreSQL\
+      run: echo $PROGRAMFILES
+      shell: bash
     - name: foo2
       run: echo $PROGRAMFILES\PostgreSQL\
       
