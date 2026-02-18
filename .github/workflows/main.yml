@@ -2,6 +2,22 @@ name: Build on macOS
 on: [push]
 
 jobs:
+
+build2:
+    name: windows
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Run SQL command
+      run: psql -U postgres -c "SELECT 1"
+      # Environment variables can be set if needed
+      env:
+        PGHOST: localhost
+        PGPORT: 5432
+        PGUSER: postgres
+    - name: foo
+      run: "dir C:\Program Files\PostgreSQL\libraries"
+
   build:
     name: "Mac OS Build"
     runs-on: macos-15-intel # macos-26 macos-15-intel
