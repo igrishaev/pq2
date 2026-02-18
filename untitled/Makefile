@@ -9,7 +9,7 @@ cleanup:
 
 compile:
 	g++ -c -fPIC \
-		-I${JAVA_HOME}include/darwin \
+		-I${JAVA_HOME}include \
 		-I/opt/homebrew/opt/libpq/include \
 		org_pq_Native.cpp -o org_pq_Native.o
 
