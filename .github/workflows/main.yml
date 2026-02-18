@@ -25,4 +25,9 @@ jobs:
     - name: compile
       run: |
         cd untitled && make
-        
+
+    - name: save file
+      uses: actions/upload-artifact@v4
+      with:
+        name: the_lib
+        path: untitled/libfoo.dylib
