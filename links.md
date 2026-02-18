@@ -19,3 +19,6 @@ https://stackoverflow.com/questions/10617735/in-jni-how-do-i-cache-the-class-met
 
 JNI Performance - Welcome to the dark side
 http://normanmaurer.me/blog/2014/01/07/JNI-Performance-Welcome-to-the-dark-side/
+
+Standard GitHub-hosted runners for public repositories
+https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#standard-github-hosted-runners-for-public-repositories
