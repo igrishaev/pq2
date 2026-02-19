@@ -45,9 +45,6 @@ jobs:
     name: "Mac OS Intel"
     runs-on: macos-15-intel
 
-    env:
-      LIBPQ: /usr/local/opt/libpq
-
     steps:
       - name: Check out
         uses: actions/checkout@v4
@@ -73,9 +70,6 @@ jobs:
   mac-m1:
     name: "Mac OS M1"
     runs-on: macos-26
-
-    env:
-      LIBPQ: /opt/homebrew/opt/libpq
 
     steps:
       - name: Check out

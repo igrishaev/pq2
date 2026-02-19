@@ -11,15 +11,14 @@ cleanup:
 
 FILENAME = $(shell java src/main/java/org/pq/tool/OS.java)
 
-LIBPQ ?= $(error Please specify full path to libpq)
-# LIBPQ = /opt/homebrew/opt/libpq
-# LIBPQ = /usr/local/opt/libpq
+LIBPQ_LIB = $(shell pg_config --libdir)
+LIBPQ_INCLUDE = $(shell pg_config --includedir)
 
 # remove trailing slash
 JAVA_HOME := $(shell echo $${JAVA_HOME%/})
 
-CPPFLAGS = -I${LIBPQ}/include -I${JAVA_HOME}/include -I${JAVA_HOME}/include/darwin -I${JAVA_HOME}/include/win32 -I${JAVA_HOME}/include/linux
-LDFLAGS = -L${LIBPQ}/lib
+CPPFLAGS = -I${LIBPQ_INCLUDE} -I${JAVA_HOME}/include -I${JAVA_HOME}/include/darwin -I${JAVA_HOME}/include/win32 -I${JAVA_HOME}/include/linux
+LDFLAGS = -L${LIBPQ_LIB}
 
 $(info JAVA_HOME=${JAVA_HOME})
 $(info LIBPQ=${LIBPQ})
