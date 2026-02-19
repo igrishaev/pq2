@@ -1,5 +1,7 @@
-name: Build on macOS
-on: [push]
+name: Build on various systems
+
+env:
+  HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
 
 jobs:
 
@@ -35,34 +37,59 @@ jobs:
       run: dir C:/PROGRA~1/POSTGR~1/18/lib
     - name: foo3
       run: dir C:/PROGRA~1/POSTGR~1/18/include
-      
-  build:
-    name: "Mac OS Build"
-    runs-on: macos-15-intel # macos-26 macos-15-intel
 
-    steps:
-    - name: foo
-      run: ls -l ${JAVA_HOME}include
+  mac-intel:
+    name: "Mac OS Intel"
+    runs-on: macos-15-intel
 
-    - name: Check out repository code
-      uses: actions/checkout@v4 # Use actions/checkout@v4 (or a later version)
+    env:
+      LIBPQ: /usr/local/opt/libpq
 
-    - name: Update Homebrew and install a formula (e.g., GitHub CLI)
+    - name: Check out
+      uses: actions/checkout@v4
+
+    - name: Install Homebrew & stuff
       run: |
         brew update
-        brew install gh # Installs the GitHub CLI
-      # Homebrew is located in the PATH, so 'brew' commands work directly
-
-    - name: Install libpq
-      run: |
+        brew install gh
         brew install libpq
 
     - name: compile
       run: |
         cd untitled && make
 
-    - name: save file
+    - run: ls -l untitled
+
+    - name: Save artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: the_lib
+        name: foo
         path: untitled/libfoo.dylib
+
+  mac-m1:
+    name: "Mac OS M1"
+    runs-on: macos-26
+
+    env:
+      LIBPQ: /opt/homebrew/opt/libpq
+
+    - name: Check out
+      uses: actions/checkout@v4
+
+    - name: Install Homebrew & stuff
+      run: |
+        brew update
+        brew install gh
+        brew install libpq
+
+    - name: compile
+      run: |
+        cd untitled && make
+
+    - run: ls -l untitled
+
+    - name: Save artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: macos_aarch64.lib
+        path: untitled/macos_aarch64.lib

@@ -11,18 +11,18 @@ cleanup:
 
 FILENAME = $(shell java src/main/java/org/pq/tool/OS.java)
 
-LIBPQ = /opt/homebrew/opt/libpq
+LIBPQ ?= $(error Please specify full path to libpq)
+# LIBPQ = /opt/homebrew/opt/libpq
 # LIBPQ = /usr/local/opt/libpq
 
 # remove trailing slash
 JAVA_HOME := $(shell echo $${JAVA_HOME%/})
 
-$(info JAVA_HOME=${JAVA_HOME})
-$(info LIBPQ=${LIBPQ})
-
 CPPFLAGS = -I${LIBPQ}/include -I${JAVA_HOME}/include -I${JAVA_HOME}/include/darwin
 LDFLAGS = -L${LIBPQ}/lib
 
+$(info JAVA_HOME=${JAVA_HOME})
+$(info LIBPQ=${LIBPQ})
 $(info LDFLAGS=${LDFLAGS})
 $(info CPPFLAGS=${CPPFLAGS})
 $(info FILENAME=${FILENAME})
@@ -37,5 +37,3 @@ link:
 
 headers:
 	javac -h . src/main/java/org/pq/Native.java src/main/java/org/pq/api/PGRES.java
-
-# HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK=1
