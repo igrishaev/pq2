@@ -1,4 +1,5 @@
 name: Build on various systems
+on: push
 
 env:
   HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
