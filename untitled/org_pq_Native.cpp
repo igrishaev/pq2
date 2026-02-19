@@ -1,32 +1,31 @@
 #include <jni.h>
+// #include <cstdio>
+// #include <string.h>
 // #include <cstdint>
 #include <iostream>
 #include "libpq-fe.h"
 #include "org_pq_Native.h"
 
-char* put_int(char* bb, int value) {
-    memcpy(bb, &value, 4);
-    return bb += 4;
+#define SIZE_LONG sizeof(jlong)
+#define SIZE_INT sizeof(jint)
+
+char* put_int(char* bb, jint value) {
+    memcpy(bb, &value, SIZE_INT);
+    return bb += SIZE_INT;
 }
 
-char* put_long(char* bb, long value) {
-    memcpy(bb, &value, 8);
-    return bb += 8;
+char* put_long(char* bb, jlong value) {
+    memcpy(bb, &value, SIZE_LONG);
+    return bb += SIZE_LONG;
 }
 
-char* put_string(char* bb, char* string) {
-    char* pos = stpcpy(bb + 4, string);
-    int len = pos - bb - 4;
-    put_int(bb, len);
-    memcpy(bb, &len, 4);
-    return pos;
-}
-
-int get_int(char* bb, int& off) {
-    int i = *((int*) (bb + off));
-    off += 4;
-    return i;
-}
+// char* put_string(char* bb, char* string) {
+//     char* pos = std::stpcpy(bb + SIZE_INT, string);
+//     int len = pos - bb - SIZE_INT;
+//     put_int(bb, len);
+//     memcpy(bb, &len, SIZE_INT);
+//     return pos;
+// }
 
 /*
  * Class:     org_pq_Native
@@ -99,8 +98,8 @@ JNIEXPORT jint JNICALL Java_org_pq_Native_initByteBuffer
     char* bb = (char*) addr;
 
     bb = put_int(bb, 1);
-    bb = put_long(bb, (long) addr);
-    bb = put_long(bb, (long) NULL);
+    bb = put_long(bb, (jlong) addr);
+    bb = put_long(bb, (jlong) NULL);
 
     return 0;
 }
@@ -166,9 +165,6 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_execPrepared
     const char* stmtName = env->GetStringUTFChars(jstmtName, NULL);
 
     int off = 0;
-
-    // int nParams = get_int(bb, off);
-    // int* int_ptr = reinterpret_cast<int*>(bb);
 
     int32_t nParams = *((int32_t*) (bb + off));
     off += sizeof(int32_t);
@@ -243,9 +239,6 @@ JNIEXPORT jint JNICALL Java_org_pq_Native_sendQueryPrepared
     const char* stmtName = env->GetStringUTFChars(jstmtName, NULL);
 
     int off = 0;
-
-    // int nParams = get_int(bb, off);
-    // int* int_ptr = reinterpret_cast<int*>(bb);
 
     int32_t nParams = *((int32_t*) (bb + off));
     off += sizeof(int32_t);
