@@ -1,6 +1,6 @@
 #include <jni.h>
 // #include <cstdio>
-// #include <string.h>
+#include <cstring>
 // #include <cstdint>
 #include <iostream>
 #include "libpq-fe.h"
