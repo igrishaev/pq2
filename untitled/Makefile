@@ -36,7 +36,7 @@ compile:
 	g++ -c -fPIC ${CPPFLAGS} ${OBJ}.cpp -o ${OBJ}.o
 
 link:
-	g++ -dynamiclib -o ${FILENAME}.lib ${OBJ}.o -lc -lpq ${LDFLAGS}
+	g++ -dynamiclib -o ${FILENAME}.lib ${OBJ}.o -lc -lpq ${LDFLAGS} -shared
 
 headers:
 	javac -h . src/main/java/org/pq/Native.java src/main/java/org/pq/api/PGRES.java
