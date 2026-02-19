@@ -7,37 +7,33 @@ env:
 jobs:
 
   windows-x64:
-    name: windows
+    name: Windows x64
     runs-on: windows-2025
+
+    env:
+      LIBPQ: "C:/PROGRA~1/POSTGR~1/18"
+
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up MinGW
-      uses: egor-tensin/setup-mingw@v3
-      with:
-        platform: x64
-    - name: aaa
-      run: g++ --version
-    - name: Setup PostgreSQL
-      uses: ikalnytskyi/action-setup-postgres@v8
-      with:
-        postgresql-version: '18' # Specify your desired version
-        # Other optional parameters:
-        # username: ci
-        # password: sw0rdfish
-        # database: test
-    - name: compile
-      run: cd untitled && g++ -c -fPIC -I${JAVA_HOME}/include -I${JAVA_HOME}/include/win32 -IC:/PROGRA~1/POSTGR~1/18/include org_pq_Native.cpp -o org_pq_Native.o
-      shell: bash
-    - name: bar
-      run: echo $PG_LIBDIR
-      shell: bash
-    - name: foo
-      run: echo $PROGRAMFILES
-      shell: bash
-    - name: foo2
-      run: dir C:/PROGRA~1/POSTGR~1/18/lib
-    - name: foo3
-      run: dir C:/PROGRA~1/POSTGR~1/18/include
+      - uses: actions/checkout@v4
+      - name: MinGW
+        uses: egor-tensin/setup-mingw@v3
+        with:
+          platform: x64
+      # TODO: do we need this?
+      - name: PostgreSQL
+        uses: ikalnytskyi/action-setup-postgres@v8
+        with:
+          postgresql-version: '15' # Specify your desired version
+          # Other optional parameters:
+          # username: ci
+          # password: sw0rdfish
+          # database: test
+      - name: compile
+        run: cd untitled && make
+        # run: cd untitled && g++ -c -fPIC -I${JAVA_HOME}/include -I${JAVA_HOME}/include/win32 -IC:/PROGRA~1/POSTGR~1/18/include org_pq_Native.cpp -o org_pq_Native.o
+        shell: bash
+      - run: ls -l untitled
+        shell: bash
 
   mac-intel:
     name: "Mac OS Intel"
@@ -65,8 +61,8 @@ jobs:
       - name: Save artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: foo
-          path: untitled/libfoo.dylib
+          name: macos_x86_64.lib
+          path: untitled/macos_x86_64.lib
 
   mac-m1:
     name: "Mac OS M1"
