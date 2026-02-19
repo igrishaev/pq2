@@ -52,8 +52,7 @@ jobs:
       - name: Install Homebrew & stuff
         run: |
           brew update
-          brew install gh
-          brew install postgresql
+          brew install libpq
 
       - run: pg_config
 
@@ -80,8 +79,7 @@ jobs:
       - name: Install Homebrew & stuff
         run: |
           brew update
-          brew install gh
-          brew install postgresql
+          brew install libpq
 
       - run: pg_config
 
