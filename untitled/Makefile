@@ -18,7 +18,7 @@ LIBPQ ?= $(error Please specify full path to libpq)
 # remove trailing slash
 JAVA_HOME := $(shell echo $${JAVA_HOME%/})
 
-CPPFLAGS = -I${LIBPQ}/include -I${JAVA_HOME}/include -I${JAVA_HOME}/include/darwin
+CPPFLAGS = -I${LIBPQ}/include -I${JAVA_HOME}/include -I${JAVA_HOME}/include/darwin -I${JAVA_HOME}/include/win32
 LDFLAGS = -L${LIBPQ}/lib
 
 $(info JAVA_HOME=${JAVA_HOME})
