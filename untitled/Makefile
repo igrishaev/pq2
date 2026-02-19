@@ -7,9 +7,14 @@ classes:
 cleanup:
 	rm -f org_pq_Native.o libfoo.dylib
 
+# LIBPQ = /opt/homebrew/opt/libpq
+LIBPQ = /usr/local/opt/libpq
 
-LIBPQ = /opt/homebrew/opt/libpq
-# LIBPQ = /usr/local/opt/libpq
+# remove trailing slash
+JAVA_HOME := $(shell echo $${JAVA_HOME%/})
+
+$(info JAVA_HOME=${JAVA_HOME})
+$(info LIBPQ=${LIBPQ})
 
 compile:
 	g++ -c -fPIC \
