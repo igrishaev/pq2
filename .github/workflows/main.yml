@@ -117,12 +117,12 @@ jobs:
 
       - name: compile
         run: |
-          cd untitled && make LIBPQ_LIB=/usr/lib/x86_64-linux-gnu LIBPQ_INC=/usr/include/postgresql
+          cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
 
       - run: ls -l untitled
 
       - name: Save artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: foo
-          path: untitled/foo
+          name: linux_amd64.lib
+          path: untitled/linux_amd64.lib
