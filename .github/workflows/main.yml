@@ -111,6 +111,8 @@ jobs:
           sudo apt update
           sudo apt install -y libpq-dev
 
+      - run: pg_config
+
       - name: compile
         run: |
           cd untitled && make
