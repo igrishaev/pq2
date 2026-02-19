@@ -117,7 +117,7 @@ jobs:
 
       - name: compile
         run: |
-          cd untitled && make
+          cd untitled && make LIBPQ_LIB=/usr/lib/x86_64-linux-gnu LIBPQ_INC=/usr/include/postgresql
 
       - run: ls -l untitled
 
