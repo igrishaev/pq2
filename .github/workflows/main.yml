@@ -5,9 +5,9 @@ env:
 
 jobs:
 
-  build2:
+  windows-x64:
     name: windows
-    runs-on: windows-latest
+    runs-on: windows-2025
     steps:
     - uses: actions/checkout@v4
     - name: Set up MinGW
@@ -19,7 +19,7 @@ jobs:
     - name: Setup PostgreSQL
       uses: ikalnytskyi/action-setup-postgres@v8
       with:
-        postgresql-version: '15' # Specify your desired version
+        postgresql-version: '18' # Specify your desired version
         # Other optional parameters:
         # username: ci
         # password: sw0rdfish
@@ -45,26 +45,27 @@ jobs:
     env:
       LIBPQ: /usr/local/opt/libpq
 
-    - name: Check out
-      uses: actions/checkout@v4
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
 
-    - name: Install Homebrew & stuff
-      run: |
-        brew update
-        brew install gh
-        brew install libpq
+      - name: Install Homebrew & stuff
+        run: |
+          brew update
+          brew install gh
+          brew install libpq
 
-    - name: compile
-      run: |
-        cd untitled && make
+      - name: compile
+        run: |
+          cd untitled && make
 
-    - run: ls -l untitled
+      - run: ls -l untitled
 
-    - name: Save artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: foo
-        path: untitled/libfoo.dylib
+      - name: Save artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: foo
+          path: untitled/libfoo.dylib
 
   mac-m1:
     name: "Mac OS M1"
@@ -73,23 +74,24 @@ jobs:
     env:
       LIBPQ: /opt/homebrew/opt/libpq
 
-    - name: Check out
-      uses: actions/checkout@v4
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
 
-    - name: Install Homebrew & stuff
-      run: |
-        brew update
-        brew install gh
-        brew install libpq
+      - name: Install Homebrew & stuff
+        run: |
+          brew update
+          brew install gh
+          brew install libpq
 
-    - name: compile
-      run: |
-        cd untitled && make
+      - name: compile
+        run: |
+          cd untitled && make
 
-    - run: ls -l untitled
+      - run: ls -l untitled
 
-    - name: Save artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: macos_aarch64.lib
-        path: untitled/macos_aarch64.lib
+      - name: Save artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos_aarch64.lib
+          path: untitled/macos_aarch64.lib
