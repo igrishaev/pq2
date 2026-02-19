@@ -1,4 +1,5 @@
 #include <jni.h>
+// #include <cstdint>
 #include <iostream>
 #include "libpq-fe.h"
 #include "org_pq_Native.h"
@@ -35,7 +36,7 @@ int get_int(char* bb, int& off) {
 JNIEXPORT jlong JNICALL Java_org_pq_Native_connect
 (JNIEnv* env, jclass, jstring jconninfo) {
     const char* conninfo = env->GetStringUTFChars(jconninfo, 0);
-    return (long) PQconnectdb(conninfo);
+    return (jlong) PQconnectdb(conninfo);
 }
 
 /*
@@ -125,7 +126,7 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_prepare
     PGconn* conn = (PGconn*) jconn;
     const char* stmtName = env->GetStringUTFChars(jname, NULL);
     const char* query = env->GetStringUTFChars(jquery, NULL);
-    return (long) PQprepare(conn, stmtName, query, 0, NULL);
+    return (jlong) PQprepare(conn, stmtName, query, 0, NULL);
 }
 
 /*
@@ -137,7 +138,7 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_describe
 (JNIEnv* env, jclass, jlong jconn, jstring jname) {
     PGconn* conn = (PGconn*) jconn;
     const char* stmtName = env->GetStringUTFChars(jname, NULL);
-    return (long) PQdescribePrepared(conn, stmtName);
+    return (jlong) PQdescribePrepared(conn, stmtName);
 }
 
 /*
@@ -149,7 +150,7 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_closeStatement
 (JNIEnv* env, jclass, jlong jconn, jstring jstmtName) {
     PGconn* conn = (PGconn*) jconn;
     const char* stmtName = env->GetStringUTFChars(jstmtName, NULL);
-    return (long) PQclosePrepared(conn, stmtName);
+    return (jlong) PQclosePrepared(conn, stmtName);
 }
 
 /*
@@ -217,7 +218,7 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_execPrepared
 
     // printf("resultFormat: %d \n", resultFormat);
 
-    return (long) PQexecPrepared(conn,
+    return (jlong) PQexecPrepared(conn,
                                  stmtName,
                                  nParams,
                                  paramValues,
@@ -377,7 +378,7 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_query
 (JNIEnv* env, jclass, jlong jconn, jstring jquery) {
     PGconn* conn = (PGconn*) jconn;
     const char* query = env->GetStringUTFChars(jquery, NULL);
-    return (long) PQexec(conn, query);
+    return (jlong) PQexec(conn, query);
 }
 
 /*
@@ -444,5 +445,5 @@ JNIEXPORT jint JNICALL Java_org_pq_Native_paramOid
 JNIEXPORT jlong JNICALL Java_org_pq_Native_getResult
 (JNIEnv *, jclass, jlong jconn) {
     PGconn* conn = (PGconn*) jconn;
-    return (long) PQgetResult(conn);
+    return (jlong) PQgetResult(conn);
 }

@@ -7,15 +7,19 @@ classes:
 cleanup:
 	rm -f org_pq_Native.o libfoo.dylib
 
+
+LIBPQ = /opt/homebrew/opt/libpq
+# LIBPQ = /usr/local/opt/libpq
+
 compile:
 	g++ -c -fPIC \
-		-I${JAVA_HOME}include \
-		-I${JAVA_HOME}include/darwin \
-		-I/usr/local/opt/libpq/include \
+		-I${JAVA_HOME}/include \
+		-I${JAVA_HOME}/include/darwin \
+		-I${LIBPQ}/include \
 		org_pq_Native.cpp -o org_pq_Native.o
 
 link:
-	g++ -dynamiclib -o libfoo.dylib org_pq_Native.o -lc -lpq -L/usr/local/opt/libpq/lib
+	g++ -dynamiclib -o libfoo.dylib org_pq_Native.o -lc -lpq -L${LIBPQ}/lib
 
 
 headers:
