@@ -55,6 +55,8 @@ jobs:
           brew install gh
           brew install libpq
 
+      - run: pg_config
+
       - name: compile
         run: |
           cd untitled && make
@@ -80,6 +82,8 @@ jobs:
           brew update
           brew install gh
           brew install libpq
+
+      - run: pg_config
 
       - name: compile
         run: |
