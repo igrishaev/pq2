@@ -14,21 +14,23 @@ jobs:
       LIBPQ: "C:/PROGRA~1/POSTGR~1/18"
 
     steps:
-      - run: pg_config
       - uses: actions/checkout@v4
       - name: MinGW
         uses: egor-tensin/setup-mingw@v3
         with:
           platform: x64
-      # TODO: do we need this?
-      # - name: PostgreSQL
-      #   uses: ikalnytskyi/action-setup-postgres@v8
-      #   with:
-      #     postgresql-version: '15' # Specify your desired version
-      #     # Other optional parameters:
-      #     # username: ci
-      #     # password: sw0rdfish
-      #     # database: test
+
+      # Windows ships Postgres 16 by default which is too old.
+      # PQclosePrepared' was not declared in this scope and
+      # other compilation errors
+
+      - name: PostgreSQL
+        uses: ikalnytskyi/action-setup-postgres@v8
+        with:
+          postgresql-version: '18'
+
+      - run: pg_config
+
       - name: compile
         run: cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
         shell: bash
