@@ -45,37 +45,37 @@ jobs:
   #         name: artifacts-${{ matrix.os }}
   #         path: untitled/*.lib
 
-  # macOS:
-  #   name: "macOS"
+  macOS:
+    name: "macOS"
 
-  #   strategy:
-  #     matrix:
-  #       os: [macos-15-intel, macos-26]
+    strategy:
+      matrix:
+        os: [macos-15-intel, macos-26]
 
-  #   runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
 
-  #   steps:
-  #     - name: Check out
-  #       uses: actions/checkout@v4
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
 
-  #     - name: Install libpq
-  #       run: |
-  #         brew update
-  #         brew install libpq@18
+      - name: Install libpq
+        run: |
+          brew update
+          brew install libpq@18
 
-  #     - run: pg_config
+      - run: pg_config
 
-  #     - name: compile
-  #       run: |
-  #         cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
+      - name: compile
+        run: |
+          cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
 
-  #     - run: ls -l untitled
+      - run: ls -l untitled
 
-  #     - name: Save artifacts
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: artifacts-${{ matrix.os }}
-  #         path: untitled/*.lib
+      - name: Save artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts-${{ matrix.os }}
+          path: untitled/*.lib
 
   Linux:
 
