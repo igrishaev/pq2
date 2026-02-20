@@ -20,14 +20,14 @@ jobs:
         with:
           platform: x64
       # TODO: do we need this?
-      # - name: PostgreSQL
-      #   uses: ikalnytskyi/action-setup-postgres@v8
-      #   with:
-      #     postgresql-version: '15' # Specify your desired version
-      #     # Other optional parameters:
-      #     # username: ci
-      #     # password: sw0rdfish
-      #     # database: test
+      - name: PostgreSQL
+        uses: ikalnytskyi/action-setup-postgres@v8
+        with:
+          postgresql-version: '15' # Specify your desired version
+          # Other optional parameters:
+          # username: ci
+          # password: sw0rdfish
+          # database: test
       - name: compile
         run: cd untitled && make
         # run: cd untitled && g++ -c -fPIC -I${JAVA_HOME}/include -I${JAVA_HOME}/include/win32 -IC:/PROGRA~1/POSTGR~1/18/include org_pq_Native.cpp -o org_pq_Native.o
