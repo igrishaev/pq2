@@ -12,6 +12,8 @@ jobs:
       matrix:
         os:
           - name: windows-2025
+            sys: mingw64
+            env: x86_64
           # - name: windows-11-arm
 
     runs-on: ${{ matrix.os.name }}
@@ -23,8 +25,12 @@ jobs:
 
       - uses: msys2/setup-msys2@v2
         with:
-          msystem: ucrt64 # mingw64
-          install: mingw-w64-ucrt-x86_64-openssl # mingw-w64-x86_64-openssl
+          msystem: ${{ matrix.os.sys }}
+          install: >-
+            mingw-w64-${{ matrix.os.env }}-openssl
+            mingw-w64-${{ matrix.os.env }}-make
+            mingw-w64-${{ matrix.os.env }}-gcc
+
 
       - run: g++ --version
 
