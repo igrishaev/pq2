@@ -23,6 +23,18 @@ jobs:
       - name: Check out
         uses: actions/checkout@v4
 
+      - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed
+        shell: bash
+
+      - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed/x64-windows
+        shell: bash
+
+      - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed/x64-windows/lib
+        shell: bash
+
+      - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed/x64-windows/include
+        shell: bash
+
       - run: vcpkg install libpq
 
       # - name: Setup MSYS2
