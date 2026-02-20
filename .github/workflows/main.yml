@@ -23,10 +23,10 @@ jobs:
       - name: Check out
         uses: actions/checkout@v4
 
-      - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed
+      - run: tree ${VCPKG_INSTALLATION_ROOT}
         shell: bash
 
-      - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed/x64-windows
+      - run: ls -l ${VCPKG_INSTALLATION_ROOT}\installed\x64-windows
         shell: bash
 
       - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed/x64-windows/lib
