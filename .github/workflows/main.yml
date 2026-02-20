@@ -63,49 +63,16 @@ jobs:
   #         name: artifacts-${{ matrix.os.name }}
   #         path: untitled/*.lib
 
-  # macOS:
-  #   name: "macOS"
-
-  #   strategy:
-  #     matrix:
-  #       os:
-  #         - name: macos-15-intel
-  #           libpq: /usr/local/opt/libpq
-  #         - name: macos-26
-  #           libpq: /opt/homebrew/opt/libpq
-
-  #   runs-on: ${{ matrix.os.name }}
-
-  #   steps:
-  #     - name: Check out
-  #       uses: actions/checkout@v4
-
-  #     - name: Install libpq
-  #       run: |
-  #         brew update
-  #         brew install libpq@18
-
-  #     - run: ls -l ${{ matrix.os.libpq }}
-
-  #     - name: compile
-  #       run: |
-  #         cd untitled && make LIBPQ_LIB=${{ matrix.os.libpq }}/lib LIBPQ_INC=${{ matrix.os.libpq }}/include
-
-  #     - run: ls -l untitled
-
-  #     - name: Save artifacts
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: artifacts-${{ matrix.os.name }}
-  #         path: untitled/*.lib
-
-  Linux:
+  macOS:
+    name: "macOS"
 
     strategy:
       matrix:
         os:
-          - name: ubuntu-24.04
-          - name: ubuntu-24.04-arm
+          - name: macos-15-intel
+            libpq: /usr/local/opt/libpq
+          - name: macos-26
+            libpq: /opt/homebrew/opt/libpq
 
     runs-on: ${{ matrix.os.name }}
 
@@ -115,17 +82,14 @@ jobs:
 
       - name: Install libpq
         run: |
-          sudo apt update
-          sudo apt install -y postgresql-common
-          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
-          sudo apt update
-          sudo apt install -y libpq-dev
+          brew update
+          brew install libpq@18
 
-      - run: pg_config
+      - run: ls -l ${{ matrix.os.libpq }}
 
       - name: compile
         run: |
-          cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
+          cd untitled && make LIBPQ_LIB=${{ matrix.os.libpq }}/lib LIBPQ_INC=${{ matrix.os.libpq }}/include
 
       - run: ls -l untitled
 
@@ -134,3 +98,39 @@ jobs:
         with:
           name: artifacts-${{ matrix.os.name }}
           path: untitled/*.lib
+
+  # Linux:
+
+  #   strategy:
+  #     matrix:
+  #       os:
+  #         - name: ubuntu-24.04
+  #         - name: ubuntu-24.04-arm
+
+  #   runs-on: ${{ matrix.os.name }}
+
+  #   steps:
+  #     - name: Check out
+  #       uses: actions/checkout@v4
+
+  #     - name: Install libpq
+  #       run: |
+  #         sudo apt update
+  #         sudo apt install -y postgresql-common
+  #         sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+  #         sudo apt update
+  #         sudo apt install -y libpq-dev
+
+  #     - run: pg_config
+
+  #     - name: compile
+  #       run: |
+  #         cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
+
+  #     - run: ls -l untitled
+
+  #     - name: Save artifacts
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: artifacts-${{ matrix.os.name }}
+  #         path: untitled/*.lib
