@@ -44,60 +44,34 @@ jobs:
           name: Windows-x64
           path: untitled/*.lib
 
-  macOS-Intel:
+  macOS:
     name: "macOS Intel"
-    runs-on: macos-15-intel
 
-    env:
-      LIBPQ: /usr/local/opt/libpq
+    strategy:
+      matrix:
+        os: [macos-15-intel, macos-26]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Check out
         uses: actions/checkout@v4
 
-      - name: Install Homebrew & stuff
+      - name: Install libpq
         run: |
           brew update
           brew install libpq
 
       - name: compile
         run: |
-          cd untitled && make
+          cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
 
       - run: ls -l untitled
 
       - name: Save artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: macOS-Intel
-          path: untitled/*.lib
-
-  macOS-arm64:
-    name: "macOS arm64"
-    runs-on: macos-26
-
-    env:
-      LIBPQ: /opt/homebrew/opt/libpq
-
-    steps:
-      - name: Check out
-        uses: actions/checkout@v4
-
-      - name: Install Homebrew & stuff
-        run: |
-          brew update
-          brew install libpq
-
-      - name: compile
-        run: |
-          cd untitled && make
-
-      - run: ls -l untitled
-
-      - name: Save artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: macOS-arm64
+          name: artifacts-${{ matrix.os }}
           path: untitled/*.lib
 
   Linux-x64:
