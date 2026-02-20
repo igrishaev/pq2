@@ -23,8 +23,8 @@ jobs:
 
       - uses: msys2/setup-msys2@v2
         with:
-          msystem: clang64 # mingw64
-          install: mingw-w64-clang-x86_64-openssl # mingw-w64-x86_64-openssl
+          msystem: ucrt64 # mingw64
+          install: mingw-w64-ucrt-x86_64-openssl # mingw-w64-x86_64-openssl
 
       - run: g++ --version
 
