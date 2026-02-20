@@ -23,7 +23,7 @@ jobs:
       - name: Check out
         uses: actions/checkout@v4
 
-      # - run: vcpkg install libpq
+      - run: vcpkg install libpq
 
       # - name: Setup MSYS2
       #   uses: msys2/setup-msys2@v2
@@ -50,12 +50,12 @@ jobs:
       # PQclosePrepared' was not declared in this scope and
       # other compilation errors
 
-      - name: PostgreSQL
-        uses: ikalnytskyi/action-setup-postgres@v8
-        with:
-          postgresql-version: '18'
+      # - name: PostgreSQL
+      #   uses: ikalnytskyi/action-setup-postgres@v8
+      #   with:
+      #     postgresql-version: '18'
 
-      - run: pg_config
+      # - run: pg_config
 
       # - run: dir "C:/PROGRA~1/POSTGR~1/18/include"
       #   shell: cmd
@@ -66,15 +66,21 @@ jobs:
       # - run: dir "C:/PROGRA~1/PostgreSQL/17/lib"
       #   shell: cmd
 
-      # - run: ls -l ${VCPKG_ROOT}/installed/x64-windows/lib
-      #   shell: bash
+      - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed
+        shell: bash
 
-      # - run: ls -l ${VCPKG_ROOT}/installed/x64-windows/include
-      #   shell: bash
+      - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed/x64-windows
+        shell: bash
+
+      - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed/x64-windows/lib
+        shell: bash
+
+      - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed/x64-windows/include
+        shell: bash
 
       - name: compile
-        # run: cd untitled && make LIBPQ_LIB=${VCPKG_ROOT}/installed/x64-windows/lib LIBPQ_INC=${VCPKG_ROOT}/installed/x64-windows/include
-        run: cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
+        run: cd untitled && make LIBPQ_LIB=${VCPKG_INSTALLATION_ROOT}/installed/x64-windows/lib LIBPQ_INC=${VCPKG_INSTALLATION_ROOT}/installed/x64-windows/include
+        # run: cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
         shell: bash
 
       - run: ls -l untitled
