@@ -23,6 +23,12 @@ jobs:
       - name: Check out
         uses: actions/checkout@v4
 
+      - name: Setup MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          update: true
+          install: mingw-w64-x86_64-gcc
+
       # - uses: msys2/setup-msys2@v2
       #   with:
       #     msystem: ${{ matrix.os.sys }}
@@ -31,10 +37,10 @@ jobs:
       #       mingw-w64-${{ matrix.os.env }}-make
       #       mingw-w64-${{ matrix.os.env }}-gcc
 
-      - name: MinGW
-        uses: egor-tensin/setup-mingw@v3
-        with:
-          platform: x64
+      # - name: MinGW
+      #   uses: egor-tensin/setup-mingw@v3
+      #   with:
+      #     platform: x64
 
       - run: g++ --version
 
