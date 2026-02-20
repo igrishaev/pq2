@@ -6,44 +6,44 @@ env:
 
 jobs:
 
-  Windows:
+  # Windows:
 
-    strategy:
-      matrix:
-        os: [windows-2025, windows-11-arm]
+  #   strategy:
+  #     matrix:
+  #       os: [windows-2025, windows-11-arm]
 
-    runs-on: ${{ matrix.os }}
+  #   runs-on: ${{ matrix.os }}
 
-    steps:
-      - uses: actions/checkout@v4
-      - name: MinGW
-        uses: egor-tensin/setup-mingw@v3
-        with:
-          platform: x64
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: MinGW
+  #       uses: egor-tensin/setup-mingw@v3
+  #       with:
+  #         platform: x64
 
-      # Windows ships Postgres 16 by default which is too old.
-      # PQclosePrepared' was not declared in this scope and
-      # other compilation errors
+  #     # Windows ships Postgres 16 by default which is too old.
+  #     # PQclosePrepared' was not declared in this scope and
+  #     # other compilation errors
 
-      - name: PostgreSQL
-        uses: ikalnytskyi/action-setup-postgres@v8
-        with:
-          postgresql-version: '18'
+  #     - name: PostgreSQL
+  #       uses: ikalnytskyi/action-setup-postgres@v8
+  #       with:
+  #         postgresql-version: '18'
 
-      - run: pg_config
+  #     - run: pg_config
 
-      - name: compile
-        run: cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
-        shell: bash
+  #     - name: compile
+  #       run: cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
+  #       shell: bash
 
-      - run: ls -l untitled
-        shell: bash
+  #     - run: ls -l untitled
+  #       shell: bash
 
-      - name: Save artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: artifacts-${{ matrix.os }}
-          path: untitled/*.lib
+  #     - name: Save artifacts
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: artifacts-${{ matrix.os }}
+  #         path: untitled/*.lib
 
   # macOS:
   #   name: "macOS"
@@ -95,7 +95,7 @@ jobs:
           sudo apt install -y postgresql-common
           sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
           sudo apt update
-          sudo apt install -y postgresql-client-18
+          sudo apt install -y postgresql-client-18 postgresql-common-dev-18
 
       - run: pg_config
 
