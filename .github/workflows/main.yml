@@ -12,7 +12,7 @@ jobs:
       matrix:
         os:
           - name: windows-2025
-          - name: windows-11-arm
+          # - name: windows-11-arm
 
     runs-on: ${{ matrix.os.name }}
 
