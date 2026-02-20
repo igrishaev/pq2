@@ -31,10 +31,11 @@ compile:
 	g++ ${CPPFLAGS} -c ${OBJ}.cpp -o ${OBJ}.o
 
 link:
-	g++ -shared -o ${FILENAME}.lib ${OBJ}.o -lc -lpq ${LDFLAGS}
+	g++ -dynamiclib -static-libstdc++ -o ${FILENAME}.lib ${OBJ}.o -lc -lpq ${LDFLAGS}
 
 headers:
 	javac -h . src/main/java/org/pq/Native.java src/main/java/org/pq/api/PGRES.java
 
 # g++ -dynamiclib -o ${FILENAME}.lib ${OBJ}.o -lc -lpq ${LDFLAGS} # -shared
 # g++ -c -fPIC ${CPPFLAGS} ${OBJ}.cpp -o ${OBJ}.o
+# -shared
