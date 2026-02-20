@@ -67,7 +67,7 @@ jobs:
           brew update
           brew install libpq@18
 
-      - run: pg_config
+      - name: ls -l ${{ matrix.os.libpq }}
 
       - name: compile
         run: |
