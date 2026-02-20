@@ -6,12 +6,13 @@ env:
 
 jobs:
 
-  Windows-x64:
-    name: Windows x64
-    runs-on: windows-2025
+  Windows:
 
-    env:
-      LIBPQ: "C:/PROGRA~1/POSTGR~1/18"
+    strategy:
+      matrix:
+        os: [windows-2025, windows-11-arm]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - uses: actions/checkout@v4
@@ -41,43 +42,42 @@ jobs:
       - name: Save artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Windows-x64
-          path: untitled/*.lib
-
-  macOS:
-    name: "macOS"
-
-    strategy:
-      matrix:
-        os: [macos-15-intel] # , macos-26
-
-    runs-on: ${{ matrix.os }}
-
-    steps:
-      - name: Check out
-        uses: actions/checkout@v4
-
-      - name: Install libpq
-        run: |
-          brew update
-          brew install libpq@18
-
-      - run: pg_config
-
-      - name: compile
-        run: |
-          cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
-
-      - run: ls -l untitled
-
-      - name: Save artifacts
-        uses: actions/upload-artifact@v4
-        with:
           name: artifacts-${{ matrix.os }}
           path: untitled/*.lib
 
+  # macOS:
+  #   name: "macOS"
+
+  #   strategy:
+  #     matrix:
+  #       os: [macos-15-intel, macos-26]
+
+  #   runs-on: ${{ matrix.os }}
+
+  #   steps:
+  #     - name: Check out
+  #       uses: actions/checkout@v4
+
+  #     - name: Install libpq
+  #       run: |
+  #         brew update
+  #         brew install libpq@18
+
+  #     - run: pg_config
+
+  #     - name: compile
+  #       run: |
+  #         cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
+
+  #     - run: ls -l untitled
+
+  #     - name: Save artifacts
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: artifacts-${{ matrix.os }}
+  #         path: untitled/*.lib
+
   Linux:
-    name: "Linux"
 
     strategy:
       matrix:

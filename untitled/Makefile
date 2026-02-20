@@ -11,12 +11,8 @@ cleanup:
 
 FILENAME = $(shell java src/main/java/org/pq/tool/OS.java)
 
-LIBPQ ?= $(error Please specify full path to libpq)
-# LIBPQ = /opt/homebrew/opt/libpq
-# LIBPQ = /usr/local/opt/libpq
-
-LIBPQ_LIB ?= ${LIBPQ}/lib
-LIBPQ_INC ?= ${LIBPQ}/include
+LIBPQ_LIB ?= $(error LIBPQ_LIB is not set)
+LIBPQ_INC ?= $(error LIBPQ_INC is not set)
 
 # remove trailing slash
 JAVA_HOME := $(shell echo $${JAVA_HOME%/})
