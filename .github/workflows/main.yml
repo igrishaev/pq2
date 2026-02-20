@@ -67,7 +67,7 @@ jobs:
           brew update
           brew install libpq@18
 
-      - name: ls -l ${{ matrix.os.libpq }}
+      - run: ls -l ${{ matrix.os.libpq }}
 
       - name: compile
         run: |
