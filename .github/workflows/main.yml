@@ -55,11 +55,11 @@ jobs:
 
       - run: pg_config
 
-      - run: dir "C:/PROGRA~1/PostgreSQL/17/lib"
+      - run: dir "C:/PROGRA~1/PostgreSQL/16/lib"
         shell: cmd
 
       - name: compile
-        run: cd untitled && make LIBPQ_LIB=C:/PROGRA~1/PostgreSQL/17/lib LIBPQ_INC=C:/PROGRA~1/PostgreSQL/17/include
+        run: cd untitled && make LIBPQ_LIB=C:/PROGRA~1/PostgreSQL/16/lib LIBPQ_INC=C:/PROGRA~1/PostgreSQL/16/include
         shell: bash
 
       - run: ls -l untitled
