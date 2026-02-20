@@ -23,71 +23,11 @@ jobs:
       - name: Check out
         uses: actions/checkout@v4
 
-      - run: ls -l ${VCPKG_INSTALLATION_ROOT}
-        shell: bash
-
-      - run: ls -l ${VCPKG_INSTALLATION_ROOT}\installed\x64-windows
-        shell: bash
-
-      - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed/x64-windows/lib
-        shell: bash
-
-      - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed/x64-windows/include
-        shell: bash
-
       - run: vcpkg install libpq
 
-      # - name: Setup MSYS2
-      #   uses: msys2/setup-msys2@v2
-      #   with:
-      #     update: true
-      #     install: mingw-w64-x86_64-gcc
-
-      # - uses: msys2/setup-msys2@v2
-      #   with:
-      #     msystem: ${{ matrix.os.sys }}
-      #     install: >-
-      #       mingw-w64-${{ matrix.os.env }}-openssl
-      #       mingw-w64-${{ matrix.os.env }}-make
-      #       mingw-w64-${{ matrix.os.env }}-gcc
-
-      # - name: MinGW
-      #   uses: egor-tensin/setup-mingw@v3
-      #   with:
-      #     platform: x64
-
-      # - run: g++ --version
-
-      # Windows ships Postgres 16 by default which is too old.
-      # PQclosePrepared' was not declared in this scope and
-      # other compilation errors
-
-      # - name: PostgreSQL
-      #   uses: ikalnytskyi/action-setup-postgres@v8
-      #   with:
-      #     postgresql-version: '18'
-
-      # - run: pg_config
-
-      # - run: dir "C:/PROGRA~1/POSTGR~1/18/include"
-      #   shell: cmd
-
-      # - run: dir "C:/PROGRA~1/POSTGR~1/18/lib"
-      #   shell: cmd
-
-      # - run: dir "C:/PROGRA~1/PostgreSQL/17/lib"
-      #   shell: cmd
+      - run: g++ --version
 
       - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed
-        shell: bash
-
-      - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed/x64-windows
-        shell: bash
-
-      - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed/x64-windows/lib
-        shell: bash
-
-      - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed/x64-windows/include
         shell: bash
 
       - name: compile
