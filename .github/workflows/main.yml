@@ -50,9 +50,13 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos-15-intel] # macos-26
+        os:
+          - name: macos-15-intel
+            libpq: /usr/local/opt/libpq
+          - name: macos-26
+            libpq: /opt/homebrew/opt/libpq
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os.name }}
 
     steps:
       - name: Check out
@@ -67,14 +71,14 @@ jobs:
 
       - name: compile
         run: |
-          cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
+          cd untitled && make LIBPQ_LIB=${{ matrix.os.libpq }}/lib LIBPQ_INC=${{ matrix.os.libpq }}/include
 
       - run: ls -l untitled
 
       - name: Save artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: artifacts-${{ matrix.os }}
+          name: artifacts-${{ matrix.os.name }}
           path: untitled/*.lib
 
   # Linux:
