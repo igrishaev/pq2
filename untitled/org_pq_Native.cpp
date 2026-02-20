@@ -166,8 +166,8 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_execPrepared
 
     int off = 0;
 
-    int32_t nParams = *((int32_t*) (bb + off));
-    off += sizeof(int32_t);
+    int nParams = *((int*) (bb + off));
+    off += sizeof(int);
 
     // printf("nParams: %d, off: %d \n", nParams, off);
 
@@ -177,14 +177,14 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_execPrepared
     char** paramValues = (char**) (bb + off);
     off += sizeof(char*) * nParams;
 
-    int32_t* paramLengths = (int32_t*) (bb + off);
-    off += sizeof(int32_t) * nParams;;
+    int* paramLengths = (int*) (bb + off);
+    off += sizeof(int) * nParams;;
 
-    int32_t* paramFormats = (int32_t*) (bb + off);
-    off += sizeof(int32_t) * nParams;;
+    int* paramFormats = (int*) (bb + off);
+    off += sizeof(int) * nParams;;
 
-    int32_t resultFormat = *((int32_t*) (bb + off));
-    off += sizeof(int32_t);
+    int resultFormat = *((int*) (bb + off));
+    off += sizeof(int);
 
     // Oid* oid;
     // for (int i = 0; i < nParams; i++) {
@@ -240,8 +240,8 @@ JNIEXPORT jint JNICALL Java_org_pq_Native_sendQueryPrepared
 
     int off = 0;
 
-    int32_t nParams = *((int32_t*) (bb + off));
-    off += sizeof(int32_t);
+    int nParams = *((int*) (bb + off));
+    off += sizeof(int);
 
     // printf("nParams: %d, off: %d \n", nParams, off);
 
@@ -251,14 +251,14 @@ JNIEXPORT jint JNICALL Java_org_pq_Native_sendQueryPrepared
     char** paramValues = (char**) (bb + off);
     off += sizeof(char*) * nParams;
 
-    int32_t* paramLengths = (int32_t*) (bb + off);
-    off += sizeof(int32_t) * nParams;;
+    int* paramLengths = (int*) (bb + off);
+    off += sizeof(int) * nParams;;
 
-    int32_t* paramFormats = (int32_t*) (bb + off);
-    off += sizeof(int32_t) * nParams;;
+    int* paramFormats = (int*) (bb + off);
+    off += sizeof(int) * nParams;
 
-    int32_t resultFormat = *((int32_t*) (bb + off));
-    off += sizeof(int32_t);
+    int resultFormat = *((int*) (bb + off));
+    off += sizeof(int);
 
     // Oid* oid;
     // for (int i = 0; i < nParams; i++) {
