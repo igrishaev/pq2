@@ -6,62 +6,62 @@ env:
 
 jobs:
 
-  Windows:
+  # Windows:
 
-    strategy:
-      matrix:
-        os:
-          - name: windows-2025
-            sys: mingw64
-            env: x86_64
-          # - name: windows-11-arm
+  #   strategy:
+  #     matrix:
+  #       os:
+  #         - name: windows-2025
+  #           sys: mingw64
+  #           env: x86_64
+  #         # - name: windows-11-arm
 
-    runs-on: ${{ matrix.os.name }}
+  #   runs-on: ${{ matrix.os.name }}
 
-    steps:
+  #   steps:
 
-      - name: Check out
-        uses: actions/checkout@v4
+  #     - name: Check out
+  #       uses: actions/checkout@v4
 
-      - uses: msys2/setup-msys2@v2
-        with:
-          msystem: ${{ matrix.os.sys }}
-          install: >-
-            mingw-w64-${{ matrix.os.env }}-openssl
-            mingw-w64-${{ matrix.os.env }}-make
-            mingw-w64-${{ matrix.os.env }}-gcc
+  #     - uses: msys2/setup-msys2@v2
+  #       with:
+  #         msystem: ${{ matrix.os.sys }}
+  #         install: >-
+  #           mingw-w64-${{ matrix.os.env }}-openssl
+  #           mingw-w64-${{ matrix.os.env }}-make
+  #           mingw-w64-${{ matrix.os.env }}-gcc
 
-      - run: g++ --version
+  #     - run: g++ --version
 
-      # - uses: actions/checkout@v4
-      # - name: MinGW
-      #   uses: egor-tensin/setup-mingw@v3
-      #   with:
-      #     platform: x64
+  #     # - uses: actions/checkout@v4
+  #     # - name: MinGW
+  #     #   uses: egor-tensin/setup-mingw@v3
+  #     #   with:
+  #     #     platform: x64
 
-      # Windows ships Postgres 16 by default which is too old.
-      # PQclosePrepared' was not declared in this scope and
-      # other compilation errors
+  #     # Windows ships Postgres 16 by default which is too old.
+  #     # PQclosePrepared' was not declared in this scope and
+  #     # other compilation errors
 
-      - name: PostgreSQL
-        uses: ikalnytskyi/action-setup-postgres@v8
-        with:
-          postgresql-version: '18'
+  #     - name: PostgreSQL
+  #       uses: ikalnytskyi/action-setup-postgres@v8
+  #       with:
+  #         postgresql-version: '18'
 
-      - run: pg_config
+  #     - run: pg_config
 
-      - name: compile
-        run: cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
-        shell: bash
+  #     - name: compile
+  #       run: cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
+  #       shell: bash
 
-      - run: ls -l untitled
-        shell: bash
+  #     - run: ls -l untitled
+  #       shell: bash
 
-      - name: Save artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: artifacts-${{ matrix.os.name }}
-          path: untitled/*.lib
+  #     - name: Save artifacts
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: artifacts-${{ matrix.os.name }}
+  #         path: untitled/*.lib
 
   # macOS:
   #   name: "macOS"
@@ -99,38 +99,38 @@ jobs:
   #         name: artifacts-${{ matrix.os.name }}
   #         path: untitled/*.lib
 
-  # Linux:
+  Linux:
 
-  #   strategy:
-  #     matrix:
-  #       os:
-  #         - name: ubuntu-24.04
-  #         - name: ubuntu-24.04-arm
+    strategy:
+      matrix:
+        os:
+          - name: ubuntu-24.04
+          - name: ubuntu-24.04-arm
 
-  #   runs-on: ${{ matrix.os.name }}
+    runs-on: ${{ matrix.os.name }}
 
-  #   steps:
-  #     - name: Check out
-  #       uses: actions/checkout@v4
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
 
-  #     - name: Install libpq
-  #       run: |
-  #         sudo apt update
-  #         sudo apt install -y postgresql-common
-  #         sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
-  #         sudo apt update
-  #         sudo apt install -y libpq-dev
+      - name: Install libpq
+        run: |
+          sudo apt update
+          sudo apt install -y postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt update
+          sudo apt install -y libpq-dev
 
-  #     - run: pg_config
+      - run: pg_config
 
-  #     - name: compile
-  #       run: |
-  #         cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
+      - name: compile
+        run: |
+          cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
 
-  #     - run: ls -l untitled
+      - run: ls -l untitled
 
-  #     - name: Save artifacts
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: artifacts-${{ matrix.os.name }}
-  #         path: untitled/*.lib
+      - name: Save artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts-${{ matrix.os.name }}
+          path: untitled/*.lib
