@@ -28,10 +28,14 @@ $(info FILENAME=${FILENAME})
 $(info )
 
 compile:
-	g++ ${CPPFLAGS} -c ${OBJ}.cpp -o ${OBJ}.o
+	g++ -fPIC ${CPPFLAGS} -c ${OBJ}.cpp -o ${OBJ}.o
+	# libtool -static -o libfoo.a ${OBJ}.o /opt/homebrew/opt/libpq/lib/libpq.a
+	# g++ -shared -static -L. -L${LIBPQ_LIB} -lfoo -lpq -o ${FILENAME}.lib
+	# g++ -shared org_pq_Native.o /opt/homebrew/opt/libpq/lib/libpq.a -o foo.lib -L/opt/homebrew/opt/libpq/lib -I/opt/homebrew/opt/libpq/include
+	# g++ -shared -Wl,-all_load libfoo.a -o foo.lib -v
+	g++ -shared ${OBJ}.o -o ${FILENAME}.lib -v -lpq ${LDFLAGS}
 
 link:
-	g++ -dynamiclib -static-libstdc++ -o ${FILENAME}.lib ${OBJ}.o -lc -lpq ${LDFLAGS}
 
 headers:
 	javac -h . src/main/java/org/pq/Native.java src/main/java/org/pq/api/PGRES.java
