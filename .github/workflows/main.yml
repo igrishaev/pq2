@@ -23,7 +23,7 @@ jobs:
       - name: Check out
         uses: actions/checkout@v4
 
-      # - run: vcpkg install libpq
+      - run: vcpkg install libpq
 
       # - name: Setup MSYS2
       #   uses: msys2/setup-msys2@v2
@@ -50,18 +50,18 @@ jobs:
       # PQclosePrepared' was not declared in this scope and
       # other compilation errors
 
-      - name: PostgreSQL
-        uses: ikalnytskyi/action-setup-postgres@v8
-        with:
-          postgresql-version: '18'
+      # - name: PostgreSQL
+      #   uses: ikalnytskyi/action-setup-postgres@v8
+      #   with:
+      #     postgresql-version: '18'
 
       - run: pg_config
 
-      - run: dir "C:/PROGRA~1/POSTGR~1/18/include"
-        shell: cmd
+      # - run: dir "C:/PROGRA~1/POSTGR~1/18/include"
+      #   shell: cmd
 
-      - run: dir "C:/PROGRA~1/POSTGR~1/18/lib"
-        shell: cmd
+      # - run: dir "C:/PROGRA~1/POSTGR~1/18/lib"
+      #   shell: cmd
 
       # - run: dir "C:/PROGRA~1/PostgreSQL/17/lib"
       #   shell: cmd
