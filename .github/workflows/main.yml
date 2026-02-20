@@ -62,6 +62,8 @@ jobs:
           brew update
           brew install libpq
 
+      - run: which pg_config
+
       - name: compile
         run: |
           cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
