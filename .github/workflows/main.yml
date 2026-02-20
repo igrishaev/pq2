@@ -29,7 +29,7 @@ jobs:
         shell: bash
 
       - name: compile
-        run: cd untitled && make LIBPQ_LIB=${VCPKG_INSTALLATION_ROOT}/installed/x64-windows/lib LIBPQ_INC=${VCPKG_INSTALLATION_ROOT}/installed/x64-windows/include
+        run: cd untitled && make LIBPQ_LIB=${VCPKG_INSTALLATION_ROOT}/installed/arm64-windows/lib LIBPQ_INC=${VCPKG_INSTALLATION_ROOT}/installed/arm64-windows/include
         # run: cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
         shell: bash
 
