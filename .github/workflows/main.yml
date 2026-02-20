@@ -11,9 +11,7 @@ jobs:
     strategy:
       matrix:
         os:
-          - name: windows-2025
-            sys: mingw64
-            env: x86_64
+          - name: windows-11-arm # windows-2025
           # - name: windows-11-arm
 
     runs-on: ${{ matrix.os.name }}
