@@ -55,6 +55,12 @@ jobs:
 
       - run: pg_config
 
+      - run: dir C:/PROGRA~1/POSTGR~1/18/include
+        shell: cmd
+
+      - run: dir C:/PROGRA~1/POSTGR~1/18/lib
+        shell: cmd
+
       # - run: dir "C:/PROGRA~1/PostgreSQL/17/lib"
       #   shell: cmd
 
