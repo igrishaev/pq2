@@ -23,6 +23,8 @@ jobs:
       - name: Check out
         uses: actions/checkout@v4
 
+      - run: vcpkg install libpq
+
       # - name: Setup MSYS2
       #   uses: msys2/setup-msys2@v2
       #   with:
