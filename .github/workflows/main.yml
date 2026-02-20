@@ -95,7 +95,7 @@ jobs:
           sudo apt install -y postgresql-common
           sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
           sudo apt update
-          sudo apt install -y postgresql-common-dev
+          sudo apt install -y libpq-dev
 
       - run: pg_config
 
