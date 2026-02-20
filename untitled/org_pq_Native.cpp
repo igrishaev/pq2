@@ -378,9 +378,9 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_query
 /*
  * Class:     org_pq_Native
  * Method:    sendQuery
- * Signature: (JLjava/lang/String;I)I
+ * Signature: (JLjava/lang/String;)I
  */
-JNIEXPORT int JNICALL Java_org_pq_Native_sendQuery
+JNIEXPORT jint JNICALL Java_org_pq_Native_sendQuery
 (JNIEnv* env, jclass, jlong jconn, jstring jquery) {
     PGconn* conn = (PGconn*) jconn;
     const char* query = env->GetStringUTFChars(jquery, NULL);
