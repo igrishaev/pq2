@@ -8,111 +8,113 @@ jobs:
 
   # Windows:
 
-  #   strategy:
-  #     matrix:
-  #       os: [windows-2025, windows-11-arm]
-
-  #   runs-on: ${{ matrix.os }}
-
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: MinGW
-  #       uses: egor-tensin/setup-mingw@v3
-  #       with:
-  #         platform: x64
-
-  #     # Windows ships Postgres 16 by default which is too old.
-  #     # PQclosePrepared' was not declared in this scope and
-  #     # other compilation errors
-
-  #     - name: PostgreSQL
-  #       uses: ikalnytskyi/action-setup-postgres@v8
-  #       with:
-  #         postgresql-version: '18'
-
-  #     - run: pg_config
-
-  #     - name: compile
-  #       run: cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
-  #       shell: bash
-
-  #     - run: ls -l untitled
-  #       shell: bash
-
-  #     - name: Save artifacts
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: artifacts-${{ matrix.os }}
-  #         path: untitled/*.lib
-
-  macOS:
-    name: "macOS"
-
     strategy:
       matrix:
         os:
-          - name: macos-15-intel
-            libpq: /usr/local/opt/libpq
-          - name: macos-26
-            libpq: /opt/homebrew/opt/libpq
+          - name: windows-2025
+          - name: windows-11-arm
 
     runs-on: ${{ matrix.os.name }}
 
     steps:
-      - name: Check out
-        uses: actions/checkout@v4
-
-      - name: Install libpq
-        run: |
-          brew update
-          brew install libpq@18
-
-      - run: ls -l ${{ matrix.os.libpq }}
-
-      - name: compile
-        run: |
-          cd untitled && make LIBPQ_LIB=${{ matrix.os.libpq }}/lib LIBPQ_INC=${{ matrix.os.libpq }}/include
-
-      - run: ls -l untitled
-
-      - name: Save artifacts
-        uses: actions/upload-artifact@v4
+      - uses: actions/checkout@v4
+      - name: MinGW
+        uses: egor-tensin/setup-mingw@v3
         with:
-          name: artifacts-${{ matrix.os.name }}
-          path: untitled/*.lib
+          platform: x64
 
-  Linux:
+      # Windows ships Postgres 16 by default which is too old.
+      # PQclosePrepared' was not declared in this scope and
+      # other compilation errors
 
-    strategy:
-      matrix:
-        os:
-          - name: ubuntu-24.04
-          - name: ubuntu-24.04-arm
-
-    runs-on: ${{ matrix.os.name }}
-
-    steps:
-      - name: Check out
-        uses: actions/checkout@v4
-
-      - name: Install libpq
-        run: |
-          sudo apt update
-          sudo apt install -y postgresql-common
-          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
-          sudo apt update
-          sudo apt install -y libpq-dev
+      - name: PostgreSQL
+        uses: ikalnytskyi/action-setup-postgres@v8
+        with:
+          postgresql-version: '18'
 
       - run: pg_config
 
       - name: compile
-        run: |
-          cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
+        run: cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
+        shell: bash
 
       - run: ls -l untitled
+        shell: bash
 
       - name: Save artifacts
         uses: actions/upload-artifact@v4
         with:
           name: artifacts-${{ matrix.os.name }}
           path: untitled/*.lib
+
+  # macOS:
+  #   name: "macOS"
+
+  #   strategy:
+  #     matrix:
+  #       os:
+  #         - name: macos-15-intel
+  #           libpq: /usr/local/opt/libpq
+  #         - name: macos-26
+  #           libpq: /opt/homebrew/opt/libpq
+
+  #   runs-on: ${{ matrix.os.name }}
+
+  #   steps:
+  #     - name: Check out
+  #       uses: actions/checkout@v4
+
+  #     - name: Install libpq
+  #       run: |
+  #         brew update
+  #         brew install libpq@18
+
+  #     - run: ls -l ${{ matrix.os.libpq }}
+
+  #     - name: compile
+  #       run: |
+  #         cd untitled && make LIBPQ_LIB=${{ matrix.os.libpq }}/lib LIBPQ_INC=${{ matrix.os.libpq }}/include
+
+  #     - run: ls -l untitled
+
+  #     - name: Save artifacts
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: artifacts-${{ matrix.os.name }}
+  #         path: untitled/*.lib
+
+  # Linux:
+
+  #   strategy:
+  #     matrix:
+  #       os:
+  #         - name: ubuntu-24.04
+  #         - name: ubuntu-24.04-arm
+
+  #   runs-on: ${{ matrix.os.name }}
+
+  #   steps:
+  #     - name: Check out
+  #       uses: actions/checkout@v4
+
+  #     - name: Install libpq
+  #       run: |
+  #         sudo apt update
+  #         sudo apt install -y postgresql-common
+  #         sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+  #         sudo apt update
+  #         sudo apt install -y libpq-dev
+
+  #     - run: pg_config
+
+  #     - name: compile
+  #       run: |
+  #         cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
+
+  #     - run: ls -l untitled
+
+  #     - name: Save artifacts
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: artifacts-${{ matrix.os.name }}
+  #         path: untitled/*.lib
