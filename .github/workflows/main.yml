@@ -31,7 +31,6 @@ jobs:
             mingw-w64-${{ matrix.os.env }}-make
             mingw-w64-${{ matrix.os.env }}-gcc
 
-
       - run: g++ --version
 
       # - uses: actions/checkout@v4
