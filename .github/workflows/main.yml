@@ -55,7 +55,7 @@ jobs:
 
       - run: pg_config
 
-      - run: dir "C:\Program Files\PostgreSQL\17"
+      - run: dir "C:/PROGRA~1/PostgreSQL/17/lib"
         shell: cmd
 
       - name: compile
