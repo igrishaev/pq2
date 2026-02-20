@@ -29,7 +29,7 @@ $(info )
 
 compile:
 	g++ -fPIC ${CPPFLAGS} -c ${OBJ}.cpp -o ${OBJ}.o
-	g++ -shared ${OBJ}.o -o ${FILENAME}.lib -v -lpq ${LDFLAGS} -lpgcommon -lpgport $(shell pg_config --cflags)
+	g++ -v -shared ${OBJ}.o $(shell pg_config --libs) -lpq ${LDFLAGS} -o ${FILENAME}.lib
 
 link:
 
