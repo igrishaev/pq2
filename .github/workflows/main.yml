@@ -37,12 +37,12 @@ jobs:
       #       mingw-w64-${{ matrix.os.env }}-make
       #       mingw-w64-${{ matrix.os.env }}-gcc
 
-      - name: MinGW
-        uses: egor-tensin/setup-mingw@v3
-        with:
-          platform: x64
+      # - name: MinGW
+      #   uses: egor-tensin/setup-mingw@v3
+      #   with:
+      #     platform: x64
 
-      - run: g++ --version
+      # - run: g++ --version
 
       # Windows ships Postgres 16 by default which is too old.
       # PQclosePrepared' was not declared in this scope and
