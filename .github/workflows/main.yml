@@ -17,11 +17,18 @@ jobs:
     runs-on: ${{ matrix.os.name }}
 
     steps:
-      - uses: actions/checkout@v4
-      - name: MinGW
-        uses: egor-tensin/setup-mingw@v3
+
+      - uses: msys2/setup-msys2@v2
         with:
-          platform: x64
+          msystem: CLANG64
+
+      - run: g++ --version
+
+      # - uses: actions/checkout@v4
+      # - name: MinGW
+      #   uses: egor-tensin/setup-mingw@v3
+      #   with:
+      #     platform: x64
 
       # Windows ships Postgres 16 by default which is too old.
       # PQclosePrepared' was not declared in this scope and
