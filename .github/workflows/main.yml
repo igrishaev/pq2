@@ -6,7 +6,7 @@ env:
 
 jobs:
 
-  windows-x64:
+  Windows-x64:
     name: Windows x64
     runs-on: windows-2025
 
@@ -14,6 +14,7 @@ jobs:
       LIBPQ: "C:/PROGRA~1/POSTGR~1/18"
 
     steps:
+      - run: pg_config
       - uses: actions/checkout@v4
       - name: MinGW
         uses: egor-tensin/setup-mingw@v3
@@ -40,9 +41,8 @@ jobs:
           name: windows_amd64.lib
           path: untitled/windows_amd64.lib
 
-
-  mac-intel:
-    name: "Mac OS Intel"
+  macOS-Intel:
+    name: "macOS Intel"
     runs-on: macos-15-intel
 
     env:
@@ -66,11 +66,10 @@ jobs:
       - name: Save artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: macos_x86_64.lib
-          path: untitled/macos_x86_64.lib
+          path: untitled/*.lib
 
-  mac-m1:
-    name: "Mac OS M1"
+  macOS-arm64:
+    name: "macOS arm64"
     runs-on: macos-26
 
     env:
@@ -94,10 +93,9 @@ jobs:
       - name: Save artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: macos_aarch64.lib
-          path: untitled/macos_aarch64.lib
+          path: untitled/*.lib
 
-  linux-x64:
+  Linux-x64:
     name: "Linux x64"
     runs-on: ubuntu-24.04
 
@@ -124,5 +122,4 @@ jobs:
       - name: Save artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: linux_amd64.lib
-          path: untitled/linux_amd64.lib
+          path: untitled/*.lib
