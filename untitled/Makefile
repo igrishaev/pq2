@@ -21,7 +21,6 @@ CPPFLAGS = -I${LIBPQ_INC} -I${JAVA_HOME}/include -I${JAVA_HOME}/include/darwin -
 LDFLAGS = -L${LIBPQ_LIB}
 
 $(info JAVA_HOME=${JAVA_HOME})
-$(info LIBPQ=${LIBPQ})
 $(info LDFLAGS=${LDFLAGS})
 $(info CPPFLAGS=${CPPFLAGS})
 $(info FILENAME=${FILENAME})
@@ -32,7 +31,7 @@ compile:
 	g++ ${CPPFLAGS} -c ${OBJ}.cpp -o ${OBJ}.o
 
 link:
-	g++ -shared -o ${FILENAME}.lib ${OBJ}.o -lpq ${LDFLAGS}
+	g++ -shared -o ${FILENAME}.lib ${OBJ}.o -lc -lpq ${LDFLAGS}
 
 headers:
 	javac -h . src/main/java/org/pq/Native.java src/main/java/org/pq/api/PGRES.java
