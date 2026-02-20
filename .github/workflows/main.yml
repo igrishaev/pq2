@@ -92,7 +92,7 @@ jobs:
       - name: Install libpq
         run: |
           sudo apt update
-          sudo apt install -y libpq-dev
+          sudo apt install -y postgresql-client-18
 
       - run: pg_config
 
