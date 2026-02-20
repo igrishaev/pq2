@@ -149,7 +149,8 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_closeStatement
 (JNIEnv* env, jclass, jlong jconn, jstring jstmtName) {
     PGconn* conn = (PGconn*) jconn;
     const char* stmtName = env->GetStringUTFChars(jstmtName, NULL);
-    return (jlong) PQclosePrepared(conn, stmtName);
+    return 0;
+    // return (jlong) PQclosePrepared(conn, stmtName);
 }
 
 /*
@@ -394,7 +395,8 @@ JNIEXPORT int JNICALL Java_org_pq_Native_sendQuery
 JNIEXPORT jint JNICALL Java_org_pq_Native_setChunkedRowsMode
 (JNIEnv *, jclass, jlong jconn, jint size) {
     PGconn* conn = (PGconn*) jconn;
-    return PQsetChunkedRowsMode(conn, size);
+    return 0;
+    // return PQsetChunkedRowsMode(conn, size);
 }
 
 /*
