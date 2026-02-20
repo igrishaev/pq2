@@ -92,6 +92,9 @@ jobs:
       - name: Install libpq
         run: |
           sudo apt update
+          sudo apt install -y postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh
+          sudo apt update
           sudo apt install -y postgresql-client-18
 
       - run: pg_config
