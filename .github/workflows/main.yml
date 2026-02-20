@@ -61,9 +61,8 @@ jobs:
         run: |
           brew update
           brew install libpq@18
-          brew install postgresql@18
 
-      - run: which pg_config
+      - run: pg_config
 
       - name: compile
         run: |
