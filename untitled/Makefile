@@ -29,10 +29,13 @@ $(info FILENAME=${FILENAME})
 $(info )
 
 compile:
-	g++ -c -fPIC ${CPPFLAGS} ${OBJ}.cpp -o ${OBJ}.o
+	g++ ${CPPFLAGS} -c ${OBJ}.cpp -o ${OBJ}.o
 
 link:
-	g++ -dynamiclib -o ${FILENAME}.lib ${OBJ}.o -lc -lpq ${LDFLAGS} # -shared
+	g++ -shared -o ${FILENAME}.lib ${OBJ}.o -lpq ${LDFLAGS}
 
 headers:
 	javac -h . src/main/java/org/pq/Native.java src/main/java/org/pq/api/PGRES.java
+
+# g++ -dynamiclib -o ${FILENAME}.lib ${OBJ}.o -lc -lpq ${LDFLAGS} # -shared
+# g++ -c -fPIC ${CPPFLAGS} ${OBJ}.cpp -o ${OBJ}.o
