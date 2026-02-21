@@ -20,6 +20,8 @@ jobs:
       - name: Check out
         uses: actions/checkout@v4
 
+      - run: g++ --version
+
       - uses: msys2/setup-msys2@v2
         with:
           msystem: CLANGARM64
