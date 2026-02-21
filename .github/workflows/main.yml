@@ -20,7 +20,7 @@ jobs:
       - name: Check out
         uses: actions/checkout@v4
 
-      - run: g++ --version
+      # - run: g++ --version
 
       # - uses: msys2/setup-msys2@v2
       #   with:
@@ -36,23 +36,28 @@ jobs:
             mingw-w64-clang-aarch64-libpqxx
             mingw-w64-clang-aarch64-gcc-compat
 
+      # - run: g++ --version
+
+      # - run: vcpkg install libpq
+
+      - run: ls -l c:\msys64\clangarm64
+        shell: bash
+
+      # - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed
+      #   shell: bash
+
       - name: Compile the project
         shell: msys2 {0} # Use the MSYS2 shell to access the MinGW environment
         run: |
           g++ --version
+          cd untitled
+          make LIBPQ_LIB=c:\msys64\clangarm64\lib LIBPQ_INC=c:\msys64\clangarm64\include
 
-      - run: g++ --version
-
-      - run: vcpkg install libpq
-
-      - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed
-        shell: bash
-
-      - name: compile
-        run: cd untitled && make LIBPQ_LIB=${VCPKG_INSTALLATION_ROOT}/installed/arm64-windows/lib LIBPQ_INC=${VCPKG_INSTALLATION_ROOT}/installed/arm64-windows/include
-        # run: cd untitled && make LIBPQ_LIB=${VCPKG_INSTALLATION_ROOT}/installed/arm64-windows/lib LIBPQ_INC=${VCPKG_INSTALLATION_ROOT}/installed/arm64-windows/include
-        # run: cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
-        shell: bash
+      # - name: compile
+      #   run: cd untitled && make LIBPQ_LIB=c:\msys64\clangarm64\lib LIBPQ_INC=c:\msys64\clangarm64\include
+      #   # run: cd untitled && make LIBPQ_LIB=${VCPKG_INSTALLATION_ROOT}/installed/arm64-windows/lib LIBPQ_INC=${VCPKG_INSTALLATION_ROOT}/installed/arm64-windows/include
+      #   # run: cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
+      #   shell: bash
 
       - run: ls -l untitled
         shell: bash
