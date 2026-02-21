@@ -1,6 +1,7 @@
 name: Build on various systems
 on: push
 
+# todo: move to macos
 env:
   HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
 
@@ -24,12 +25,14 @@ jobs:
             mingw-w64-clang-aarch64-libpqxx
             mingw-w64-clang-aarch64-gcc-compat
 
+      - name: set filename
+        run: echo "FILENAME=$(make filename)" >> $GITHUB_ENV
+
       - name: Compile the project
         shell: msys2 {0}
         run: |
           g++ --version
           cd untitled
-          export FILENAME=windows_aarch64
           export OBJ=org_pq_Native
           export JAVA_HOME=$(echo ${JAVA_HOME%/})
           g++ -fPIC -I${JAVA_HOME}/include -I${JAVA_HOME}/include/win32 -c ${OBJ}.cpp -o ${OBJ}.o
