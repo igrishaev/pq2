@@ -7,9 +7,18 @@ env:
 
 jobs:
 
-  Windows-arm64:
+  Windows:
 
-    runs-on: windows-11-arm
+      matrix:
+        opt:
+          - image: windows-11-arm
+            msys: CLANGARM64
+            env: clang-aarch64
+          - image: windows-2025
+            msys: CLANG64
+            env: clang-x86_64
+
+    runs-on: ${{ matrix.opt.image }}
 
     steps:
 
@@ -19,11 +28,11 @@ jobs:
       - name: Setup MSYS2 and MinGW
         uses: msys2/setup-msys2@v2
         with:
-          msystem: CLANGARM64
+          msystem: ${{ matrix.opt.msys }}
           install: >-
             make
-            mingw-w64-clang-aarch64-libpqxx
-            mingw-w64-clang-aarch64-gcc-compat
+            mingw-w64-${{ matrix.opt.env }}-libpqxx
+            mingw-w64-${{ matrix.opt.env }}-gcc-compat
 
       - name: prepare files
         run: ./script/platform.sh
@@ -33,12 +42,12 @@ jobs:
         shell: msys2 {0}
         run: |
           g++ --version
-          ./script/build-windows-arm64.sh
+          ./script/build-windows.sh
 
       - name: Save artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: artifacts-windows-arm64
+          name: artifacts-${{ matrix.opt.image }}
           path: "*.dll"
           if-no-files-found: error
 
