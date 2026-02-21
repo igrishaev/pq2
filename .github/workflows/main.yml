@@ -9,14 +9,15 @@ jobs:
 
   Windows:
 
-    matrix:
-      opt:
-        - image: windows-11-arm
-          msys: CLANGARM64
-          env: clang-aarch64
-        - image: windows-2025
-          msys: CLANG64
-          env: clang-x86_64
+    strategy:
+      matrix:
+        opt:
+          - image: windows-11-arm
+            msys: CLANGARM64
+            env: clang-aarch64
+          - image: windows-2025
+            msys: CLANG64
+            env: clang-x86_64
 
     runs-on: ${{ matrix.opt.image }}
 
