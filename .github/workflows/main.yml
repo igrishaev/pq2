@@ -80,8 +80,6 @@ jobs:
           brew update
           brew install libpq@18
 
-      - run: pg_config
-
       - name: prepare files
         run: ./script/platform.sh
         shell: bash
