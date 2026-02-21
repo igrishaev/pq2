@@ -33,6 +33,7 @@ jobs:
           msystem: CLANGARM64
           update: true
           install: >-
+            make
             mingw-w64-clang-aarch64-libpqxx
             mingw-w64-clang-aarch64-gcc-compat
 
