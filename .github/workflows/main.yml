@@ -40,8 +40,8 @@ jobs:
 
       # - run: vcpkg install libpq
 
-      - run: ls -l c:/msys64/clangarm64
-        shell: bash
+      # - run: ls -l c:/msys64/clangarm64
+      #   shell: bash
 
       # - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed
       #   shell: bash
@@ -51,7 +51,7 @@ jobs:
         run: |
           g++ --version
           cd untitled
-          make LIBPQ_LIB=c:\msys64\clangarm64\lib LIBPQ_INC=c:\msys64\clangarm64\include
+          make
 
       # - name: compile
       #   run: cd untitled && make LIBPQ_LIB=c:\msys64\clangarm64\lib LIBPQ_INC=c:\msys64\clangarm64\include
