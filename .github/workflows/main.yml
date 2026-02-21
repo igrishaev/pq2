@@ -33,10 +33,7 @@ jobs:
         run: |
           g++ --version
           cd untitled
-          export OBJ=org_pq_Native
-          export JAVA_HOME=$(echo ${JAVA_HOME%/})
-          g++ -fPIC -I${JAVA_HOME}/include -I${JAVA_HOME}/include/win32 -c ${OBJ}.cpp -o ${OBJ}.o
-          g++ -v -shared ${OBJ}.o -lpq -o ${FILENAME}.lib
+          make compile FILENAME=$(make filename)
 
       - run: ls -l untitled
         shell: bash

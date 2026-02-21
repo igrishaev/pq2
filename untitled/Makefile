@@ -9,23 +9,18 @@ classes:
 cleanup:
 	rm -f ${OBJ}.o
 
-.phony: filename
-filename:
-	@java src/main/java/org/pq/tool/OS.java
-
-# LIBPQ_LIB ?= $(error LIBPQ_LIB is not set)
-# LIBPQ_INC ?= $(error LIBPQ_INC is not set)
-
 # remove trailing slash
 JAVA_HOME := $(shell echo $${JAVA_HOME%/})
 
 JAVA_INC = -I${JAVA_HOME}/include -I${JAVA_HOME}/include/darwin -I${JAVA_HOME}/include/win32 -I${JAVA_HOME}/include/linux
 
-CPPFLAGS = -I${LIBPQ_INC}
-# LDFLAGS =
+FILENAME ?= $(error FILENAME is not set)
+
+filename:
+	@java src/main/java/org/pq/tool/OS.java
 
 compile:
-	g++ -fPIC ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o
+	g++ -fPIC ${CPPFLAGS} ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o
 	g++ -v -shared ${OBJ}.o -lpq ${LDFLAGS} -o ${FILENAME}.lib
 
 headers:
@@ -40,3 +35,11 @@ headers:
 # g++ -shared org_pq_Native.o /opt/homebrew/opt/libpq/lib/libpq.a -o foo.lib -L/opt/homebrew/opt/libpq/lib -I/opt/homebrew/opt/libpq/include
 # g++ -shared -Wl,-all_load libfoo.a -o foo.lib -v
 # $(shell pg_config --libs)
+
+# CPPFLAGS = -I${LIBPQ_INC}
+# # LDFLAGS =
+
+# LIBPQ_LIB ?= $(error LIBPQ_LIB is not set)
+# LIBPQ_INC ?= $(error LIBPQ_INC is not set)
+
+# make compile FILENAME=$(make filename) CPPFLAGS=-I$(pg_config --includedir) LDFLAGS=-L$(pg_config --libdir)
