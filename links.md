@@ -22,3 +22,9 @@ http://normanmaurer.me/blog/2014/01/07/JNI-Performance-Welcome-to-the-dark-side/
 
 Standard GitHub-hosted runners for public repositories
 https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#standard-github-hosted-runners-for-public-repositories
+
+setup-msys2
+https://github.com/msys2/setup-msys2
+
+msys2 packages
+https://packages.msys2.org/packages/?repo=clangarm64

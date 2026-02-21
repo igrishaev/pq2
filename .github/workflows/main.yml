@@ -25,15 +25,16 @@ jobs:
             mingw-w64-clang-aarch64-libpqxx
             mingw-w64-clang-aarch64-gcc-compat
 
-      - name: set filename
-        run: cd untitled && echo "FILENAME=$(make filename)" >> $GITHUB_ENV
+      - name: set env vars
+        run: echo "FILENAME=$(make filename) >> $GITHUB_ENV
+        shell: bash
 
       - name: Compile the project
         shell: msys2 {0}
         run: |
           g++ --version
           cd untitled
-          make compile FILENAME=$(make filename)
+          make compile
 
       - run: ls -l untitled
         shell: bash
@@ -41,45 +42,48 @@ jobs:
       - name: Save artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: artifacts-windows-aarch64
+          name: artifacts-windows-arm64
           path: untitled/*.lib
           if-no-files-found: error
 
-  # Windows-x64:
+  Windows-x64:
 
-  #   strategy:
-  #     matrix:
-  #       os:
-  #         - name: windows-2025
+    runs-on: windows-2025
 
-  #   runs-on: ${{ matrix.os.name }}
+    steps:
 
-  #   steps:
+      - name: Check out
+        uses: actions/checkout@v4
 
-  #     - name: Check out
-  #       uses: actions/checkout@v4
+      - name: Setup MSYS2 and MinGW
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: CLANG64
+          install: >-
+            make
+            mingw-w64-clang-x86_64-libpqxx
+            mingw-w64-clang-x86_64-gcc-compat
 
-  #     - run: vcpkg install libpq
+      - name: set env vars
+        run: echo "FILENAME=$(make filename) >> $GITHUB_ENV
+        shell: bash
 
-  #     - run: g++ --version
+      - name: Compile the project
+        shell: msys2 {0}
+        run: |
+          g++ --version
+          cd untitled
+          make compile
 
-  #     - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed
-  #       shell: bash
+      - run: ls -l untitled
+        shell: bash
 
-  #     - name: compile
-  #       run: cd untitled && make LIBPQ_LIB=${VCPKG_INSTALLATION_ROOT}/installed/x64-windows/lib LIBPQ_INC=${VCPKG_INSTALLATION_ROOT}/installed/x64-windows/include
-  #       # run: cd untitled && make LIBPQ_LIB=${VCPKG_INSTALLATION_ROOT}/installed/arm64-windows/lib LIBPQ_INC=${VCPKG_INSTALLATION_ROOT}/installed/arm64-windows/include
-  #       # run: cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
-  #       shell: bash
-
-  #     - run: ls -l untitled
-  #       shell: bash
-
-  #     - name: Save artifacts
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: artifacts-${{ matrix.os.name }}
-  #         path: untitled/*.lib
+      - name: Save artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts-windows-x64
+          path: untitled/*.lib
+          if-no-files-found: error
 
   # macOS:
   #   name: "macOS"
