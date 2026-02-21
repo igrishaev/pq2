@@ -19,11 +19,13 @@ filename:
 # remove trailing slash
 JAVA_HOME := $(shell echo $${JAVA_HOME%/})
 
-CPPFLAGS = -I${LIBPQ_INC} -I${JAVA_HOME}/include -I${JAVA_HOME}/include/darwin -I${JAVA_HOME}/include/win32 -I${JAVA_HOME}/include/linux
+JAVA_INC = -I${JAVA_HOME}/include -I${JAVA_HOME}/include/darwin -I${JAVA_HOME}/include/win32 -I${JAVA_HOME}/include/linux
+
+CPPFLAGS = -I${LIBPQ_INC}
 # LDFLAGS =
 
 compile:
-	g++ -fPIC ${CPPFLAGS} -c ${OBJ}.cpp -o ${OBJ}.o
+	g++ -fPIC ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o
 	g++ -v -shared ${OBJ}.o -lpq ${LDFLAGS} -o ${FILENAME}.lib
 
 headers:
