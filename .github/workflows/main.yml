@@ -26,7 +26,7 @@ jobs:
             mingw-w64-clang-aarch64-gcc-compat
 
       - name: set filename
-        run: echo "FILENAME=$(make filename)" >> $GITHUB_ENV
+        run: cd untitled && echo "FILENAME=$(make filename)" >> $GITHUB_ENV
 
       - name: Compile the project
         shell: msys2 {0}
