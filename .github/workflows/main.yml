@@ -25,7 +25,27 @@ jobs:
       - uses: msys2/setup-msys2@v2
         with:
           msystem: ucrt64 # CLANGARM64
-          install: mingw-w64-ucrt-x86_64-gcc
+          install: mingw-w64-clang-aarch64-clang # mingw-w64-ucrt-x86_64-gcc
+
+      - name: Setup MSYS2 and MinGW
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64 # Use MINGW64 environment
+          update: true
+          install: >-
+            # List required MinGW packages here
+            mingw-w64-ucrt-x86_64-gcc
+            make
+            git
+
+      - name: Compile the project
+        shell: msys2 {0} # Use the MSYS2 shell to access the MinGW environment
+        run: |
+          # Replace with your actual build commands, e.g., make, cmake, etc.
+          g++ --version
+          gcc --version
+          # make
+          # ./your_app.exe
 
       - run: g++ --version
 
