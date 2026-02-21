@@ -12,7 +12,7 @@ JAVA_INC="-I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux"
 
 PLATFORM=$(cat PLATFORM)
 
-g++ -fPIC -I$(pg_config --includedir) ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o
+g++ -fPIC -L$(pg_config --libdir) -I$(pg_config --includedir) ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o
 g++ -shared ${OBJ}.o -lpq -o ${PLATFORM}.so
 
 ls -l . | grep *.so
