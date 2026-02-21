@@ -56,41 +56,50 @@ jobs:
           path: "*.dll"
           if-no-files-found: error
 
-  # macOS:
-  #   name: "macOS"
+  macOS:
 
-  #   strategy:
-  #     matrix:
-  #       os:
-  #         - name: macos-15-intel
-  #           libpq: /usr/local/opt/libpq
-  #         - name: macos-26
-  #           libpq: /opt/homebrew/opt/libpq
+    strategy:
+      matrix:
+        opt:
+          - image: macos-15-intel
+            name: "MacOS Intel"
+            libpq: /usr/local/opt/libpq
+          - image: macos-26
+            name: "MacOS M1"
+            libpq: /opt/homebrew/opt/libpq
 
-  #   runs-on: ${{ matrix.os.name }}
+    runs-on: ${{ matrix.opt.image }}
 
-  #   steps:
-  #     - name: Check out
-  #       uses: actions/checkout@v4
+    name: ${{ matrix.opt.name }}
 
-  #     - name: Install libpq
-  #       run: |
-  #         brew update
-  #         brew install libpq@18
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
 
-  #     - run: ls -l ${{ matrix.os.libpq }}
+      - name: Install libpq
+        run: |
+          brew update
+          brew install libpq@18
 
-  #     - name: compile
-  #       run: |
-  #         make LIBPQ_LIB=${{ matrix.os.libpq }}/lib LIBPQ_INC=${{ matrix.os.libpq }}/include
+      - run: pg_config
 
-  #     - run: ls -l .
+      - name: prepare files
+        run: ./script/platform.sh
+        shell: bash
 
-  #     - name: Save artifacts
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: artifacts-${{ matrix.os.name }}
-  #         path: *.lib
+      - name: Compile the project
+        shell: bash
+        run: |
+          g++ --version
+          ./script/build-macos.sh
+
+      - run: ls -l .
+
+      - name: Save artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts-${{ matrix.os.name }}
+          path: "*.dylib"
 
   Linux:
 
