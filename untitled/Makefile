@@ -9,7 +9,9 @@ classes:
 cleanup:
 	rm -f ${OBJ}.o
 
-FILENAME = $(shell java src/main/java/org/pq/tool/OS.java)
+# FILENAME = $(shell java src/main/java/org/pq/tool/OS.java)
+
+FILENAME = foobar.lib
 
 # LIBPQ_LIB ?= $(error LIBPQ_LIB is not set)
 # LIBPQ_INC ?= $(error LIBPQ_INC is not set)
