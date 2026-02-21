@@ -39,7 +39,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: artifacts-windows-arm64
-          path: *.lib
+          path: "*.dll"
           if-no-files-found: error
 
   # Windows-x64:
