@@ -52,7 +52,7 @@ jobs:
         run: |
           g++ --version
           cd untitled
-          make
+          make compile
 
       # - name: compile
       #   run: cd untitled && make LIBPQ_LIB=c:\msys64\clangarm64\lib LIBPQ_INC=c:\msys64\clangarm64\include
