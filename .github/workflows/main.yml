@@ -13,13 +13,17 @@ jobs:
       matrix:
         opt:
           - image: windows-11-arm
+            name: "Windows x64"
             msys: CLANGARM64
             env: clang-aarch64
           - image: windows-2025
+            name: "Windows arm64"
             msys: CLANG64
             env: clang-x86_64
 
     runs-on: ${{ matrix.opt.image }}
+
+    name: ${{ matrix.opt.name }}
 
     steps:
 
@@ -51,44 +55,6 @@ jobs:
           name: artifacts-${{ matrix.opt.image }}
           path: "*.dll"
           if-no-files-found: error
-
-  # Windows-x64:
-
-  #   runs-on: windows-2025
-
-  #   steps:
-
-  #     - name: Check out
-  #       uses: actions/checkout@v4
-
-  #     - name: Setup MSYS2 and MinGW
-  #       uses: msys2/setup-msys2@v2
-  #       with:
-  #         msystem: CLANG64
-  #         install: >-
-  #           make
-  #           mingw-w64-clang-x86_64-libpqxx
-  #           mingw-w64-clang-x86_64-gcc-compat
-
-  #     - name: set env vars
-  #       run: echo "FILENAME=$(make filename)" >> $GITHUB_ENV
-  #       shell: bash
-
-  #     - name: Compile the project
-  #       shell: msys2 {0}
-  #       run: |
-  #         g++ --version
-  #         make compile
-
-  #     - run: ls -l . | grep *.lib
-  #       shell: bash
-
-  #     - name: Save artifacts
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: artifacts-windows-x64
-  #         path: *.lib
-  #         if-no-files-found: error
 
   # macOS:
   #   name: "macOS"
@@ -126,38 +92,47 @@ jobs:
   #         name: artifacts-${{ matrix.os.name }}
   #         path: *.lib
 
-  # Linux:
+  Linux:
 
-  #   strategy:
-  #     matrix:
-  #       os:
-  #         - name: ubuntu-24.04
-  #         - name: ubuntu-24.04-arm
+    strategy:
+      matrix:
+        opt:
+          - image: ubuntu-24.04
+            name: "Linux x64"
+          - image: ubuntu-24.04-arm
+            name: "Linux arm64"
 
-  #   runs-on: ${{ matrix.os.name }}
+    runs-on: ${{ matrix.opt.image }}
 
-  #   steps:
-  #     - name: Check out
-  #       uses: actions/checkout@v4
+    name: ${{ matrix.opt.name }}
 
-  #     - name: Install libpq
-  #       run: |
-  #         sudo apt update
-  #         sudo apt install -y postgresql-common
-  #         sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
-  #         sudo apt update
-  #         sudo apt install -y libpq-dev
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
 
-  #     - run: pg_config
+      - name: Install libpq
+        run: |
+          sudo apt update
+          sudo apt install -y postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt update
+          sudo apt install -y libpq-dev
 
-  #     - name: compile
-  #       run: |
-  #         make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
+      - run: pg_config
 
-  #     - run: ls -l .
+      - name: prepare files
+        run: ./script/platform.sh
+        shell: bash
 
-  #     - name: Save artifacts
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: artifacts-${{ matrix.os.name }}
-  #         path: *.lib
+      - name: Compile the project
+        shell: msys2 {0}
+        run: |
+          g++ --version
+          ./script/build-linux.sh
+
+      - name: Save artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts-${{ matrix.opt.image }}
+          path: "*.so"
+          if-no-files-found: error
