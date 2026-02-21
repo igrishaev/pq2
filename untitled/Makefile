@@ -17,7 +17,9 @@ FILENAME = foobar.lib
 # LIBPQ_INC ?= $(error LIBPQ_INC is not set)
 
 # remove trailing slash
-JAVA_HOME := $(shell echo $${JAVA_HOME%/})
+# JAVA_HOME := $(shell echo $${JAVA_HOME%/})
+
+JAVA_HOME = /c/hostedtoolcache/windows/Java_Temurin-Hotspot_jdk/21.0.9-10.0/aarch64
 
 # CPPFLAGS = -I${LIBPQ_INC} -I${JAVA_HOME}/include -I${JAVA_HOME}/include/darwin -I${JAVA_HOME}/include/win32 -I${JAVA_HOME}/include/linux
 # LDFLAGS = -L${LIBPQ_LIB}
