@@ -26,14 +26,13 @@ jobs:
             mingw-w64-clang-aarch64-gcc-compat
 
       - name: set env vars
-        run: cd untitled && echo "FILENAME=$(make filename)" >> $GITHUB_ENV
+        run: echo "FILENAME=$(make filename)" >> $GITHUB_ENV
         shell: bash
 
       - name: Compile the project
         shell: msys2 {0}
         run: |
           g++ --version
-          cd untitled
           make compile
 
       - run: ls -l . | grep *.lib
@@ -43,7 +42,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: artifacts-windows-arm64
-          path: untitled/*.lib
+          path: *.lib
           if-no-files-found: error
 
   Windows-x64:
@@ -65,14 +64,13 @@ jobs:
             mingw-w64-clang-x86_64-gcc-compat
 
       - name: set env vars
-        run: cd untitled && echo "FILENAME=$(make filename)" >> $GITHUB_ENV
+        run: echo "FILENAME=$(make filename)" >> $GITHUB_ENV
         shell: bash
 
       - name: Compile the project
         shell: msys2 {0}
         run: |
           g++ --version
-          cd untitled
           make compile
 
       - run: ls -l . | grep *.lib
@@ -82,7 +80,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: artifacts-windows-x64
-          path: untitled/*.lib
+          path: *.lib
           if-no-files-found: error
 
   # macOS:
@@ -111,15 +109,15 @@ jobs:
 
   #     - name: compile
   #       run: |
-  #         cd untitled && make LIBPQ_LIB=${{ matrix.os.libpq }}/lib LIBPQ_INC=${{ matrix.os.libpq }}/include
+  #         make LIBPQ_LIB=${{ matrix.os.libpq }}/lib LIBPQ_INC=${{ matrix.os.libpq }}/include
 
-  #     - run: ls -l untitled
+  #     - run: ls -l .
 
   #     - name: Save artifacts
   #       uses: actions/upload-artifact@v4
   #       with:
   #         name: artifacts-${{ matrix.os.name }}
-  #         path: untitled/*.lib
+  #         path: *.lib
 
   # Linux:
 
@@ -147,12 +145,12 @@ jobs:
 
   #     - name: compile
   #       run: |
-  #         cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
+  #         make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
 
-  #     - run: ls -l untitled
+  #     - run: ls -l .
 
   #     - name: Save artifacts
   #       uses: actions/upload-artifact@v4
   #       with:
   #         name: artifacts-${{ matrix.os.name }}
-  #         path: untitled/*.lib
+  #         path: *.lib

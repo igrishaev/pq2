@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 public class Native {
 
     static {
-        System.load(String.format("/Users/%s/work/pq2/untitled/macos_aarch64.lib", System.getenv("USER")));
+        System.load(String.format("/Users/%s/work/pq2/macos_aarch64.lib", System.getenv("USER")));
     }
 
     public static native long connect(String connInfo);
