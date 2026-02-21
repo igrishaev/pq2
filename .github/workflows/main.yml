@@ -125,7 +125,7 @@ jobs:
         shell: bash
 
       - name: Compile the project
-        shell: msys2 {0}
+        shell: bash
         run: |
           g++ --version
           ./script/build-linux.sh
