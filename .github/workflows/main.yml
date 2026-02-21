@@ -6,13 +6,12 @@ env:
 
 jobs:
 
-  Windows:
+  Windows-arm64:
 
     strategy:
       matrix:
         os:
-          - name: windows-11-arm # windows-2025
-          # - name: windows-11-arm
+          - name: windows-11-arm
 
     runs-on: ${{ matrix.os.name }}
 
@@ -21,15 +20,20 @@ jobs:
       - name: Check out
         uses: actions/checkout@v4
 
-      - run: vcpkg install libpq
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: CLANGARM64
 
       - run: g++ --version
+
+      - run: vcpkg install libpq
 
       - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed
         shell: bash
 
       - name: compile
         run: cd untitled && make LIBPQ_LIB=${VCPKG_INSTALLATION_ROOT}/installed/arm64-windows/lib LIBPQ_INC=${VCPKG_INSTALLATION_ROOT}/installed/arm64-windows/include
+        # run: cd untitled && make LIBPQ_LIB=${VCPKG_INSTALLATION_ROOT}/installed/arm64-windows/lib LIBPQ_INC=${VCPKG_INSTALLATION_ROOT}/installed/arm64-windows/include
         # run: cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
         shell: bash
 
@@ -41,6 +45,42 @@ jobs:
         with:
           name: artifacts-${{ matrix.os.name }}
           path: untitled/*.lib
+
+  # Windows-x64:
+
+  #   strategy:
+  #     matrix:
+  #       os:
+  #         - name: windows-2025
+
+  #   runs-on: ${{ matrix.os.name }}
+
+  #   steps:
+
+  #     - name: Check out
+  #       uses: actions/checkout@v4
+
+  #     - run: vcpkg install libpq
+
+  #     - run: g++ --version
+
+  #     - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed
+  #       shell: bash
+
+  #     - name: compile
+  #       run: cd untitled && make LIBPQ_LIB=${VCPKG_INSTALLATION_ROOT}/installed/x64-windows/lib LIBPQ_INC=${VCPKG_INSTALLATION_ROOT}/installed/x64-windows/include
+  #       # run: cd untitled && make LIBPQ_LIB=${VCPKG_INSTALLATION_ROOT}/installed/arm64-windows/lib LIBPQ_INC=${VCPKG_INSTALLATION_ROOT}/installed/arm64-windows/include
+  #       # run: cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
+  #       shell: bash
+
+  #     - run: ls -l untitled
+  #       shell: bash
+
+  #     - name: Save artifacts
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: artifacts-${{ matrix.os.name }}
+  #         path: untitled/*.lib
 
   # macOS:
   #   name: "macOS"
