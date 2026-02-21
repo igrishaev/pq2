@@ -40,7 +40,7 @@ jobs:
 
       # - run: vcpkg install libpq
 
-      - run: ls -l c:\msys64\clangarm64
+      - run: ls -l c:/msys64/clangarm64
         shell: bash
 
       # - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed
