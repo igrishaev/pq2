@@ -1,13 +1,9 @@
 name: Build on various systems
 on: push
 
-# todo: move to macos
-env:
-  HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
-
 jobs:
 
-  Windows:
+  windows:
 
     strategy:
       matrix:
@@ -56,7 +52,10 @@ jobs:
           path: "*.dll"
           if-no-files-found: error
 
-  macOS:
+  macos:
+
+    env:
+      HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
 
     strategy:
       matrix:
@@ -91,7 +90,7 @@ jobs:
         shell: bash
         run: |
           g++ --version
-          ./script/build-macos.sh
+          LIBPQ=${{ matrix.os.name }} ./script/build-macos.sh
 
       - run: ls -l .
 
@@ -101,7 +100,7 @@ jobs:
           name: artifacts-${{ matrix.os.name }}
           path: "*.dylib"
 
-  Linux:
+  linux:
 
     strategy:
       matrix:

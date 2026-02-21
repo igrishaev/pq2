@@ -12,7 +12,7 @@ JAVA_INC="-I${JAVA_HOME}/include -I${JAVA_HOME}/include/darwin"
 
 PLATFORM=$(cat PLATFORM)
 
-g++ -fPIC -I$(pg_config --includedir) ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o
-g++ -shared ${OBJ}.o -lpq -L$(pg_config --libdir) -o ${PLATFORM}.dylib
+g++ -fPIC -I${LIBPQ}/include ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o
+g++ -shared ${OBJ}.o -lpq -L${LIBPQ}/lib -o ${PLATFORM}.dylib
 
 ls -l . | grep *.dylib
