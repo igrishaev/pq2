@@ -36,7 +36,7 @@ jobs:
           cd untitled
           make compile
 
-      - run: ls -l untitled
+      - run: ls -l . | grep *.lib
         shell: bash
 
       - name: Save artifacts
@@ -75,7 +75,7 @@ jobs:
           cd untitled
           make compile
 
-      - run: ls -l untitled
+      - run: ls -l . | grep *.lib
         shell: bash
 
       - name: Save artifacts
