@@ -15,50 +15,37 @@ jobs:
 
     runs-on: ${{ matrix.os.name }}
 
+    env:
+      FILENAME: windows_aarch64
+
     steps:
 
       - name: Check out
         uses: actions/checkout@v4
 
-      # - run: g++ --version
-
-      # - uses: msys2/setup-msys2@v2
-      #   with:
-      #     msystem: ucrt64 # CLANGARM64
-      #     install: mingw-w64-clang-aarch64-clang # mingw-w64-ucrt-x86_64-gcc
-
       - name: Setup MSYS2 and MinGW
         uses: msys2/setup-msys2@v2
         with:
           msystem: CLANGARM64
-          update: true
           install: >-
             make
             mingw-w64-clang-aarch64-libpqxx
             mingw-w64-clang-aarch64-gcc-compat
 
-      # - run: g++ --version
-
-      # - run: vcpkg install libpq
-
-      # - run: ls -l c:/msys64/clangarm64
-      #   shell: bash
-
-      # - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed
-      #   shell: bash
+      - name: set file name
+        run: echo "FILENAME=$(make filename)" >> $GITHUB_ENV
+        shell: bash
 
       - name: Compile the project
-        shell: msys2 {0} # Use the MSYS2 shell to access the MinGW environment
+        shell: msys2 {0}
         run: |
           g++ --version
           cd untitled
-          make compile
-
-      # - name: compile
-      #   run: cd untitled && make LIBPQ_LIB=c:\msys64\clangarm64\lib LIBPQ_INC=c:\msys64\clangarm64\include
-      #   # run: cd untitled && make LIBPQ_LIB=${VCPKG_INSTALLATION_ROOT}/installed/arm64-windows/lib LIBPQ_INC=${VCPKG_INSTALLATION_ROOT}/installed/arm64-windows/include
-      #   # run: cd untitled && make LIBPQ_LIB=$(pg_config --libdir) LIBPQ_INC=$(pg_config --includedir)
-      #   shell: bash
+          export FILENAME=$(make filename)
+          export OBJ=org_pq_Native
+          export JAVA_HOME=$(echo ${JAVA_HOME%/})
+          g++ -fPIC -I${JAVA_HOME}/include -I${JAVA_HOME}/include/win32 -c ${OBJ}.cpp -o ${OBJ}.o
+          g++ -v -shared ${OBJ}.o -lpq -o ${FILENAME}.lib
 
       - run: ls -l untitled
         shell: bash

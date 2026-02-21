@@ -9,36 +9,22 @@ classes:
 cleanup:
 	rm -f ${OBJ}.o
 
-# FILENAME = $(shell java src/main/java/org/pq/tool/OS.java)
-
-FILENAME = foobar.lib
+.phony: filename
+filename:
+	@java src/main/java/org/pq/tool/OS.java
 
 # LIBPQ_LIB ?= $(error LIBPQ_LIB is not set)
 # LIBPQ_INC ?= $(error LIBPQ_INC is not set)
 
 # remove trailing slash
-# JAVA_HOME := $(shell echo $${JAVA_HOME%/})
+JAVA_HOME := $(shell echo $${JAVA_HOME%/})
 
-JAVA_HOME = /c/hostedtoolcache/windows/Java_Temurin-Hotspot_jdk/21.0.9-10.0/aarch64
-
-# CPPFLAGS = -I${LIBPQ_INC} -I${JAVA_HOME}/include -I${JAVA_HOME}/include/darwin -I${JAVA_HOME}/include/win32 -I${JAVA_HOME}/include/linux
-# LDFLAGS = -L${LIBPQ_LIB}
-
-CPPFLAGS = -I${JAVA_HOME}/include -I${JAVA_HOME}/include/darwin -I${JAVA_HOME}/include/win32 -I${JAVA_HOME}/include/linux
-LDFLAGS =
-
-$(info JAVA_HOME=${JAVA_HOME})
-$(info LDFLAGS=${LDFLAGS})
-$(info CPPFLAGS=${CPPFLAGS})
-$(info FILENAME=${FILENAME})
-
-$(info )
+CPPFLAGS = -I${LIBPQ_INC} -I${JAVA_HOME}/include -I${JAVA_HOME}/include/darwin -I${JAVA_HOME}/include/win32 -I${JAVA_HOME}/include/linux
+# LDFLAGS =
 
 compile:
 	g++ -fPIC ${CPPFLAGS} -c ${OBJ}.cpp -o ${OBJ}.o
 	g++ -v -shared ${OBJ}.o -lpq ${LDFLAGS} -o ${FILENAME}.lib
-
-link:
 
 headers:
 	javac -h . src/main/java/org/pq/Native.java src/main/java/org/pq/api/PGRES.java
