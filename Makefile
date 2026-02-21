@@ -16,12 +16,20 @@ JAVA_INC = -I${JAVA_HOME}/include -I${JAVA_HOME}/include/darwin -I${JAVA_HOME}/i
 
 FILENAME ?= $(error FILENAME is not set)
 
+PLATFORM = _PLATFORM
+
+build-windows:
+	echo ${foo}
+
+platform:
+	java src/main/java/org/pq/tool/OS.java > ${PLATFORM}
+
 filename:
 	@java src/main/java/org/pq/tool/OS.java
 
-compile:
+compile: ${PLATFORM}
 	g++ -fPIC ${CPPFLAGS} ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o
-	g++ -v -shared ${OBJ}.o -lpq ${LDFLAGS} -o ${FILENAME}.lib
+	# g++ -v -shared ${OBJ}.o -lpq ${LDFLAGS} -o $(shell cat ${PLATFORM}).lib
 
 headers:
 	javac -h . src/main/java/org/pq/Native.java src/main/java/org/pq/api/PGRES.java

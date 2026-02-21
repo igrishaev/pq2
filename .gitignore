@@ -38,3 +38,5 @@ build/
 *.dylib
 *.o
 *.lib
+
+PLATFORM

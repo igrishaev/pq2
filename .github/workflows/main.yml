@@ -25,18 +25,15 @@ jobs:
             mingw-w64-clang-aarch64-libpqxx
             mingw-w64-clang-aarch64-gcc-compat
 
-      - name: set env vars
-        run: echo "FILENAME=$(make filename)" >> $GITHUB_ENV
+      - name: prepare files
+        run: ./script/platform.sh
         shell: bash
 
       - name: Compile the project
         shell: msys2 {0}
         run: |
           g++ --version
-          make compile
-
-      - run: ls -l . | grep *.lib
-        shell: bash
+          ./script/build-windows-arm64.sh
 
       - name: Save artifacts
         uses: actions/upload-artifact@v4
@@ -45,43 +42,43 @@ jobs:
           path: *.lib
           if-no-files-found: error
 
-  Windows-x64:
+  # Windows-x64:
 
-    runs-on: windows-2025
+  #   runs-on: windows-2025
 
-    steps:
+  #   steps:
 
-      - name: Check out
-        uses: actions/checkout@v4
+  #     - name: Check out
+  #       uses: actions/checkout@v4
 
-      - name: Setup MSYS2 and MinGW
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: CLANG64
-          install: >-
-            make
-            mingw-w64-clang-x86_64-libpqxx
-            mingw-w64-clang-x86_64-gcc-compat
+  #     - name: Setup MSYS2 and MinGW
+  #       uses: msys2/setup-msys2@v2
+  #       with:
+  #         msystem: CLANG64
+  #         install: >-
+  #           make
+  #           mingw-w64-clang-x86_64-libpqxx
+  #           mingw-w64-clang-x86_64-gcc-compat
 
-      - name: set env vars
-        run: echo "FILENAME=$(make filename)" >> $GITHUB_ENV
-        shell: bash
+  #     - name: set env vars
+  #       run: echo "FILENAME=$(make filename)" >> $GITHUB_ENV
+  #       shell: bash
 
-      - name: Compile the project
-        shell: msys2 {0}
-        run: |
-          g++ --version
-          make compile
+  #     - name: Compile the project
+  #       shell: msys2 {0}
+  #       run: |
+  #         g++ --version
+  #         make compile
 
-      - run: ls -l . | grep *.lib
-        shell: bash
+  #     - run: ls -l . | grep *.lib
+  #       shell: bash
 
-      - name: Save artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: artifacts-windows-x64
-          path: *.lib
-          if-no-files-found: error
+  #     - name: Save artifacts
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: artifacts-windows-x64
+  #         path: *.lib
+  #         if-no-files-found: error
 
   # macOS:
   #   name: "macOS"
