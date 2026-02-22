@@ -3,3 +3,4 @@
 - move cpp files into a directory
 - fix windows build
 - add quick test on CI
+- rename all files to .lib on CI
