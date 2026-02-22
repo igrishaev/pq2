@@ -15,9 +15,11 @@ PLATFORM=$(cat PLATFORM)
 g++ -fPIC ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o
 g++ -shared ${OBJ}.o -lpq -o ${PLATFORM}.dll
 
-ls -l /c/a/_temp/msys64/${MSYS}
+MSYS_DIR=D:/a/_temp/msys64/${MSYS}
+
+ls -l ${MSYS_DIR}
 
 # copy libpq
-cp /c/a/_temp/msys64/${MSYS}/lib/libpq.dll ./${PLATFORM}_libpq.dll
+cp ${MSYS_DIR}/lib/libpq.dll ./${PLATFORM}_libpq.dll
 
 find . -name '*.dll'
