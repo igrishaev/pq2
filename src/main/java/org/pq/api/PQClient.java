@@ -1,6 +1,7 @@
 package org.pq.api;
 
 import org.pq.Native;
+import org.pq.Wrapper;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -14,11 +15,6 @@ public record PQClient (
     AtomicInteger counter
 ) implements AutoCloseable {
 
-    // TODO
-    public static CONNECTION connStatus(final long connPtr) {
-        return CONNECTION.of(Native.connStatus(connPtr));
-    }
-
     public static PQClient of(final String connInfo) {
 
         final Arena arena = Arena.of(Const.BB_SIZE);
@@ -27,7 +23,7 @@ public record PQClient (
         if (ptr == arena.NULL()) {
             throw PQError.error("PQ connection returned null");
         }
-        final CONNECTION connStatus = connStatus(ptr);
+        final CONNECTION connStatus = Wrapper.connStatus(ptr);
 
         return switch (connStatus) {
             case OK -> new PQClient(
@@ -50,7 +46,7 @@ public record PQClient (
 
     public PQResult query(final String query) {
         final long resPtr = Native.query(this.ptr, query);
-        final PGRES pgres = Native.resultStatus(resPtr);
+        final PGRES pgres = Wrapper.resultStatus(resPtr);
         switch (pgres) {
             case TUPLES_OK -> {}
             default -> throw error("query has failed: code: %s, SQL: %s", pgres, query);
@@ -67,7 +63,7 @@ public record PQClient (
         }
         Native.setChunkedRowsMode(ptr, chunkSize);
         final long resPtr = Native.getResult(ptr);
-        final PGRES pgres = Native.resultStatus(resPtr);
+        final PGRES pgres = Wrapper.resultStatus(resPtr);
         switch (pgres) {
             case TUPLES_CHUNK -> {}
             default -> {
@@ -85,7 +81,7 @@ public record PQClient (
         String message;
 
         resPtr = Native.prepare(ptr, stmtName, query);
-        status = Native.resultStatus(resPtr);
+        status = Wrapper.resultStatus(resPtr);
         Native.closeResult(resPtr);
         switch (status) {
             case COMMAND_OK -> {}
@@ -95,7 +91,7 @@ public record PQClient (
             }
         }
         resPtr = Native.describe(ptr, stmtName);
-        status = Native.resultStatus(resPtr);
+        status = Wrapper.resultStatus(resPtr);
         switch (status) {
             case COMMAND_OK -> {
                 final int nParams = Native.nParams(resPtr);

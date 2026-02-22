@@ -37,4 +37,4 @@ build/
 
 *.o
 
-PLATFORM
+_PLATFORM

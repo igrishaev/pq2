@@ -1,6 +1,5 @@
 package org.pq;
 
-import org.pq.api.PGRES;
 import org.pq.tool.OS;
 
 import java.io.*;
@@ -12,14 +11,14 @@ public class Native {
     public static File dumpLib(final String filename) throws IOException {
         final File temp = File.createTempFile("temp", ".lib");
         temp.deleteOnExit();
-        try (InputStream in = Objects.requireNonNull(Native.class.getResource(filename)).openStream();
+        try (InputStream in = Native.class.getResourceAsStream(filename);
              OutputStream out = new FileOutputStream(temp)) {
-            in.transferTo(out);
+            Objects.requireNonNull(in).transferTo(out);
         }
         return temp;
     }
 
-    static {
+    public static void loadLibs() {
         final String prefix = OS.prefix();
         try {
             System.load(dumpLib(String.format("/%s_libpq.lib", prefix)).getAbsolutePath());
@@ -33,10 +32,14 @@ public class Native {
         }
     }
 
+    static {
+        loadLibs();
+    }
+
     public static native long connect(String connInfo);
     public static native void closeConnection (long conn);
     public static native int connStatus(long conn);
-    public static native int resStatus(long result); // TODO
+    public static native int resultStatus(long result);
     public static native String connError(long conn);
     public static native int initByteBuffer(ByteBuffer bb);
     public static native void closeResult(long result);
@@ -58,8 +61,4 @@ public class Native {
     public static native int nParams(long result);
     public static native int paramOid(long result, int i);
     public static native long getResult(long conn);
-
-    public static PGRES resultStatus(final long result) {
-        return PGRES.of(resStatus(result));
-    }
 }

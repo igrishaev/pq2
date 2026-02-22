@@ -1,6 +1,7 @@
 package org.pq.api;
 
 import org.pq.Native;
+import org.pq.Wrapper;
 import org.pq.codec.Encoder;
 
 import static org.pq.api.PQError.error;
@@ -26,7 +27,7 @@ public record PQStatement(
         }
         Encoder.encodeExecParams(arena, nParams, params, paramOids);
         final long resPtr = Native.execPrepared(connPtr, stmtName, arena.ptr());
-        final PGRES status = Native.resultStatus(resPtr);
+        final PGRES status = Wrapper.resultStatus(resPtr);
         return switch (status) {
             case TUPLES_OK -> new PQResult(connPtr, resPtr, arena, false);
             default -> {
@@ -50,7 +51,7 @@ public record PQStatement(
         }
         Native.setChunkedRowsMode(connPtr, chunkSize);
         final long resPtr = Native.getResult(connPtr);
-        final PGRES pgres = Native.resultStatus(resPtr);
+        final PGRES pgres = Wrapper.resultStatus(resPtr);
         return switch (pgres) {
             case TUPLES_CHUNK -> new PQResult(connPtr, resPtr, arena, true);
             default -> {
@@ -64,7 +65,7 @@ public record PQStatement(
     @Override
     public void close() {
         final long resPtr = Native.closeStatement(connPtr, stmtName);
-        final PGRES status = Native.resultStatus(resPtr);
+        final PGRES status = Wrapper.resultStatus(resPtr);
         Native.closeResult(resPtr);
         switch (status) {
             case COMMAND_OK -> {}

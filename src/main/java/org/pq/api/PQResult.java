@@ -1,6 +1,7 @@
 package org.pq.api;
 
 import org.pq.Native;
+import org.pq.Wrapper;
 import org.pq.codec.Decoder;
 
 import java.util.Iterator;
@@ -63,7 +64,7 @@ public class PQResult implements AutoCloseable {
         if (isEnd && isMulti) {
             Native.closeResult(resPtr);
             final long newPtr = Native.getResult(connPtr);
-            final PGRES status = Native.resultStatus(newPtr);
+            final PGRES status = Wrapper.resultStatus(newPtr);
             switch (status) {
                 case TUPLES_CHUNK, TUPLES_OK -> {
                     resPtr = newPtr;

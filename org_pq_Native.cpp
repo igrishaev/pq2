@@ -62,10 +62,10 @@ JNIEXPORT jint JNICALL Java_org_pq_Native_connStatus
 
 /*
  * Class:     org_pq_Native
- * Method:    resStatus
+ * Method:    resultStatus
  * Signature: (J)I
  */
-JNIEXPORT jint JNICALL Java_org_pq_Native_resStatus
+JNIEXPORT jint JNICALL Java_org_pq_Native_resultStatus
 (JNIEnv *, jclass, jlong jresult) {
     PGresult* result = (PGresult*) jresult;
     return PQresultStatus(result);

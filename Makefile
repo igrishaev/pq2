@@ -1,5 +1,5 @@
 
-all: cleanup headers compile link classes
+all: cleanup dump-platform headers compile classes
 
 OBJ = org_pq_Native
 
@@ -11,7 +11,6 @@ cleanup:
 
 # remove trailing slash
 JAVA_HOME := $(shell echo $${JAVA_HOME%/})
-
 JAVA_INC = -I${JAVA_HOME}/include -I${JAVA_HOME}/include/darwin -I${JAVA_HOME}/include/win32 -I${JAVA_HOME}/include/linux
 
 FILENAME ?= $(error FILENAME is not set)
@@ -21,18 +20,20 @@ PLATFORM = _PLATFORM
 build-windows:
 	echo ${foo}
 
-platform:
+dump-platform:
 	java src/main/java/org/pq/tool/OS.java > ${PLATFORM}
 
 filename:
 	@java src/main/java/org/pq/tool/OS.java
 
 compile: ${PLATFORM}
-	g++ -fPIC ${CPPFLAGS} ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o
-	# g++ -v -shared ${OBJ}.o -lpq ${LDFLAGS} -o $(shell cat ${PLATFORM}).lib
+	rm -rf src/main/resources/*.lib
+	g++ -fPIC -I$(shell pg_config --includedir) ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o
+	g++ -shared ${OBJ}.o -lpq -L$(shell pg_config --libdir) -o src/main/resources/$(shell cat ${PLATFORM})_api.lib
+	cp $(shell pg_config --libdir)/libpq.dylib src/main/resources/$(shell cat ${PLATFORM})_libpq.lib
 
 headers:
-	javac -h . src/main/java/org/pq/Native.java src/main/java/org/pq/api/PGRES.java
+	javac -h . src/main/java/org/pq/Native.java src/main/java/org/pq/tool/OS.java
 
 # g++ -dynamiclib -o ${FILENAME}.lib ${OBJ}.o -lc -lpq ${LDFLAGS} # -shared
 # g++ -c -fPIC ${CPPFLAGS} ${OBJ}.cpp -o ${OBJ}.o
