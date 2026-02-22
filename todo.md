@@ -1,0 +1,5 @@
+- Native/API modules
+- fix todo for resStatus/resultStatus
+- move cpp files into a directory
+- fix windows build
+- add quick test on CI
