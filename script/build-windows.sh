@@ -17,7 +17,7 @@ g++ -shared ${OBJ}.o -lpq -o ${PLATFORM}.dll
 
 MSYS_DIR=D:/a/_temp/msys64/${MSYS}
 
-ls -l ${MSYS_DIR}
+ls -l ${MSYS_DIR}/lib
 
 # copy libpq
 cp ${MSYS_DIR}/lib/libpq.dll ./${PLATFORM}_libpq.dll
