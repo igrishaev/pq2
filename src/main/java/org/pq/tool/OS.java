@@ -14,11 +14,17 @@ public class OS {
             throw new RuntimeException(String.format("unknown os family: %s", osName));
         }
     }
+
+    public static String osArch() {
+        return System.getProperty("os.arch");
+    }
+
+    public static String prefix() {
+        return String.format("%s_%s", osFamily(), osArch());
+    }
     
     public static void main(String... args) {
-        final String family = osFamily();
-        final String arch = System.getProperty("os.arch");
-        System.out.printf("%s_%s%n", family, arch);
+        System.out.print(prefix());
     }
 
 }

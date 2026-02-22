@@ -1,13 +1,36 @@
 package org.pq;
 
 import org.pq.api.PGRES;
+import org.pq.tool.OS;
 
+import java.io.*;
 import java.nio.ByteBuffer;
+import java.util.Objects;
 
 public class Native {
 
+    public static File dumpLib(final String filename) throws IOException {
+        final File temp = File.createTempFile("temp", ".lib");
+        temp.deleteOnExit();
+        try (InputStream in = Objects.requireNonNull(Native.class.getResource(filename)).openStream();
+             OutputStream out = new FileOutputStream(temp)) {
+            in.transferTo(out);
+        }
+        return temp;
+    }
+
     static {
-        System.load(String.format("/Users/%s/work/pq2/macos_aarch64.lib", System.getenv("USER")));
+        final String prefix = OS.prefix();
+        try {
+            System.load(dumpLib(String.format("/%s_libpq.lib", prefix)).getAbsolutePath());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        try {
+            System.load(dumpLib(String.format("/%s_api.lib", prefix)).getAbsolutePath());
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     public static native long connect(String connInfo);
