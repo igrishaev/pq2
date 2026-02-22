@@ -35,8 +35,6 @@ build/
 ### Mac OS ###
 .DS_Store
 
-*.dylib
 *.o
-*.lib
 
 PLATFORM
