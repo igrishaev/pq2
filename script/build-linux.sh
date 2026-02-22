@@ -15,6 +15,8 @@ PLATFORM=$(cat PLATFORM)
 g++ -fPIC -I$(pg_config --includedir) ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o
 g++ -shared ${OBJ}.o -lpq -o ${PLATFORM}_api.so
 
+ls -l $(pg_config --libdir)
+
 # copy libpq
 cp $(pg_config --libdir)/libpq.so ./${PLATFORM}_libpq.so
 
