@@ -20,4 +20,4 @@ ls -l /c/a/_temp/msys64/${MSYS}
 # copy libpq
 cp /c/a/_temp/msys64/${MSYS}/lib/libpq.dll ./${PLATFORM}_libpq.dll
 
-ls -l . | grep *.dll
+find . -name '*.dll'

@@ -19,3 +19,5 @@ ls -l ${LIBPQ}/lib
 
 # copy libpq
 cp ${LIBPQ}/lib/libpq.dylib ./${PLATFORM}_libpq.dylib
+
+find . -name '*.dylib'
