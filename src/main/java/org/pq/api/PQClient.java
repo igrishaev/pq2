@@ -114,15 +114,13 @@ public record PQClient (
 //        Native.PQreset(ptr);
 //    }
 
-//    public CONNECTION status() {
-//        final int result = Native.PQstatus(ptr);
-//        return CONNECTION.of(result);
-//    }
+    public CONNECTION status() {
+        return Wrapper.connStatus(ptr);
+    }
 
-//    public PQTRANS transactionStatus() {
-//        final int result = Native.PQtransactionStatus(ptr);
-//        return PQTRANS.of(result);
-//    }
+    public PQTRANS txStatus() {
+        return Wrapper.txStatus(ptr);
+    }
 
     @Override
     public void close() {
@@ -134,6 +132,8 @@ public record PQClient (
         try (final PQClient client = PQClient.of(connInfo);
              final PQStatement stmt = client.prepare("select x, x + $1::int4 from generate_series(1, 22) as seq(x)");
              final PQResult res = stmt.executeMulti(List.of(10), 10)) {
+            System.out.println(client.status());
+            System.out.println(client.txStatus());
             while (res.next()) {
                 for (int col: res.iterCols()) {
                     System.out.println(res.getColumn(col));

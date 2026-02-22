@@ -61,4 +61,5 @@ public class Native {
     public static native int nParams(long result);
     public static native int paramOid(long result, int i);
     public static native long getResult(long conn);
+    public static native int transactionStatus(long conn);
 }

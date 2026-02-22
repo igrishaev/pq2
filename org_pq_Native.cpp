@@ -440,3 +440,14 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_getResult
     PGconn* conn = (PGconn*) jconn;
     return (jlong) PQgetResult(conn);
 }
+
+/*
+ * Class:     org_pq_Native
+ * Method:    transactionStatus
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_transactionStatus
+  (JNIEnv *, jclass, jlong jconn) {
+    PGconn* conn = (PGconn*) jconn;
+    return PQtransactionStatus(conn);
+}
