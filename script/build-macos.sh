@@ -17,4 +17,5 @@ g++ -shared ${OBJ}.o -lpq -L${LIBPQ}/lib -o ${PLATFORM}_api.dylib
 
 ls -l ${LIBPQ}/lib
 
+# copy libpq
 cp ${LIBPQ}/lib/libpq.dylib ./${PLATFORM}_libpq.dylib

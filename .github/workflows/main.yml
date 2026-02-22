@@ -43,7 +43,7 @@ jobs:
         shell: msys2 {0}
         run: |
           g++ --version
-          ./script/build-windows.sh
+          MSYS=${{ matrix.opt.msys }} ./script/build-windows.sh
 
       - name: Save artifacts
         uses: actions/upload-artifact@v4
