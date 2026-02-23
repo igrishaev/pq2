@@ -215,6 +215,14 @@ JNIEXPORT jlong JNICALL Java_org_pq_Native_getResult
 JNIEXPORT jint JNICALL Java_org_pq_Native_transactionStatus
   (JNIEnv *, jclass, jlong);
 
+/*
+ * Class:     org_pq_Native
+ * Method:    libVersion
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_libVersion
+  (JNIEnv *, jclass);
+
 #ifdef __cplusplus
 }
 #endif

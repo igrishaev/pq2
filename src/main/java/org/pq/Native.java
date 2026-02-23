@@ -13,24 +13,34 @@ public class Native {
         temp.deleteOnExit();
         try (InputStream in = Native.class.getResourceAsStream(filename);
              OutputStream out = new FileOutputStream(temp)) {
-            Objects.requireNonNull(in).transferTo(out);
+            if (in == null) {
+                throw error("resource %s not found", filename);
+            }
+            in.transferTo(out);
         }
         return temp;
     }
 
-    public static void loadLibs() {
-        final String libName = OS.libName();
+    public static RuntimeException error(final String template, final Object... args) {
+        return new RuntimeException(String.format(template, args));
+    }
 
+    public static RuntimeException error(final Throwable e, final String template, final Object... args) {
+        return new RuntimeException(String.format(template, args), e);
+    }
+
+    public static void loadLib(final String name) {
+        final String libPath = "/" + OS.libName(name);
         try {
-            System.load(dumpLib(String.format("/" + libName)).getAbsolutePath());
+            System.load(dumpLib(libPath).getAbsolutePath());
         } catch (IOException e) {
-            throw new UncheckedIOException(e);
+            throw error(e, "failed to load library: %s", libPath);
         }
-        try {
-            System.load(dumpLib(String.format("/" + libName)).getAbsolutePath());
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    }
+
+    public static void loadLibs() {
+        loadLib("libpq");
+        loadLib("api");
     }
 
     static {
@@ -63,4 +73,5 @@ public class Native {
     public static native int paramOid(long result, int i);
     public static native long getResult(long conn);
     public static native int transactionStatus(long conn);
+    public static native int libVersion();
 }

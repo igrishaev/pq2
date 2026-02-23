@@ -3,7 +3,7 @@ package org.pq.tool;
 public class OS {
 
     public enum OSFamily {
-        MAC("mac", "dylib"),
+        MAC("macos", "dylib"),
         LINUX("linux", "so"),
         WINDOWS("windows", "dll.a");
         public final String tag;
@@ -14,7 +14,7 @@ public class OS {
         }
     }
 
-    public static OSFamily osFamily() {
+    public static OSFamily getOSFamily() {
         final String osName = System.getProperty("os.name").toLowerCase();
         if (osName.contains("mac")) {
             return OSFamily.MAC;
@@ -31,13 +31,20 @@ public class OS {
         return System.getProperty("os.arch");
     }
 
-    public static String libName() {
-        final OSFamily osFamily = osFamily();
-        return String.format("%s_%s.%s", osFamily.tag, osArch(), osFamily.ext);
+    public static final OSFamily osFamily;
+    public static final String libPrefix;
+    static {
+        osFamily = getOSFamily();
+        libPrefix = String.format("%s_%s", osFamily.tag, osArch());
     }
-    
+
+    public static String libName(final String name) {
+        return String.format("%s_%s.%s", libPrefix, name, osFamily.ext);
+    }
+
+
     public static void main(String... args) {
-        System.out.print(libName());
+        System.out.print(libPrefix);
     }
 
 }

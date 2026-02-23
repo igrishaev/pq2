@@ -451,3 +451,13 @@ JNIEXPORT jint JNICALL Java_org_pq_Native_transactionStatus
     PGconn* conn = (PGconn*) jconn;
     return PQtransactionStatus(conn);
 }
+
+/*
+ * Class:     org_pq_Native
+ * Method:    libVersion
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_org_pq_Native_libVersion
+(JNIEnv *, jclass) {
+    return PQlibVersion();
+}
