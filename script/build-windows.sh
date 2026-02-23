@@ -15,8 +15,6 @@ PLATFORM=$(cat PLATFORM)
 g++ -fPIC ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o
 g++ -shared ${OBJ}.o -lpq -o ${PLATFORM}_api.dll.a
 
-MSYS_DIR=D:/a/_temp/msys64/${MSYS}
-
 ls -l ${MSYS_DIR}/lib
 
 # copy libpq

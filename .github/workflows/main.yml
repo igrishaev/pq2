@@ -8,14 +8,18 @@ jobs:
     strategy:
       matrix:
         opt:
-          - image: windows-11-arm
-            name: "Windows x64"
-            msys: CLANGARM64
-            env: clang-aarch64
+          - name: "Windows arm64"
+            image: windows-11-arm
+            msys:
+              env: CLANGARM64
+              dir: C:/a/_temp/msys64
+              arch: clang-aarch64
           - image: windows-2025
-            name: "Windows arm64"
-            msys: CLANG64
-            env: clang-x86_64
+            name: "Windows x64"
+            msys:
+              env: CLANG64
+              dir: D:/a/_temp/msys64
+              arch: clang-aarch64
 
     runs-on: ${{ matrix.opt.image }}
 
@@ -29,11 +33,11 @@ jobs:
       - name: Setup MSYS2 and MinGW
         uses: msys2/setup-msys2@v2
         with:
-          msystem: ${{ matrix.opt.msys }}
+          msystem: ${{ matrix.opt.msys.env }}
           install: >-
             make
-            mingw-w64-${{ matrix.opt.env }}-libpqxx
-            mingw-w64-${{ matrix.opt.env }}-gcc-compat
+            mingw-w64-${{ matrix.opt.msys.arch }}-libpqxx
+            mingw-w64-${{ matrix.opt.msys.arch }}-gcc-compat
 
       - name: prepare files
         run: ./script/platform.sh
@@ -43,7 +47,9 @@ jobs:
         shell: msys2 {0}
         run: |
           g++ --version
-          MSYS=${{ matrix.opt.msys }} ./script/build-windows.sh
+          export MSYS_DIR=${{ matrix.opt.msys.dir }}/${{ matrix.opt.msys.env }}
+          echo $MSYS_DIR
+          ./script/build-windows.sh
 
       - name: Save artifacts
         uses: actions/upload-artifact@v4
