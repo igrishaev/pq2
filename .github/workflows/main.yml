@@ -19,7 +19,7 @@ jobs:
             msys:
               env: CLANG64
               dir: D:/a/_temp/msys64
-              arch: clang-aarch64
+              arch: clang-x86_64
 
     runs-on: ${{ matrix.opt.image }}
 
