@@ -2,16 +2,28 @@ package org.pq.tool;
 
 public class OS {
 
-    public static String osFamily() {
+    public enum OSFamily {
+        MAC("mac", "dylib"),
+        LINUX("linux", "so"),
+        WINDOWS("windows", "dll.a");
+        public final String tag;
+        public final String ext;
+        OSFamily(final String tag, final String ext) {
+            this.tag = tag;
+            this.ext = ext;
+        }
+    }
+
+    public static OSFamily osFamily() {
         final String osName = System.getProperty("os.name").toLowerCase();
         if (osName.contains("mac")) {
-            return "macos";
+            return OSFamily.MAC;
         } else if (osName.contains("windows")) {
-            return "windows";
+            return OSFamily.WINDOWS;
         } else if (osName.contains("linux") || osName.contains("unix")) {
-            return "linux";
+            return OSFamily.LINUX;
         } else {
-            throw new RuntimeException(String.format("unknown os family: %s", osName));
+            throw new RuntimeException(String.format("unsupported OS: %s", osName));
         }
     }
 
@@ -19,12 +31,13 @@ public class OS {
         return System.getProperty("os.arch");
     }
 
-    public static String prefix() {
-        return String.format("%s_%s", osFamily(), osArch());
+    public static String libName() {
+        final OSFamily osFamily = osFamily();
+        return String.format("%s_%s.%s", osFamily.tag, osArch(), osFamily.ext);
     }
     
     public static void main(String... args) {
-        System.out.print(prefix());
+        System.out.print(libName());
     }
 
 }

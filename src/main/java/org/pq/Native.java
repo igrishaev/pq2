@@ -19,14 +19,15 @@ public class Native {
     }
 
     public static void loadLibs() {
-        final String prefix = OS.prefix();
+        final String libName = OS.libName();
+
         try {
-            System.load(dumpLib(String.format("/%s_libpq.lib", prefix)).getAbsolutePath());
+            System.load(dumpLib(String.format("/" + libName)).getAbsolutePath());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
         try {
-            System.load(dumpLib(String.format("/%s_api.lib", prefix)).getAbsolutePath());
+            System.load(dumpLib(String.format("/" + libName)).getAbsolutePath());
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
