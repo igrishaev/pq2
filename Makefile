@@ -33,7 +33,7 @@ ci-check: maven-sync
 	rm -rf target/classes/bin/*.*            # drop existing binaries
 	cp *.dylib target/classes/bin/ | true    # copy the new ones (mac)
 	cp *.so    target/classes/bin/ | true    # copy the new ones (linux)
-	cp *.dll.a target/classes/bin/ | true    # copy the new ones (windows)
+	cp *.dll   target/classes/bin/ | true    # copy the new ones (windows)
 	java -cp target/classes org.pq.CICheck   # run the check (with new libs)
 
 headers:
