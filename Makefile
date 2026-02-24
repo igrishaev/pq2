@@ -30,7 +30,11 @@ maven-sync:
 	mvn compile
 
 ci-check: maven-sync
-	java -cp target/classes org.pq.CICheck
+	rm -rf target/classes/bin/*.*            # drop existing binaries
+	cp *.dylib target/classes/bin/ | true    # copy the new ones (mac)
+	cp *.so    target/classes/bin/ | true    # copy the new ones (linux)
+	cp *.dll.a target/classes/bin/ | true    # copy the new ones (windows)
+	java -cp target/classes org.pq.CICheck   # run the check (with new libs)
 
 headers:
 	javac -h . src/main/java/org/pq/Native.java src/main/java/org/pq/tool/OS.java

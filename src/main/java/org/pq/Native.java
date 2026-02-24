@@ -29,7 +29,7 @@ public class Native {
     }
 
     public static void loadLib(final String name) {
-        final String libPath = "/" + OS.libName(name);
+        final String libPath = "/bin/" + OS.libName(name);
         try {
             System.load(dumpLib(libPath).getAbsolutePath());
         } catch (IOException e) {
