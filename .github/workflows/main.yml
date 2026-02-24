@@ -51,6 +51,10 @@ jobs:
           echo $MSYS_DIR
           ./script/build-windows.sh
 
+      - name: CI check
+        run: make ci-check
+        shell: bash
+
       - name: Save artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -95,6 +99,10 @@ jobs:
         run: |
           g++ --version
           LIBPQ=${{ matrix.opt.libpq }} ./script/build-macos.sh
+
+      - name: CI check
+        run: make ci-check
+        shell: bash
 
       - run: ls -l .
 
