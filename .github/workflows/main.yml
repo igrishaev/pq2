@@ -14,12 +14,12 @@ jobs:
               env: CLANGARM64
               dir: C:/a/_temp/msys64
               arch: clang-aarch64
-          - image: windows-2025
-            name: "Windows x64"
-            msys:
-              env: CLANG64
-              dir: D:/a/_temp/msys64
-              arch: clang-x86_64
+          # - image: windows-2025
+          #   name: "Windows x64"
+          #   msys:
+          #     env: CLANG64
+          #     dir: D:/a/_temp/msys64
+          #     arch: clang-x86_64
 
     runs-on: ${{ matrix.opt.image }}
 
