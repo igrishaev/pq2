@@ -27,6 +27,10 @@ jobs:
 
     steps:
 
+      - name: java version
+        run: java -version
+        shell: bash
+
       - name: Check out
         uses: actions/checkout@v4
 
