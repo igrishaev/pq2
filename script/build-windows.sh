@@ -20,6 +20,6 @@ g++ -shared ${OBJ}.o -lpq -o ${PLATFORM}_api.dll
 
 g++ -shared -lpq -o ${PLATFORM}_libpq.dll
 
-ls -la ${MSYS_DIR}/lib
+# ls -la ${MSYS_DIR}/lib
 
 find . -name '*.dll'
