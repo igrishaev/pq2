@@ -13,11 +13,9 @@ JAVA_INC="-I${JAVA_HOME}/include -I${JAVA_HOME}/include/win32"
 PLATFORM=$(cat PLATFORM)
 
 g++ -fPIC ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o
-g++ -shared ${OBJ}.o -lpq -o ${PLATFORM}_api.dll.a
+g++ -shared ${OBJ}.o -lpq -o ${PLATFORM}_api.dll
 
-ls -l ${MSYS_DIR}/lib
+# compile static libpq as shared
+g++ -shared ${MSYS_DIR}/lib/libpq.dll.a -o ${PLATFORM}_libpq.dll
 
-# copy libpq
-cp ${MSYS_DIR}/lib/libpq.dll.a ./${PLATFORM}_libpq.dll.a
-
-find . -name '*.dll.a'
+find . -name '*.dll'

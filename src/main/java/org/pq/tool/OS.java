@@ -5,7 +5,7 @@ public class OS {
     public enum OSFamily {
         MAC("macos", "dylib"),
         LINUX("linux", "so"),
-        WINDOWS("windows", "dll.a");
+        WINDOWS("windows", "dll");
         public final String tag;
         public final String ext;
         OSFamily(final String tag, final String ext) {
