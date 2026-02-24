@@ -31,7 +31,7 @@ jobs:
       - name: Setup PostgreSQL
         uses: tj-actions/install-postgresql@v3
         with:
-          postgresql-version: 17
+          postgresql-version: 18
 
       - run: pg_config
 
