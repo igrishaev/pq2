@@ -22,4 +22,4 @@ g++ -shared ${MSYS_DIR}/lib/libpq.dll.a -o ${PLATFORM}_libpq.dll -march=x86-64
 
 # ls -la ${MSYS_DIR}/lib
 
-ls -la '*.dll'
+find . -name '*.dll'
