@@ -39,7 +39,7 @@ public class Native {
 
     public static void loadLibs() {
         loadLib("libpq");
-        // loadLib("api");
+        loadLib("api");
     }
 
     static {

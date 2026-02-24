@@ -15,6 +15,8 @@ PLATFORM=$(cat PLATFORM)
 g++ -fPIC ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o -lpq
 g++ -shared ${OBJ}.o -lpq -o ${PLATFORM}_api.dll
 
+ls -la ${MSYS_DIR}/lib
+
 # compile static libpq as shared
 g++ -shared ${MSYS_DIR}/lib/libpq.dll.a -o ${PLATFORM}_libpq.dll
 
