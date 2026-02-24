@@ -12,12 +12,14 @@ JAVA_INC="-I${JAVA_HOME}/include -I${JAVA_HOME}/include/win32"
 
 PLATFORM=$(cat PLATFORM)
 
-g++ -fPIC ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o -march=x86-64
-g++ -shared ${OBJ}.o -lpq -o ${PLATFORM}_api.dll -march=x86-64
+# -march=x86-64
+
+g++ -fPIC ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o
+g++ -shared ${OBJ}.o -lpq -o ${PLATFORM}_api.dll
 
 # compile static libpq as shared
-# g++ -shared ${MSYS_DIR}/lib/libpq.dll.a -o ${PLATFORM}_libpq.dll -march=x86-64
-g++ -shared -lpq -o ${PLATFORM}_libpq.dll -march=x86-64
+# g++ -shared ${MSYS_DIR}/lib/libpq.dll.a -o ${PLATFORM}_libpq.dll
+g++ -shared -lpq -o ${PLATFORM}_libpq.dll
 
 # ls -la ${MSYS_DIR}/lib
 
