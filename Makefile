@@ -1,5 +1,5 @@
 
-all: cleanup dump-platform headers compile
+all: cleanup platform headers compile
 
 OBJ = org_pq_Native
 
@@ -17,11 +17,10 @@ PLATFORM_FILE = _PLATFORM
 platform:
 	java src/main/java/org/pq/tool/OS.java > ${PLATFORM_FILE}
 
-compile: ${PLATFORM}
-	rm -rf src/main/resources/*.lib
+compile: ${PLATFORM_FILE}
 	g++ -fPIC -I$(shell pg_config --includedir) ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o
-	g++ -shared ${OBJ}.o -lpq -L$(shell pg_config --libdir) -o src/main/resources/$(shell cat ${PLATFORM})_api.lib
-	cp $(shell pg_config --libdir)/libpq.dylib src/main/resources/$(shell cat ${PLATFORM})_libpq.lib
+	g++ -shared ${OBJ}.o -lpq -L$(shell pg_config --libdir) -o src/main/resources/bin/$(shell cat ${PLATFORM})_api.dylib
+	cp $(shell pg_config --libdir)/libpq.dylib src/main/resources/bin/$(shell cat ${PLATFORM})_libpq.dylib
 	mvn compile
 
 maven-sync:
