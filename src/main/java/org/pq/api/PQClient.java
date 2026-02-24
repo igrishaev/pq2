@@ -128,7 +128,7 @@ public record PQClient (
     }
 
     public static void main(String... args) {
-        final String connInfo = "host=localhost port=5432 dbname=book user=book password=book";
+        final String connInfo = "host=localhost port=15432 dbname=test user=test password=test";
         try (final PQClient client = PQClient.of(connInfo);
              final PQStatement stmt = client.prepare("select x, x + $1::int4 from generate_series(1, 22) as seq(x)");
              final PQResult res = stmt.executeMulti(List.of(10), 10)) {

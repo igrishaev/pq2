@@ -12,16 +12,10 @@ JAVA_INC = -I${JAVA_HOME}/include -I${JAVA_HOME}/include/darwin -I${JAVA_HOME}/i
 
 FILENAME ?= $(error FILENAME is not set)
 
-PLATFORM = _PLATFORM
+PLATFORM_FILE = _PLATFORM
 
-build-windows:
-	echo ${foo}
-
-dump-platform:
-	java src/main/java/org/pq/tool/OS.java > ${PLATFORM}
-
-filename:
-	@java src/main/java/org/pq/tool/OS.java
+platform:
+	java src/main/java/org/pq/tool/OS.java > ${PLATFORM_FILE}
 
 compile: ${PLATFORM}
 	rm -rf src/main/resources/*.lib
@@ -30,6 +24,13 @@ compile: ${PLATFORM}
 	cp $(shell pg_config --libdir)/libpq.dylib src/main/resources/$(shell cat ${PLATFORM})_libpq.lib
 	mvn compile
 
+maven-sync:
+	rm -rf target
+	mvn resources:resources
+	mvn compile
+
+ci-check: maven-sync
+	java -cp target/classes org.pq.CICheck
 
 headers:
 	javac -h . src/main/java/org/pq/Native.java src/main/java/org/pq/tool/OS.java
