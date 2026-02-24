@@ -29,6 +29,9 @@ jobs:
 
       - run: vcpkg install libpq
 
+      - run: ls C:\vcpkg
+        shell: bash
+
       - run: ls ${VCPKG_ROOT}
         shell: bash
 
