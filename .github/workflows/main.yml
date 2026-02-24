@@ -142,7 +142,7 @@ jobs:
           g++ --version
           ./script/build-linux.sh
 
-      - name: CI check:
+      - name: CI check
         run: make ci-check
         shell: bash
 
