@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
 public class Native {
 
     public static File dumpLib(final String filename) throws IOException {
-        final File temp = File.createTempFile("foobar", ".dll");
+        final File temp = File.createTempFile(filename, ".dll");
         temp.deleteOnExit();
         try (InputStream in = Native.class.getResourceAsStream(filename);
              OutputStream out = new FileOutputStream(temp)) {
