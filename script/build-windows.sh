@@ -14,12 +14,12 @@ PLATFORM=$(cat PLATFORM)
 
 # -march=x86-64
 
-g++ -fPIC ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o -march=x86-64
-g++ -shared ${OBJ}.o -lpq -o ${PLATFORM}_api.dll -march=x86-64
+g++ -fPIC ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o -march=native
+g++ -shared ${OBJ}.o -lpq -o ${PLATFORM}_api.dll -march=native
 
 # compile static libpq as shared
 # g++ -shared ${MSYS_DIR}/lib/libpq.dll.a -o ${PLATFORM}_libpq.dll
-g++ -shared -lpq -o ${PLATFORM}_libpq.dll -march=x86-64
+g++ -shared -lpq -o ${PLATFORM}_libpq.dll -march=native
 
 # ls -la ${MSYS_DIR}/lib
 
