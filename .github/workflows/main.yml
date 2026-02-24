@@ -27,6 +27,14 @@ jobs:
 
     steps:
 
+      - uses: actions/checkout@v4
+      - name: Setup PostgreSQL
+        uses: tj-actions/install-postgresql@v3
+        with:
+          postgresql-version: 17
+
+      - run: pg_config
+
       - name: java version
         run: java -version
         shell: bash
