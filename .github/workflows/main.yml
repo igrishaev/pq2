@@ -27,13 +27,19 @@ jobs:
 
     steps:
 
-      - run: vcpkg install libpq
+      - uses: actions/checkout@v4
+      - name: Setup PostgreSQL
+        uses: ikalnytskyi/action-setup-postgres@v8
+        with:
+          postgresql-version: '18'
 
-      - run: ls C:\vcpkg
-        shell: bash
+      # - run: vcpkg install libpq
 
-      - run: ls ${VCPKG_ROOT}
-        shell: bash
+      # - run: ls C:\vcpkg
+      #   shell: bash
+
+      # - run: ls ${VCPKG_ROOT}
+      #   shell: bash
 
       # - uses: actions/checkout@v4
       # - name: Setup PostgreSQL
