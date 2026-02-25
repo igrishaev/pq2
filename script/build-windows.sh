@@ -23,6 +23,6 @@ g++ -shared ${OBJ}.o -lpq -o ${PLATFORM}_api.dll -march=native
 
 g++ -shared ${MSYS_DIR}/lib/libpq.a -o ${PLATFORM}_libpq.dll -march=native
 
-# ls -la ${MSYS_DIR}/lib
+ls -la ${MSYS_DIR}/lib
 
 find . -name '*.dll'
