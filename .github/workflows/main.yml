@@ -33,9 +33,12 @@ jobs:
       #   with:
       #     postgresql-version: '18'
 
-      - run: vcpkg install libpq
+      - run: vcpkg install libpq:x64-windows
 
       - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed
+        shell: bash
+
+      - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed/x64-windows/bin
         shell: bash
 
       - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed/x64-windows/lib
