@@ -32,7 +32,7 @@ jobs:
         if: ${{steps.cachePostgresSource.outputs.cache-hit != 'true' && steps.cachePostgres.outputs.cache-hit != 'true'}}
         with:
           repository: "postgres/postgres.git"
-          branch: master
+          ref: ''
           path: postgres
 
       - name: build pg
