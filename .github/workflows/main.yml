@@ -74,7 +74,7 @@ jobs:
       #   with:
       #     postgresql-version: 18
 
-      # - run: pg_config
+      - run: pg_config
 
       - name: java version
         run: java -version
