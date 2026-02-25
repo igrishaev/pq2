@@ -76,6 +76,8 @@ jobs:
 
       - run: pg_config
 
+      - run: echo ${LD_LIBRARY_PATH}
+
       - run: rm -rf c:/tools/php C:/Strawberry/c/bin
 
       - name: java version
