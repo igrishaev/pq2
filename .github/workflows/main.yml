@@ -27,6 +27,19 @@ jobs:
 
     steps:
 
+      - name: Get Postgres source
+        uses: actions/checkout@v4
+        if: ${{steps.cachePostgresSource.outputs.cache-hit != 'true' && steps.cachePostgres.outputs.cache-hit != 'true'}}
+        with:
+          repository: "postgres/postgres.git"
+          path: postgres
+
+      - name: build pg
+        run: >-
+          cd postgres
+          nmake /f win32.mak
+
+      # CPU=ARM64
       # - uses: actions/checkout@v4
       # - name: Setup PostgreSQL
       #   uses: ikalnytskyi/action-setup-postgres@v8
