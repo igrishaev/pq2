@@ -18,8 +18,10 @@ ls -la ${MSYS_DIR}/bin
 # ls -la ${MSYS_DIR}/lib
 # ls -la ${MSYS_DIR}/include
 
-g++ -fPIC ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o -march=native
-g++ -shared ${OBJ}.o -lpq -o ${PLATFORM}_api.dll -march=native
+# -march=native
+
+g++ -fPIC ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o
+g++ -shared ${OBJ}.o -lpq -o ${PLATFORM}_api.dll
 
 # compile static libpq as shared
 # g++ -shared ${MSYS_DIR}/lib/libpq.dll.a -o ${PLATFORM}_libpq.dll
