@@ -36,9 +36,10 @@ jobs:
           path: postgres
 
       - name: build pg
-        run: >-
+        run: |
           cd postgres
           nmake /f win32.mak
+        shell: cmd
 
       # CPU=ARM64
       # - uses: actions/checkout@v4
