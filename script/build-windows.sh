@@ -16,7 +16,7 @@ PLATFORM=$(cat PLATFORM)
 
 # ls -la ${MSYS_DIR}/bin
 # ls -la ${MSYS_DIR}/lib
-ls -la ${MSYS_DIR}/include
+# ls -la ${MSYS_DIR}/include
 
 # -march=native
 
@@ -27,7 +27,6 @@ g++ -fPIC ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o
 # g++ -shared ${OBJ}.o -L${MSYS_DIR}/lib -o ${PLATFORM}_api.dll
 
 g++ -shared ${OBJ}.o -lpq -o ${PLATFORM}_api.dll
-
 # -I${MSYS_DIR}/include
 # -L${MSYS_DIR}/lib
 
