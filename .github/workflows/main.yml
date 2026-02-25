@@ -27,11 +27,11 @@ jobs:
 
     steps:
 
-      - uses: actions/checkout@v4
-      - name: Setup PostgreSQL
-        uses: ikalnytskyi/action-setup-postgres@v8
-        with:
-          postgresql-version: '18'
+      # - uses: actions/checkout@v4
+      # - name: Setup PostgreSQL
+      #   uses: ikalnytskyi/action-setup-postgres@v8
+      #   with:
+      #     postgresql-version: '18'
 
       # - run: vcpkg install libpq
 
@@ -47,7 +47,7 @@ jobs:
       #   with:
       #     postgresql-version: 18
 
-      - run: pg_config
+      # - run: pg_config
 
       - name: java version
         run: java -version
