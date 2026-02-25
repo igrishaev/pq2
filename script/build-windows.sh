@@ -14,8 +14,8 @@ PLATFORM=$(cat PLATFORM)
 
 # -march=x86-64
 
-ls -la ${MSYS_DIR}/bin
-# ls -la ${MSYS_DIR}/lib
+# ls -la ${MSYS_DIR}/bin
+ls -la ${MSYS_DIR}/lib
 # ls -la ${MSYS_DIR}/include
 
 # -march=native
