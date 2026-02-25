@@ -15,18 +15,18 @@ PLATFORM=$(cat PLATFORM)
 # -march=x86-64
 
 # ls -la ${MSYS_DIR}/bin
-ls -la ${MSYS_DIR}/lib
-# ls -la ${MSYS_DIR}/include
+# ls -la ${MSYS_DIR}/lib
+ls -la ${MSYS_DIR}/include
 
 # -march=native
 
 # -L${MSYS_DIR}/lib
 # -l:${MSYS_DIR}/lib/libpq.dll.a
 
-g++ -fPIC ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o
+g++ -fPIC -I${MSYS_DIR}/include ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o
 # g++ -shared ${OBJ}.o -L${MSYS_DIR}/lib -o ${PLATFORM}_api.dll
 
-g++ -shared ${OBJ}.o -lpq -o ${PLATFORM}_api.dll
+g++ -shared ${OBJ}.o -L${MSYS_DIR}/lib -lpq -o ${PLATFORM}_api.dll
 
 # -l:${MSYS_DIR}/lib/libpq.a
 
