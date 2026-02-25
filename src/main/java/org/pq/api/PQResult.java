@@ -28,12 +28,16 @@ public class PQResult implements AutoCloseable {
         this.nTuples = Native.nTuples(resPtr);
     }
 
+    public void reset() {
+        row = -1;
+    }
+
     public Object getColumn(final int col) {
         if (!(0 <= col && col < nColumns)) {
             throw error("column is out of bounds: %s", col);
         }
         if (!(0 <= row && row < nTuples)) {
-            throw error("row is out of bounds: %s", row);
+            throw error("The current row is out of bounds: %s. Perhaps you need to call .next() or .reset()", row);
         }
 
         final boolean isNull = Native.fieldIsNull(resPtr, row, col);

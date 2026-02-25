@@ -28,3 +28,7 @@ https://github.com/msys2/setup-msys2
 
 msys2 packages
 https://packages.msys2.org/packages/?repo=clangarm64
+
+PQtransactionStatus
+https://postgrespro.ru/docs/postgresql/18/libpq-status#LIBPQ-PQTRANSACTIONSTATUS
+https://github.com/postgres/postgres/blob/3322f01a11b79d4b3c84ae9322c0984891349e46/src/interfaces/libpq/libpq-fe.h#L151

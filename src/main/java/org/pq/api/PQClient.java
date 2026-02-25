@@ -21,7 +21,7 @@ public record PQClient (
 
         final long ptr = Native.connect(connInfo);
         if (ptr == arena.NULL()) {
-            throw PQError.error("PQ connection returned null");
+            throw PQError.error("PQ connection returned null (most likely it's lack of memory)");
         }
         final CONNECTION connStatus = Wrapper.connStatus(ptr);
 
@@ -48,30 +48,68 @@ public record PQClient (
         final long resPtr = Native.query(this.ptr, query);
         final PGRES pgres = Wrapper.resultStatus(resPtr);
         switch (pgres) {
-            case TUPLES_OK -> {}
-            default -> throw error("query has failed: code: %s, SQL: %s", pgres, query);
+            case TUPLES_OK, COMMAND_OK -> {}
+            default -> {
+                final String message = Native.connError(ptr);
+                throw error("query has failed: code: %s, error: %s, SQL: %s",
+                        pgres, message, query
+                );
+            }
         }
         return new PQResult(this.ptr, resPtr, arena, false);
     }
 
-    public PQResult queryMulti(final String query, int chunkSize) {
+    public PQResult queryChunked(final String query, int chunkSize) {
         final int status = Native.sendQuery(ptr, query);
         if (status == 0) {
-            System.out.println(status);
             final String message = Native.connError(ptr);
-            throw error(message);
+            throw error("failed to send query, error: %s, chunk size: %s, query: %s",
+                    message, chunkSize, query
+            );
         }
         Native.setChunkedRowsMode(ptr, chunkSize);
         final long resPtr = Native.getResult(ptr);
-        final PGRES pgres = Wrapper.resultStatus(resPtr);
-        switch (pgres) {
+        final PGRES result = Wrapper.resultStatus(resPtr);
+        switch (result) {
             case TUPLES_CHUNK -> {}
             default -> {
                 Native.closeResult(resPtr);
-                throw error("wrong result status: %s", pgres);
+                throw error("wrong result status: %s", result);
             }
         }
         return new PQResult(ptr, resPtr, arena, true);
+    }
+
+    public void begin() {
+        final PQTRANS txStatus = txStatus();
+        switch (txStatus) {
+            case IDLE -> query("begin").close();
+            case INERROR -> throw error("Cannot 'begin' as the connection is an error state. Please rollback first.");
+            case INTRANS -> {} // do nothing
+            case ACTIVE -> throw error("Cannot 'begin' as the connection is processing a command. Perhaps you should wait.");
+            case UNKNOWN -> throw error("Cannot 'begin' as the connection is an unknown mode. Perhaps it was closed.");
+        }
+    }
+
+    public void commit() {
+        final PQTRANS txStatus = txStatus();
+        switch (txStatus) {
+            case IDLE -> {}
+            case INERROR -> throw error("Cannot 'commit' as the connection is an error state. Please rollback first.");
+            case INTRANS -> query("commit").close();
+            case ACTIVE -> throw error("Cannot 'commit' as the connection is processing a command. Perhaps you should wait.");
+            case UNKNOWN -> throw error("Cannot 'commit' as the connection is an unknown mode. Perhaps it was closed.");
+        }
+    }
+
+    public void rollback() {
+        final PQTRANS txStatus = txStatus();
+        switch (txStatus) {
+            case IDLE -> {}
+            case INERROR, INTRANS -> query("rollback").close();
+            case ACTIVE -> throw error("Cannot 'rollback' as the connection is processing a command. Perhaps you should wait.");
+            case UNKNOWN -> throw error("Cannot 'rollback' as the connection is an unknown mode. Perhaps it was closed.");
+        }
     }
 
     public PQStatement prepare(final String query) {
@@ -87,7 +125,9 @@ public record PQClient (
             case COMMAND_OK -> {}
             default -> {
                 message = Native.connError(ptr);
-                throw error("prepare error: %s, query: %s", message, query);
+                throw error("failed to prepare, status: %s, error: %s, query: %s",
+                        status, message, query
+                );
             }
         }
         resPtr = Native.describe(ptr, stmtName);
