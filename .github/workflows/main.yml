@@ -98,7 +98,6 @@ jobs:
           msystem: ${{ matrix.opt.msys.env }}
           install: >-
             make
-            mingw-w64-${{ matrix.opt.msys.arch }}-libpqxx
             mingw-w64-${{ matrix.opt.msys.arch }}-gcc-compat
 
       - name: prepare files
