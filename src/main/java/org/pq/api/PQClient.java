@@ -4,6 +4,7 @@ import org.pq.Native;
 import org.pq.Wrapper;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.pq.api.PQError.error;
@@ -12,7 +13,8 @@ public record PQClient (
     long ptr,
     String connInfo,
     Arena arena,
-    AtomicInteger counter
+    AtomicInteger counter,
+    AtomicBoolean isClosed
 ) implements AutoCloseable {
 
     public static PQClient of(final String connInfo) {
@@ -30,7 +32,8 @@ public record PQClient (
                     ptr,
                     connInfo,
                     arena,
-                    new AtomicInteger()
+                    new AtomicInteger(),
+                    new AtomicBoolean(false)
             );
             case BAD -> {
                 final String message = Native.connError(ptr);
@@ -45,6 +48,7 @@ public record PQClient (
     }
 
     public PQResult query(final String query) {
+        ensureOpen();
         final long resPtr = Native.query(this.ptr, query);
         final PGRES pgres = Wrapper.resultStatus(resPtr);
         switch (pgres) {
@@ -162,9 +166,18 @@ public record PQClient (
         return Wrapper.txStatus(ptr);
     }
 
+    private void ensureOpen() {
+        if (isClosed.get()) {
+            throw error("connection is closed");
+        }
+    }
+
     @Override
     public void close() {
-        Native.closeConnection(ptr);
+        if (!isClosed.get()) {
+            Native.closeConnection(ptr);
+            isClosed.set(true);
+        }
     }
 
     public static void main(String... args) {

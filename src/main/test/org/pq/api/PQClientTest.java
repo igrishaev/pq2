@@ -25,7 +25,18 @@ public class PQClientTest {
     }
 
     @Test
-    public void simpleTest2(){
+    public void closedConnectionTest() {
+        var client = PQClient.of(connInfo);
+        client.close();
+
+        try {
+            client.query("select 1");
+            assertEquals(1, 2);
+        } catch (PQError e) {
+            assertEquals(e.getMessage(), "connection is closed");
+        }
+//        var result =
+//        assertEquals(result, 1);
 //        try (PQClient client = PQClient.of("foobar=535")) {
 //            assertEquals(client.status(), CONNECTION.OK);
 //        }
