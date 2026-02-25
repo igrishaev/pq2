@@ -15,8 +15,8 @@ PLATFORM=$(cat PLATFORM)
 # -march=x86-64
 
 ls -la ${MSYS_DIR}/bin
-ls -la ${MSYS_DIR}/lib
-ls -la ${MSYS_DIR}/include
+# ls -la ${MSYS_DIR}/lib
+# ls -la ${MSYS_DIR}/include
 
 g++ -fPIC ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o -march=native
 g++ -shared ${OBJ}.o -lpq -o ${PLATFORM}_api.dll -march=native
@@ -27,6 +27,6 @@ g++ -shared ${OBJ}.o -lpq -o ${PLATFORM}_api.dll -march=native
 
 g++ -shared ${MSYS_DIR}/lib/libpq.a -o ${PLATFORM}_libpq.dll -march=native
 
-ls -la ${MSYS_DIR}/lib
+# ls -la ${MSYS_DIR}/lib
 
 find . -name '*.dll'
