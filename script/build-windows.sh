@@ -21,8 +21,9 @@ ls -la ${MSYS_DIR}/lib
 # -march=native
 
 # -L${MSYS_DIR}/lib
+# -l:${MSYS_DIR}/lib/libpq.dll.a
 
-g++ -fPIC ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o -l:${MSYS_DIR}/lib/libpq.dll.a
+g++ -fPIC ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o
 # g++ -shared ${OBJ}.o -L${MSYS_DIR}/lib -o ${PLATFORM}_api.dll
 
 g++ -shared ${OBJ}.o -lpq -o ${PLATFORM}_api.dll

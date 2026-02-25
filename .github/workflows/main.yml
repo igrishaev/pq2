@@ -76,6 +76,8 @@ jobs:
 
       - run: pg_config
 
+      - run: rm -rf c:/tools/php C:/Strawberry/c/bin
+
       - name: java version
         run: java -version
         shell: bash
