@@ -79,6 +79,7 @@ jobs:
       - run: echo ${LD_LIBRARY_PATH}
 
       - run: rm -rf c:/tools/php C:/Strawberry/c/bin
+        shell: bash
 
       - name: java version
         run: java -version
