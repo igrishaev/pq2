@@ -25,7 +25,10 @@ g++ -shared ${OBJ}.o -lpq -o ${PLATFORM}_api.dll -march=native
 # g++ -shared ${MSYS_DIR}/lib/libpq.dll.a -o ${PLATFORM}_libpq.dll
 # g++ -shared -lpq -o ${PLATFORM}_libpq.dll -march=native
 
-g++ -shared ${MSYS_DIR}/lib/libpq.a -o ${PLATFORM}_libpq.dll -march=native
+# g++ -shared ${MSYS_DIR}/lib/libpq.a -o ${PLATFORM}_libpq.dll -march=native
+
+cp ${MSYS_DIR}/bin/libpq.dll ${PLATFORM}_libpq.dll
+# g++ -shared ${MSYS_DIR}/lib/libpq.a -o ${PLATFORM}_libpq.dll -march=native
 
 # ls -la ${MSYS_DIR}/lib
 
