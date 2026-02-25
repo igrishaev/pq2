@@ -23,7 +23,7 @@ ls -la ${MSYS_DIR}/bin
 g++ -fPIC ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o -L${MSYS_DIR}/lib
 # g++ -shared ${OBJ}.o -L${MSYS_DIR}/lib -o ${PLATFORM}_api.dll
 
-g++ -shared ${OBJ}.o -l:${MSYS_DIR}/lib/libpq.a -o ${PLATFORM}_api.dll
+g++ -shared ${OBJ}.o -l:${MSYS_DIR}/lib/libpq.dll.a -o ${PLATFORM}_api.dll
 
 # compile static libpq as shared
 # g++ -shared ${MSYS_DIR}/lib/libpq.dll.a -o ${PLATFORM}_libpq.dll
