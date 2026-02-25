@@ -2,12 +2,14 @@ package org.pq.api;
 
 import org.junit.Test;
 
+import java.util.List;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 public class PQClientTest {
 
-    public static String connInfo = "host=localhost port=15432 dbname=test user=test password=test";
+    public static String connInfo = "host=localhost port=5432 dbname=book user=book password=book";
 
     @Test
     public void simpleTest(){
@@ -28,6 +30,7 @@ public class PQClientTest {
     public void closedConnectionTest() {
         var client = PQClient.of(connInfo);
         client.close();
+        client.close();
 
         try {
             client.query("select 1");
@@ -35,10 +38,43 @@ public class PQClientTest {
         } catch (PQError e) {
             assertEquals("connection is closed", e.getMessage());
         }
-//        var result =
-//        assertEquals(result, 1);
-//        try (PQClient client = PQClient.of("foobar=535")) {
-//            assertEquals(client.status(), CONNECTION.OK);
+    }
+
+    @Test
+    public void resultClosedTest() {
+        var client = PQClient.of(connInfo);
+        var result = client.query("select x from generate_series(1, 3) as seq(x)");
+        client.close();
+
+        result.next();
+        assertEquals(1, result.getColumn(0));
+
+        result.close();
+        result.reset();
+        // result.next();
+        // assertEquals(1, result.getColumn(0));
+
+
+//        try {
+//            client.query("select 1");
+//            assertEquals(1, 2);
+//        } catch (PQError e) {
+//            assertEquals("connection is closed", e.getMessage());
 //        }
     }
+
+    @Test
+    public void testPrepare() {
+        try (PQClient client = PQClient.of(connInfo)) {
+            var stmt = client.prepare("select $1::int4 as num");
+            var res = stmt.execute(List.of(999));
+            res.next();
+            assertEquals(999, res.getColumn(0));
+
+            stmt.close();
+            var res2 = stmt.execute(List.of(999));
+
+        }
+    }
+
 }

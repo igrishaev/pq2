@@ -6,6 +6,7 @@ import org.pq.codec.Encoder;
 
 import static org.pq.api.PQError.error;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public record PQStatement(
         long connPtr,
@@ -13,14 +14,23 @@ public record PQStatement(
         String stmtName,
         String query,
         int nParams,
-        int[] paramOids
+        int[] paramOids,
+        AtomicBoolean isClosed
 ) implements AutoCloseable {
+
+    private void ensureOpen() {
+        if (isClosed.get()) {
+            throw error("prepared statement is closed");
+        }
+    }
 
     public PQResult execute() {
         return execute(List.of());
     }
 
     public PQResult execute(final List<Object> params) {
+        ensureOpen();
+
         final int size = params.size();
         if (size != this.nParams) {
             throw PQError.error("parameters mismatch: %s required, %s passed", nParams, size);
@@ -39,6 +49,8 @@ public record PQStatement(
     }
 
     public PQResult executeMulti(final List<Object> params, final int chunkSize) {
+        ensureOpen();
+
         final int size = params.size();
         if (size != this.nParams) {
             throw PQError.error("parameters mismatch: %s required, %s passed", nParams, size);
@@ -64,6 +76,10 @@ public record PQStatement(
 
     @Override
     public void close() {
+        if (isClosed.get()) {
+            return;
+        }
+        isClosed.set(true);
         final long resPtr = Native.closeStatement(connPtr, stmtName);
         final PGRES status = Wrapper.resultStatus(resPtr);
         Native.closeResult(resPtr);

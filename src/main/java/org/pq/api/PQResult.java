@@ -17,6 +17,7 @@ public class PQResult implements AutoCloseable {
     private final boolean isMulti;
     private final int nColumns;
     private int nTuples;
+    private boolean isClosed;
 
     public PQResult(long connPtr, long resPtr, Arena arena, boolean isMulti) {
         this.connPtr = connPtr;
@@ -26,13 +27,24 @@ public class PQResult implements AutoCloseable {
         this.row = -1;
         this.nColumns = Native.nColumns(resPtr);
         this.nTuples = Native.nTuples(resPtr);
+        this.isClosed = false;
     }
 
+    private void ensureOpen() {
+        if (isClosed) {
+            throw error("result is closed");
+        }
+    }
+
+    @SuppressWarnings("unused")
     public void reset() {
+        ensureOpen();
         row = -1;
     }
 
     public Object getColumn(final int col) {
+        ensureOpen();
+
         if (!(0 <= col && col < nColumns)) {
             throw error("column is out of bounds: %s", col);
         }
@@ -63,6 +75,7 @@ public class PQResult implements AutoCloseable {
     }
 
     public boolean next() {
+        ensureOpen();
 
         final boolean isEnd = (row == nTuples - 1);
         if (isEnd && isMulti) {
@@ -103,6 +116,9 @@ public class PQResult implements AutoCloseable {
 
     @Override
     public void close() {
+        if (isClosed) {
+            return;
+        }
         if (isMulti) {
             while (resPtr != 0) {
                 Native.closeResult(resPtr);
@@ -111,5 +127,6 @@ public class PQResult implements AutoCloseable {
         } else {
             Native.closeResult(resPtr);
         }
+        isClosed = true;
     }
 }

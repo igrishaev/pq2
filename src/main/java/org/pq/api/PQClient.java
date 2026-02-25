@@ -144,7 +144,7 @@ public record PQClient (
                     paramOids[i] = Native.paramOid(resPtr, i);
                 }
                 Native.closeResult(resPtr);
-                return new PQStatement(ptr, arena, stmtName, query, nParams, paramOids);
+                return new PQStatement(ptr, arena, stmtName, query, nParams, paramOids, new AtomicBoolean(false));
             }
             default -> {
                 Native.closeResult(resPtr);
