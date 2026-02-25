@@ -8,12 +8,12 @@ jobs:
     strategy:
       matrix:
         opt:
-          - name: "Windows arm64"
-            image: windows-11-arm
-            msys:
-              env: CLANGARM64
-              dir: C:/a/_temp/msys64
-              arch: clang-aarch64
+          # - name: "Windows arm64"
+          #   image: windows-11-arm
+          #   msys:
+          #     env: CLANGARM64
+          #     dir: C:/a/_temp/msys64
+          #     arch: clang-aarch64
           - image: windows-2025
             name: "Windows x64"
             msys:
@@ -33,7 +33,16 @@ jobs:
       #   with:
       #     postgresql-version: '18'
 
-      # - run: vcpkg install libpq
+      - run: vcpkg install libpq
+
+      - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed
+        shell: bash
+
+      - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed/x64-windows/lib
+        shell: bash
+
+      - run: ls -l ${VCPKG_INSTALLATION_ROOT}/installed/x64-windows/lib/libpq
+        shell: bash
 
       # - run: ls C:\vcpkg
       #   shell: bash
