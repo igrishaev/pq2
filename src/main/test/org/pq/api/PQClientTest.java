@@ -12,13 +12,13 @@ public class PQClientTest {
     @Test
     public void simpleTest(){
         try (PQClient client = PQClient.of(connInfo)) {
-            assertEquals(client.status(), CONNECTION.OK);
+            assertEquals(CONNECTION.OK, client.status());
             client.begin();
             client.query("create temp table foo (id integer, data text)").close();
             client.query("insert into foo values (1, 'test')").close();
             final PQResult res = client.query("select * from foo");
             res.next();
-            assertEquals(res.getColumn(0), 1);
+            assertEquals(1, res.getColumn(0));
             // System.out.println(res.getColumn(0));
             client.commit();
         }
@@ -33,7 +33,7 @@ public class PQClientTest {
             client.query("select 1");
             assertEquals(1, 2);
         } catch (PQError e) {
-            assertEquals(e.getMessage(), "connection is closed");
+            assertEquals("connection is closed", e.getMessage());
         }
 //        var result =
 //        assertEquals(result, 1);
