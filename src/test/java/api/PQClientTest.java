@@ -1,6 +1,7 @@
-package org.pq.api;
+package api;
 
 import org.junit.Test;
+import org.pq.api.*;
 
 import java.util.List;
 

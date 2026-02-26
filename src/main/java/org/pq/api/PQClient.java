@@ -189,7 +189,7 @@ public class PQClient implements AutoCloseable {
             return Wrapper.connStatus(ptr);
         }
     }
-    
+
     public PQTRANS txStatus() {
         try (var ignored = lock()) {
             ensureOpen();
