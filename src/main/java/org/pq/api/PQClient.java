@@ -4,8 +4,6 @@ import org.pq.Native;
 import org.pq.Wrapper;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.pq.api.PQError.error;
 
@@ -16,7 +14,7 @@ public class PQClient implements AutoCloseable {
     private final Arena arena;
     private int counter;
     private boolean isClosed;
-    private final TryLock _lock;
+    private final TryLock lock;
 
     private PQClient(final long ptr, final String connInfo, final Arena arena) {
         this.ptr = ptr;
@@ -24,7 +22,7 @@ public class PQClient implements AutoCloseable {
         this.arena = arena;
         this.counter = 0;
         this.isClosed = false;
-        this._lock = new TryLock();
+        this.lock = new TryLock();
     }
 
     public static PQClient of(final String connInfo) {
@@ -53,7 +51,7 @@ public class PQClient implements AutoCloseable {
     }
 
     public TryLock lock() {
-        return _lock.lock();
+        return lock.lock();
     }
 
     private String getStmtName() {
@@ -76,7 +74,7 @@ public class PQClient implements AutoCloseable {
                     );
                 }
             }
-            return new PQResult(this.ptr, resPtr, arena, false);
+            return new PQResult(this.ptr, resPtr, arena, lock, false);
         }
     }
 
@@ -99,7 +97,7 @@ public class PQClient implements AutoCloseable {
                     throw error("wrong result status: %s", result);
                 }
             }
-            return new PQResult(ptr, resPtr, arena, true);
+            return new PQResult(ptr, resPtr, arena, lock, true);
         }
     }
 
@@ -168,7 +166,7 @@ public class PQClient implements AutoCloseable {
                     paramOids[i] = Native.paramOid(resPtr, i);
                 }
                 Native.closeResult(resPtr);
-                return new PQStatement(ptr, arena, stmtName, query, nParams, paramOids, new AtomicBoolean(false));
+                return new PQStatement(ptr, arena, stmtName, query, nParams, paramOids, lock);
             }
             default -> {
                 Native.closeResult(resPtr);
@@ -216,9 +214,10 @@ public class PQClient implements AutoCloseable {
             System.out.println(client.status());
             System.out.println(client.txStatus());
             while (res.next()) {
-                for (int col: res.iterCols()) {
-                    System.out.println(res.getColumn(col));
-                }
+                System.out.println(res.asList());
+//                for (int col: res.iterCols()) {
+//                    System.out.println(res.getColumn(col));
+//                }
             }
 
 //            try (final PQResult r = client.query("select x * 1000 from generate_series(1, 3) as seq(x)")) {

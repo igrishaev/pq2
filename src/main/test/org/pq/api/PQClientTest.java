@@ -36,6 +36,17 @@ public class PQClientTest {
     }
 
     @Test
+    public void testResultChunked() {
+        try (var client = PQClient.of(connInfo);
+             var result = client.queryChunked("select x from generate_series(1, 99) as seq(x)", 10)) {
+//            assertEquals(1, result.affectedRows());
+//            assertEquals("a", result.commandName());
+
+
+        }
+    }
+
+    @Test
     public void resultClosedTest() {
         var client = PQClient.of(connInfo);
         var result = client.query("select x from generate_series(1, 3) as seq(x)");
@@ -44,7 +55,8 @@ public class PQClientTest {
         result.next();
         assertEquals(1, result.getColumn(0));
 
-        result.cop
+        assertEquals(3, result.affectedRows());
+        assertEquals("SELECT 3", result.commandName());
 
         result.close();
         assertThrows(PQError.class, result::reset);
@@ -57,10 +69,8 @@ public class PQClientTest {
             var res = stmt.execute(List.of(999));
             res.next();
             assertEquals(999, res.getColumn(0));
-
             stmt.close();
             var res2 = stmt.execute(List.of(999));
-
         }
     }
 
