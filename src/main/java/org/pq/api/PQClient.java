@@ -9,13 +9,23 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.pq.api.PQError.error;
 
-public record PQClient (
-    long ptr,
-    String connInfo,
-    Arena arena,
-    AtomicInteger counter,
-    AtomicBoolean isClosed
-) implements AutoCloseable {
+public class PQClient implements AutoCloseable {
+
+    private final long ptr;
+    private final String connInfo;
+    private final Arena arena;
+    private int counter;
+    private boolean isClosed;
+    private final TryLock _lock;
+
+    private PQClient(final long ptr, final String connInfo, final Arena arena) {
+        this.ptr = ptr;
+        this.connInfo = connInfo;
+        this.arena = arena;
+        this.counter = 0;
+        this.isClosed = false;
+        this._lock = new TryLock();
+    }
 
     public static PQClient of(final String connInfo) {
 
@@ -28,13 +38,7 @@ public record PQClient (
         final CONNECTION connStatus = Wrapper.connStatus(ptr);
 
         return switch (connStatus) {
-            case OK -> new PQClient(
-                    ptr,
-                    connInfo,
-                    arena,
-                    new AtomicInteger(),
-                    new AtomicBoolean(false)
-            );
+            case OK -> new PQClient(ptr, connInfo, arena);
             case BAD -> {
                 final String message = Native.connError(ptr);
                 throw PQError.error(message);
@@ -43,66 +47,86 @@ public record PQClient (
         };
     }
 
+    @SuppressWarnings("unused")
+    public String connInfo() {
+        return connInfo;
+    }
+
+    public TryLock lock() {
+        return _lock.lock();
+    }
+
     private String getStmtName() {
-        return "s" + counter.incrementAndGet();
+        try (var ignored = lock()) {
+            return "s" + ++counter;
+        }
     }
 
     public PQResult query(final String query) {
-        ensureOpen();
-        final long resPtr = Native.query(this.ptr, query);
-        final PGRES pgres = Wrapper.resultStatus(resPtr);
-        switch (pgres) {
-            case TUPLES_OK, COMMAND_OK -> {}
-            default -> {
-                final String message = Native.connError(ptr);
-                throw error("query has failed: code: %s, error: %s, SQL: %s",
-                        pgres, message, query
-                );
+        try (var ignored = lock()) {
+            ensureOpen();
+            final long resPtr = Native.query(this.ptr, query);
+            final PGRES pgres = Wrapper.resultStatus(resPtr);
+            switch (pgres) {
+                case TUPLES_OK, COMMAND_OK -> {}
+                default -> {
+                    final String message = Native.connError(ptr);
+                    throw error("query has failed: code: %s, error: %s, SQL: %s",
+                            pgres, message, query
+                    );
+                }
             }
+            return new PQResult(this.ptr, resPtr, arena, false);
         }
-        return new PQResult(this.ptr, resPtr, arena, false);
     }
 
     public PQResult queryChunked(final String query, int chunkSize) {
-        final int status = Native.sendQuery(ptr, query);
-        if (status == 0) {
-            final String message = Native.connError(ptr);
-            throw error("failed to send query, error: %s, chunk size: %s, query: %s",
-                    message, chunkSize, query
-            );
-        }
-        Native.setChunkedRowsMode(ptr, chunkSize);
-        final long resPtr = Native.getResult(ptr);
-        final PGRES result = Wrapper.resultStatus(resPtr);
-        switch (result) {
-            case TUPLES_CHUNK -> {}
-            default -> {
-                Native.closeResult(resPtr);
-                throw error("wrong result status: %s", result);
+        try (var ignored = lock()) {
+            final int status = Native.sendQuery(ptr, query);
+            if (status == 0) {
+                final String message = Native.connError(ptr);
+                throw error("failed to send query, error: %s, chunk size: %s, query: %s",
+                        message, chunkSize, query
+                );
             }
+            Native.setChunkedRowsMode(ptr, chunkSize);
+            final long resPtr = Native.getResult(ptr);
+            final PGRES result = Wrapper.resultStatus(resPtr);
+            switch (result) {
+                case TUPLES_CHUNK -> {}
+                default -> {
+                    Native.closeResult(resPtr);
+                    throw error("wrong result status: %s", result);
+                }
+            }
+            return new PQResult(ptr, resPtr, arena, true);
         }
-        return new PQResult(ptr, resPtr, arena, true);
     }
 
     public void begin() {
-        final PQTRANS txStatus = txStatus();
-        switch (txStatus) {
-            case IDLE -> query("begin").close();
-            case INERROR -> throw error("Cannot 'begin' as the connection is an error state. Please rollback first.");
-            case INTRANS -> {} // do nothing
-            case ACTIVE -> throw error("Cannot 'begin' as the connection is processing a command. Perhaps you should wait.");
-            case UNKNOWN -> throw error("Cannot 'begin' as the connection is an unknown mode. Perhaps it was closed.");
+        try (var ignored = lock()) {
+            final PQTRANS txStatus = txStatus();
+            switch (txStatus) {
+                case IDLE -> query("begin").close();
+                case INERROR -> throw error("Cannot 'begin' as the connection is an error state. Please rollback first.");
+                case INTRANS -> {} // do nothing
+                case ACTIVE -> throw error("Cannot 'begin' as the connection is processing a command. Perhaps you should wait.");
+                case UNKNOWN -> throw error("Cannot 'begin' as the connection is an unknown mode. Perhaps it was closed.");
+            }
         }
+
     }
 
     public void commit() {
-        final PQTRANS txStatus = txStatus();
-        switch (txStatus) {
-            case IDLE -> {}
-            case INERROR -> throw error("Cannot 'commit' as the connection is an error state. Please rollback first.");
-            case INTRANS -> query("commit").close();
-            case ACTIVE -> throw error("Cannot 'commit' as the connection is processing a command. Perhaps you should wait.");
-            case UNKNOWN -> throw error("Cannot 'commit' as the connection is an unknown mode. Perhaps it was closed.");
+        try (var ignored = lock()) {
+            final PQTRANS txStatus = txStatus();
+            switch (txStatus) {
+                case IDLE -> {}
+                case INERROR -> throw error("Cannot 'commit' as the connection is an error state. Please rollback first.");
+                case INTRANS -> query("commit").close();
+                case ACTIVE -> throw error("Cannot 'commit' as the connection is processing a command. Perhaps you should wait.");
+                case UNKNOWN -> throw error("Cannot 'commit' as the connection is an unknown mode. Perhaps it was closed.");
+            }
         }
     }
 
@@ -167,16 +191,20 @@ public record PQClient (
     }
 
     private void ensureOpen() {
-        if (isClosed.get()) {
+        if (isClosed) {
             throw error("connection is closed");
         }
     }
 
     @Override
     public void close() {
-        if (!isClosed.get()) {
+        if (isClosed) {
+            return;
+        }
+        try (var ignored = lock()) {
+            isClosed = true;
             Native.closeConnection(ptr);
-            isClosed.set(true);
+
         }
     }
 

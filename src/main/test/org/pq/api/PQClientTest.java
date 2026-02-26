@@ -4,12 +4,11 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 public class PQClientTest {
 
-    public static String connInfo = "host=localhost port=5432 dbname=book user=book password=book";
+    public static String connInfo = "host=localhost port=15432 dbname=test user=test password=test";
 
     @Test
     public void simpleTest(){
@@ -33,13 +32,7 @@ public class PQClientTest {
         var client = PQClient.of(connInfo);
         client.close();
         client.close();
-
-        try {
-            client.query("select 1");
-            assertEquals(1, 2);
-        } catch (PQError e) {
-            assertEquals("connection is closed", e.getMessage());
-        }
+        assertThrows(PQError.class, () -> client.query("select 1"));
     }
 
     @Test
@@ -51,18 +44,10 @@ public class PQClientTest {
         result.next();
         assertEquals(1, result.getColumn(0));
 
+        result.cop
+
         result.close();
-        result.reset();
-        // result.next();
-        // assertEquals(1, result.getColumn(0));
-
-
-//        try {
-//            client.query("select 1");
-//            assertEquals(1, 2);
-//        } catch (PQError e) {
-//            assertEquals("connection is closed", e.getMessage());
-//        }
+        assertThrows(PQError.class, result::reset);
     }
 
     @Test
