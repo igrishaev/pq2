@@ -12,6 +12,8 @@ import static org.pq.api.PQError.error;
 
 public class PQResult implements AutoCloseable {
 
+    // todo add toString
+
     private final long connPtr;
     private long resPtr;
     private final Arena arena;
@@ -30,6 +32,7 @@ public class PQResult implements AutoCloseable {
                     final long resPtr,
                     final Arena arena,
                     final TryLock lock,
+                    // todo rename
                     final boolean isMulti) {
         this.connPtr = connPtr;
         this.resPtr = resPtr;
@@ -50,20 +53,21 @@ public class PQResult implements AutoCloseable {
         }
     }
 
-    @SuppressWarnings("unused")
     public void reset() {
+        ensureOpen();
         try (var ignored = lock()) {
-            ensureOpen();
             row = -1;
         }
 
     }
 
+    // TODO: need lock?
     public String commandName() {
         ensureOpen();
         return Native.commandName(resPtr);
     }
 
+    // TODO: need lock?
     public int affectedRows() {
         ensureOpen();
         return Wrapper.affectedRows(resPtr);
@@ -142,6 +146,9 @@ public class PQResult implements AutoCloseable {
             }
         };
     }
+
+    // TODO: asMap
+    // TODO: as array
 
     public List<Object> asList() {
         final List<Object> result = new ArrayList<>(nColumns);

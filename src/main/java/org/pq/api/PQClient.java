@@ -9,6 +9,12 @@ import static org.pq.api.PQError.error;
 
 public class PQClient implements AutoCloseable {
 
+    // TODO toString
+    // todo: get user password host port etc
+    // todo: get params
+    // todo: get default params
+    // todo: try ssl
+
     private final long ptr;
     private final String connInfo;
     private final Arena arena;
@@ -45,7 +51,6 @@ public class PQClient implements AutoCloseable {
         };
     }
 
-    @SuppressWarnings("unused")
     public String connInfo() {
         return connInfo;
     }
@@ -101,6 +106,12 @@ public class PQClient implements AutoCloseable {
         }
     }
 
+    // TODO: execute
+    // TODO: executeChunked
+    // TODO: cancell
+    // TODO: secret
+    // TODO: pid
+
     public void begin() {
         try (var ignored = lock()) {
             final PQTRANS txStatus = txStatus();
@@ -112,7 +123,6 @@ public class PQClient implements AutoCloseable {
                 case UNKNOWN -> throw error("Cannot 'begin' as the connection is an unknown mode. Perhaps it was closed.");
             }
         }
-
     }
 
     public void commit() {
@@ -129,63 +139,77 @@ public class PQClient implements AutoCloseable {
     }
 
     public void rollback() {
-        final PQTRANS txStatus = txStatus();
-        switch (txStatus) {
-            case IDLE -> {}
-            case INERROR, INTRANS -> query("rollback").close();
-            case ACTIVE -> throw error("Cannot 'rollback' as the connection is processing a command. Perhaps you should wait.");
-            case UNKNOWN -> throw error("Cannot 'rollback' as the connection is an unknown mode. Perhaps it was closed.");
+        try (var ignored = lock()) {
+            final PQTRANS txStatus = txStatus();
+            switch (txStatus) {
+                case IDLE -> {}
+                case INERROR, INTRANS -> query("rollback").close();
+                case ACTIVE -> throw error("Cannot 'rollback' as the connection is processing a command. Perhaps you should wait.");
+                case UNKNOWN -> throw error("Cannot 'rollback' as the connection is an unknown mode. Perhaps it was closed.");
+            }
         }
     }
 
     public PQStatement prepare(final String query) {
-        final String stmtName = getStmtName();
-        long resPtr;
-        PGRES status;
-        String message;
+        try (var ignored = lock()) {
+            final String stmtName = getStmtName();
+            long resPtr;
+            PGRES status;
+            String message;
 
-        resPtr = Native.prepare(ptr, stmtName, query);
-        status = Wrapper.resultStatus(resPtr);
-        Native.closeResult(resPtr);
-        switch (status) {
-            case COMMAND_OK -> {}
-            default -> {
-                message = Native.connError(ptr);
-                throw error("failed to prepare, status: %s, error: %s, query: %s",
-                        status, message, query
-                );
-            }
-        }
-        resPtr = Native.describe(ptr, stmtName);
-        status = Wrapper.resultStatus(resPtr);
-        switch (status) {
-            case COMMAND_OK -> {
-                final int nParams = Native.nParams(resPtr);
-                final int[] paramOids = new int[nParams];
-                for (int i = 0; i < nParams; i++) {
-                    paramOids[i] = Native.paramOid(resPtr, i);
+            resPtr = Native.prepare(ptr, stmtName, query);
+            status = Wrapper.resultStatus(resPtr);
+            Native.closeResult(resPtr);
+            switch (status) {
+                case COMMAND_OK -> {}
+                default -> {
+                    message = Native.connError(ptr);
+                    throw error("failed to prepare, status: %s, error: %s, query: %s",
+                            status, message, query
+                    );
                 }
-                Native.closeResult(resPtr);
-                return new PQStatement(ptr, arena, stmtName, query, nParams, paramOids, lock);
             }
-            default -> {
-                Native.closeResult(resPtr);
-                message = Native.connError(ptr);
-                throw error("describe error: %s, statement: %s", message, stmtName);
+            resPtr = Native.describe(ptr, stmtName);
+            status = Wrapper.resultStatus(resPtr);
+            switch (status) {
+                case COMMAND_OK -> {
+                    final int nParams = Native.nParams(resPtr);
+                    final int[] paramOids = new int[nParams];
+                    for (int i = 0; i < nParams; i++) {
+                        paramOids[i] = Native.paramOid(resPtr, i);
+                    }
+                    Native.closeResult(resPtr);
+                    return new PQStatement(ptr, arena, stmtName, query, nParams, paramOids, lock);
+                }
+                default -> {
+                    Native.closeResult(resPtr);
+                    message = Native.connError(ptr);
+                    throw error("describe error: %s, statement: %s", message, stmtName);
+                }
             }
         }
     }
 
+    // TODO reset status
 //    public void reset() {
 //        Native.PQreset(ptr);
 //    }
 
+    // TODO: move enums
+    // TODO: rename enum
     public CONNECTION status() {
-        return Wrapper.connStatus(ptr);
+        try (var ignored = lock()) {
+            ensureOpen();
+            return Wrapper.connStatus(ptr);
+        }
     }
 
+    // TODO: rename enum
     public PQTRANS txStatus() {
-        return Wrapper.txStatus(ptr);
+        try (var ignored = lock()) {
+            ensureOpen();
+            return Wrapper.txStatus(ptr);
+        }
     }
 
     private void ensureOpen() {
@@ -202,7 +226,6 @@ public class PQClient implements AutoCloseable {
         try (var ignored = lock()) {
             isClosed = true;
             Native.closeConnection(ptr);
-
         }
     }
 
