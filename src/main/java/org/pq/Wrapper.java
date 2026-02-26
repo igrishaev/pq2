@@ -17,4 +17,13 @@ public class Wrapper {
     public static PQTRANS txStatus(final long connPtr) {
         return PQTRANS.of(Native.transactionStatus(connPtr));
     }
+
+    public static int affectedRows(final long resPtr) {
+        final String result = Native.affectedRows(resPtr);
+        if (result.isEmpty()) {
+            return -1;
+        } else {
+            return Integer.parseInt(result);
+        }
+    }
 }

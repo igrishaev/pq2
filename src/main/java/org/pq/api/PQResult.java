@@ -42,6 +42,16 @@ public class PQResult implements AutoCloseable {
         row = -1;
     }
 
+    public String commandName() {
+        ensureOpen();
+        return Native.commandName(resPtr);
+    }
+
+    public int affectedRows() {
+        ensureOpen();
+        return Wrapper.affectedRows(resPtr);
+    }
+
     public Object getColumn(final int col) {
         ensureOpen();
 

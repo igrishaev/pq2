@@ -73,4 +73,6 @@ public class Native {
     public static native long getResult(long conn);
     public static native int transactionStatus(long conn);
     public static native int libVersion();
+    public static native String affectedRows(long result);
+    public static native String commandName(long result);
 }

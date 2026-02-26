@@ -461,3 +461,28 @@ JNIEXPORT jint JNICALL Java_org_pq_Native_libVersion
 (JNIEnv *, jclass) {
     return PQlibVersion();
 }
+
+/*
+ * Class:     org_pq_Native
+ * Method:    affectedRows
+ * Signature: (J)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_org_pq_Native_affectedRows
+(JNIEnv* env, jclass, jlong jresult) {
+    PGresult* result = (PGresult*) jresult;
+    char* ptr = PQcmdTuples(result);
+    return env->NewStringUTF(ptr);
+
+}
+
+/*
+ * Class:     org_pq_Native
+ * Method:    commandName
+ * Signature: (J)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_org_pq_Native_commandName
+(JNIEnv* env, jclass, jlong jresult) {
+    PGresult* result = (PGresult*) jresult;
+    char* ptr = PQcmdStatus(result);
+    return env->NewStringUTF(ptr);
+}

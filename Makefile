@@ -17,9 +17,9 @@ PLATFORM_FILE = _PLATFORM
 platform:
 	java src/main/java/org/pq/tool/OS.java > ${PLATFORM_FILE}
 
-compile: ${PLATFORM_FILE}
+compile: platform
 	g++ -fPIC -I$(shell pg_config --includedir) ${JAVA_INC} -c ${OBJ}.cpp -o ${OBJ}.o
-	g++ -shared ${OBJ}.o -lpq -L$(shell pg_config --libdir) -o src/main/resources/bin/$(shell cat ${PLATFORM})_api.dylib
+	g++ -shared ${OBJ}.o -lpq -L$(shell pg_config --libdir) -o src/main/resources/bin/$(shell cat ${PLATFORM_FILE})_api.dylib
 	cp $(shell pg_config --libdir)/libpq.dylib src/main/resources/bin/$(shell cat ${PLATFORM})_libpq.dylib
 	mvn compile
 

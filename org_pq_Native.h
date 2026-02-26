@@ -223,6 +223,22 @@ JNIEXPORT jint JNICALL Java_org_pq_Native_transactionStatus
 JNIEXPORT jint JNICALL Java_org_pq_Native_libVersion
   (JNIEnv *, jclass);
 
+/*
+ * Class:     org_pq_Native
+ * Method:    affectedRows
+ * Signature: (J)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_org_pq_Native_affectedRows
+  (JNIEnv *, jclass, jlong);
+
+/*
+ * Class:     org_pq_Native
+ * Method:    commandName
+ * Signature: (J)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_org_pq_Native_commandName
+  (JNIEnv *, jclass, jlong);
+
 #ifdef __cplusplus
 }
 #endif

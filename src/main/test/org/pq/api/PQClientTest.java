@@ -18,6 +18,8 @@ public class PQClientTest {
             client.begin();
             client.query("create temp table foo (id integer, data text)").close();
             client.query("insert into foo values (1, 'test')").close();
+            client.commit();
+            client.rollback();
             final PQResult res = client.query("select * from foo");
             res.next();
             assertEquals(1, res.getColumn(0));
