@@ -10,8 +10,6 @@ import java.util.List;
 
 public class PQStatement implements AutoCloseable {
 
-    // TODO toString
-
     private final long connPtr;
     private final Arena arena;
     private final String stmtName;

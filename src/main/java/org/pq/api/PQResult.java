@@ -12,8 +12,6 @@ import static org.pq.api.PQError.error;
 
 public class PQResult implements AutoCloseable {
 
-    // todo add toString
-
     private final long connPtr;
     private long resPtr;
     private final Arena arena;
@@ -32,15 +30,12 @@ public class PQResult implements AutoCloseable {
                     final long resPtr,
                     final Arena arena,
                     final TryLock lock,
-                    // todo rename
                     final boolean isMulti) {
         this.connPtr = connPtr;
         this.resPtr = resPtr;
         this.arena = arena;
         this.isMulti = isMulti;
         this.row = -1;
-        // TODO move to static method
-        // TODO: calculate once
         this.nColumns = Native.nColumns(resPtr);
         this.nTuples = Native.nTuples(resPtr);
         this.lock = lock;
@@ -146,9 +141,6 @@ public class PQResult implements AutoCloseable {
             }
         };
     }
-
-    // TODO: asMap
-    // TODO: as array
 
     public List<Object> asList() {
         final List<Object> result = new ArrayList<>(nColumns);

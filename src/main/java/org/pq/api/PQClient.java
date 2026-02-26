@@ -9,12 +9,6 @@ import static org.pq.api.PQError.error;
 
 public class PQClient implements AutoCloseable {
 
-    // TODO toString
-    // todo: get user password host port etc
-    // todo: get params
-    // todo: get default params
-    // todo: try ssl
-
     private final long ptr;
     private final String connInfo;
     private final Arena arena;
@@ -106,12 +100,6 @@ public class PQClient implements AutoCloseable {
         }
     }
 
-    // TODO: execute
-    // TODO: executeChunked
-    // TODO: cancell
-    // TODO: secret
-    // TODO: pid
-
     public void begin() {
         try (var ignored = lock()) {
             final PQTRANS txStatus = txStatus();
@@ -190,21 +178,18 @@ public class PQClient implements AutoCloseable {
         }
     }
 
-    // TODO reset status
 //    public void reset() {
 //        Native.PQreset(ptr);
 //    }
 
-    // TODO: move enums
-    // TODO: rename enum
+
     public CONNECTION status() {
         try (var ignored = lock()) {
             ensureOpen();
             return Wrapper.connStatus(ptr);
         }
     }
-
-    // TODO: rename enum
+    
     public PQTRANS txStatus() {
         try (var ignored = lock()) {
             ensureOpen();
