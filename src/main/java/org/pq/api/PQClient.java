@@ -55,6 +55,7 @@ public class PQClient implements AutoCloseable {
 
     private String getStmtName() {
         try (var ignored = lock()) {
+            ensureOpen();
             return "s" + ++counter;
         }
     }
@@ -64,6 +65,7 @@ public class PQClient implements AutoCloseable {
             ensureOpen();
             final long resPtr = Native.query(this.ptr, query);
             final PGRES pgres = Wrapper.resultStatus(resPtr);
+            final int nColumns = Native.nColumns(resPtr);
             switch (pgres) {
                 case TUPLES_OK, COMMAND_OK -> {}
                 default -> {
@@ -73,7 +75,7 @@ public class PQClient implements AutoCloseable {
                     );
                 }
             }
-            return new PQResult(this.ptr, resPtr, arena, lock, false);
+            return new PQResult(this.ptr, resPtr, nColumns, arena, lock, false);
         }
     }
 
@@ -89,6 +91,7 @@ public class PQClient implements AutoCloseable {
             Native.setChunkedRowsMode(ptr, chunkSize);
             final long resPtr = Native.getResult(ptr);
             final PGRES result = Wrapper.resultStatus(resPtr);
+            final int nColumns = Native.nColumns(resPtr);
             switch (result) {
                 case TUPLES_CHUNK -> {}
                 default -> {
@@ -96,7 +99,7 @@ public class PQClient implements AutoCloseable {
                     throw error("wrong result status: %s", result);
                 }
             }
-            return new PQResult(ptr, resPtr, arena, lock, true);
+            return new PQResult(ptr, resPtr, nColumns, arena, lock, true);
         }
     }
 
@@ -222,7 +225,7 @@ public class PQClient implements AutoCloseable {
             System.out.println(client.status());
             System.out.println(client.txStatus());
             while (res.next()) {
-                System.out.println(res.asList());
+                System.out.println(res.rowAsList());
 //                for (int col: res.iterCols()) {
 //                    System.out.println(res.getColumn(col));
 //                }

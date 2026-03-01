@@ -16,11 +16,12 @@ public class PQResult implements AutoCloseable {
     private long resPtr;
     private final Arena arena;
     private int row;
-    private final boolean isMulti;
+    private final boolean isChuncked;
     private final int nColumns;
     private int nTuples;
     private final TryLock lock;
     private boolean isClosed;
+    private long totalRows;
 
     private TryLock lock() {
         return lock.lock();
@@ -28,18 +29,24 @@ public class PQResult implements AutoCloseable {
 
     public PQResult(final long connPtr,
                     final long resPtr,
+                    final int nColumns,
                     final Arena arena,
                     final TryLock lock,
-                    final boolean isMulti) {
+                    final boolean isChuncked) {
         this.connPtr = connPtr;
         this.resPtr = resPtr;
         this.arena = arena;
-        this.isMulti = isMulti;
+        this.isChuncked = isChuncked;
         this.row = -1;
-        this.nColumns = Native.nColumns(resPtr);
+        this.nColumns = nColumns;
         this.nTuples = Native.nTuples(resPtr);
+        this.totalRows = this.nTuples;
         this.lock = lock;
         this.isClosed = false;
+    }
+
+    public boolean isEmpty() {
+        return nTuples == 0;
     }
 
     private void ensureOpen() {
@@ -49,23 +56,39 @@ public class PQResult implements AutoCloseable {
     }
 
     public void reset() {
-        ensureOpen();
         try (var ignored = lock()) {
+            ensureOpen();
             row = -1;
         }
-
     }
 
-    // TODO: need lock?
     public String commandName() {
-        ensureOpen();
-        return Native.commandName(resPtr);
+        try (var ignored = lock()) {
+            ensureOpen();
+            return Native.commandName(resPtr);
+        }
     }
 
-    // TODO: need lock?
+    public int rowNumber() {
+        try (var ignored = lock()) {
+            ensureOpen();
+            return nTuples;
+        }
+    }
+
+    public long rowNumberTotal() {
+        return totalRows;
+    }
+
+    public int colNumber() {
+        return nColumns;
+    }
+
     public int affectedRows() {
-        ensureOpen();
-        return Wrapper.affectedRows(resPtr);
+        try (var ignored = lock()) {
+            ensureOpen();
+            return Wrapper.affectedRows(resPtr);
+        }
     }
 
     public Object getColumn(final int col) {
@@ -106,7 +129,7 @@ public class PQResult implements AutoCloseable {
         try (var ignored = lock()) {
             ensureOpen();
             final boolean isEnd = (row == nTuples - 1);
-            if (isEnd && isMulti) {
+            if (isEnd && isChuncked) {
                 Native.closeResult(resPtr);
                 final long newPtr = Native.getResult(connPtr);
                 final PGRES status = Wrapper.resultStatus(newPtr);
@@ -115,6 +138,7 @@ public class PQResult implements AutoCloseable {
                         resPtr = newPtr;
                         row = -1;
                         nTuples = Native.nTuples(newPtr);
+                        totalRows += nTuples;
                     }
                     default -> throw error("wrong result status: %s", status);
                 }
@@ -142,10 +166,11 @@ public class PQResult implements AutoCloseable {
         };
     }
 
-    public List<Object> asList() {
+    public List<Object> rowAsList() {
         final List<Object> result = new ArrayList<>(nColumns);
-        for (int i = 0; i < nColumns; i++) {
-            result.set(i, getColumn(i));
+        for (int col = 0; col < nColumns; col++) {
+            System.out.println(col);
+            result.add(getColumn(col));
         }
         return result;
     }
@@ -157,7 +182,7 @@ public class PQResult implements AutoCloseable {
         }
         try (var ignored = lock()) {
             isClosed = true;
-            if (isMulti) {
+            if (isChuncked) {
                 while (resPtr != arena.NULL()) {
                     Native.closeResult(resPtr);
                     resPtr = Native.getResult(connPtr);

@@ -70,8 +70,9 @@ public class PQStatement implements AutoCloseable {
             Encoder.encodeExecParams(arena, nParams, params, paramOids);
             final long resPtr = Native.execPrepared(connPtr, stmtName, arena.ptr());
             final PGRES status = Wrapper.resultStatus(resPtr);
+            final int nColumns = Native.nColumns(resPtr);
             return switch (status) {
-                case TUPLES_OK -> new PQResult(connPtr, resPtr, arena, lock, false);
+                case TUPLES_OK -> new PQResult(connPtr, resPtr, nColumns, arena, lock, false);
                 default -> {
                     Native.closeResult(resPtr);
                     final String message = Native.connError(connPtr);
@@ -98,8 +99,9 @@ public class PQStatement implements AutoCloseable {
             Native.setChunkedRowsMode(connPtr, chunkSize);
             final long resPtr = Native.getResult(connPtr);
             final PGRES pgres = Wrapper.resultStatus(resPtr);
+            final int nColumns = Native.nColumns(resPtr);
             return switch (pgres) {
-                case TUPLES_CHUNK -> new PQResult(connPtr, resPtr, arena, lock, true);
+                case TUPLES_CHUNK -> new PQResult(connPtr, resPtr, nColumns, arena, lock, true);
                 default -> {
                     Native.closeResult(resPtr);
                     final String message = Native.connError(connPtr);

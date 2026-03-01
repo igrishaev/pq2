@@ -17,7 +17,6 @@
 - result toString
 - result rename isMulti
 - result static constructor (nTuples cache?)
-- result calculate nColumns once
 - result asArray
 - result asMap
 
