@@ -16,7 +16,7 @@ public class PQResult implements AutoCloseable {
     private long resPtr;
     private final Arena arena;
     private int row;
-    private final boolean isChuncked;
+    private final boolean isChunked;
     private final int nColumns;
     private int nTuples;
     private final TryLock lock;
@@ -32,11 +32,11 @@ public class PQResult implements AutoCloseable {
                     final int nColumns,
                     final Arena arena,
                     final TryLock lock,
-                    final boolean isChuncked) {
+                    final boolean isChunked) {
         this.connPtr = connPtr;
         this.resPtr = resPtr;
         this.arena = arena;
-        this.isChuncked = isChuncked;
+        this.isChunked = isChunked;
         this.row = -1;
         this.nColumns = nColumns;
         this.nTuples = Native.nTuples(resPtr);
@@ -129,7 +129,7 @@ public class PQResult implements AutoCloseable {
         try (var ignored = lock()) {
             ensureOpen();
             final boolean isEnd = (row == nTuples - 1);
-            if (isEnd && isChuncked) {
+            if (isEnd && isChunked) {
                 Native.closeResult(resPtr);
                 final long newPtr = Native.getResult(connPtr);
                 final PGRES status = Wrapper.resultStatus(newPtr);
@@ -182,7 +182,7 @@ public class PQResult implements AutoCloseable {
         }
         try (var ignored = lock()) {
             isClosed = true;
-            if (isChuncked) {
+            if (isChunked) {
                 while (resPtr != arena.NULL()) {
                     Native.closeResult(resPtr);
                     resPtr = Native.getResult(connPtr);

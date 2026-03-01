@@ -36,7 +36,7 @@ public class PQTest {
 
     public void test() {
         Object obj;
-        try (final PQResult res = statement.executeMulti(List.of(), 100)) {
+        try (final PQResult res = statement.executeChunked(List.of(), 100)) {
             while (res.next()) {
                 for (int col = 1; col < 8; col++) {
                     obj = res.getColumn(col);

@@ -181,6 +181,20 @@ public class PQClient implements AutoCloseable {
         }
     }
 
+    public PQResult execute(final String query, final List<Object> params) {
+        ensureOpen(); // TODO
+        try (var ignored = lock();
+             var stmt = prepare(query)) {
+            return stmt.execute(params);
+        }
+    }
+
+    public PQResult execute(final String query) {
+        return execute(query, List.of());
+    }
+
+
+
 //    public void reset() {
 //        Native.PQreset(ptr);
 //    }
@@ -221,7 +235,7 @@ public class PQClient implements AutoCloseable {
         final String connInfo = "host=localhost port=15432 dbname=test user=test password=test";
         try (final PQClient client = PQClient.of(connInfo);
              final PQStatement stmt = client.prepare("select x, x + $1::int4 from generate_series(1, 22) as seq(x)");
-             final PQResult res = stmt.executeMulti(List.of(10), 10)) {
+             final PQResult res = stmt.executeChunked(List.of(10), 10)) {
             System.out.println(client.status());
             System.out.println(client.txStatus());
             while (res.next()) {

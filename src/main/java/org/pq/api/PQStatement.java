@@ -82,7 +82,7 @@ public class PQStatement implements AutoCloseable {
         }
     }
 
-    public PQResult executeMulti(final List<Object> params, final int chunkSize) {
+    public PQResult executeChunked(final List<Object> params, final int chunkSize) {
         try (var ignored = lock()) {
             ensureOpen();
 

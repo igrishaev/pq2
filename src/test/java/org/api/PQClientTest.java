@@ -1,4 +1,4 @@
-package api;
+package org.api;
 
 import org.junit.Test;
 import org.pq.api.*;
