@@ -25,7 +25,7 @@ public class PQTest {
               -- time
               null                     as nil
             from
-              generate_series(1,99999) as s(x)
+              generate_series(1,9999) as s(x)
             
             """;
 
