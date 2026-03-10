@@ -103,11 +103,40 @@ public class PQClient implements AutoCloseable {
         }
     }
 
+    private void emitBegin() {
+         query("begin").close();
+    }
+
+    public record TX (PQClient client, boolean isTx) implements AutoCloseable {
+        @Override
+        public void close() {
+            if (!isTx) {
+                try {
+                    client.commit();
+                } catch (Throwable e) {
+                    client.commit();
+                    throw e;
+                }
+            }
+        }
+    }
+
+    public TX transact() {
+        try (var ignored = lock()) {
+            ensureOpen();
+            final boolean isTx = txStatus() == PQTRANS.INTRANS;
+            if (!isTx) {
+                emitBegin();
+            }
+            return new TX(this, isTx);
+        }
+    }
+
     public void begin() {
         try (var ignored = lock()) {
             final PQTRANS txStatus = txStatus();
             switch (txStatus) {
-                case IDLE -> query("begin").close();
+                case IDLE -> emitBegin();
                 case INERROR -> throw error("Cannot 'begin' as the connection is an error state. Please rollback first.");
                 case INTRANS -> {} // do nothing
                 case ACTIVE -> throw error("Cannot 'begin' as the connection is processing a command. Perhaps you should wait.");
@@ -233,9 +262,14 @@ public class PQClient implements AutoCloseable {
 
     public static void main(String... args) {
         final String connInfo = "host=localhost port=15432 dbname=test user=test password=test";
+
         try (final PQClient client = PQClient.of(connInfo);
-             final PQStatement stmt = client.prepare("select x, x + $1::int4 from generate_series(1, 22) as seq(x)");
-             final PQResult res = stmt.executeChunked(List.of(10), 10)) {
+             var a = client.transact();
+             var b = client.transact();
+             var c = client.transact();
+             final PQStatement stmt = client.prepare("select x, x + $1::int4 from generate_series(1, 33) as seq(x)");
+             final PQResult res = stmt.executeChunked(List.of(1), 10);
+        ) {
             System.out.println(client.status());
             System.out.println(client.txStatus());
             while (res.next()) {
